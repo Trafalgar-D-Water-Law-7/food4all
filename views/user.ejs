@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <%- include('config/export')%>
+</head>
+
+<body>
+    <%- include('config/nav')%>
+        <div class="container-xxl py-5 bg-dark hero-header mb-5">
+            <div class="container text-center my-5 pt-5 pb-4">
+                <h1 class="display-3 text-white mb-3 animated slideInDown">Hi , <%=user.name%>
+                </h1>
+            </div>
+        </div>
+
+
+
+        <div class="container py-5">
+            <div class="card shadow p-4 text-center">
+                <div class="row align-items-center">
+                    <div class="col-md-4 text-center">
+                        <img src="/<%= user.photo %>" alt="Profile Photo" class="rounded-circle img-fluid" width="150">
+                    </div>
+                    <div class="col-md-8 text-md-start">
+                        <h2 class="fw-bold">Hi, <%= user.name %>
+                        </h2>
+                        <p><strong>Email:</strong>
+                            <%= user.email %>
+                        </p>
+                        <p><strong>Phone:</strong>
+                            <%= user.contact %>
+                        </p>
+                        <p><strong>Donations:</strong>
+                            <%= user.donationCount %>
+                        </p>
+                        <button class="btn btn-warning mt-2" data-bs-toggle="modal"
+                            data-bs-target="#editProfileModal">Edit Profile</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Profile Modal -->
+        <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editProfileModalLabel">Edit Profile</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="/users/update" method="POST" enctype="multipart/form-data">
+                            <input type="hidden" name="_method" value="PUT">
+
+                            <!-- Name -->
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Name</label>
+                                <input type="text" class="form-control" id="name" name="name" value="<%= user.name %>"
+                                    required>
+                                <div id="nameError" class="text-danger"></div>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email"
+                                    value="<%= user.email %>" required>
+                                <div id="emailError" class="text-danger"></div>
+                            </div>
+
+                            <!-- Phone -->
+                            <div class="mb-3">
+                                <label for="contact" class="form-label">Phone</label>
+                                <input type="text" class="form-control" id="contact" name="contact"
+                                    value="<%= user.contact %>" required>
+                                <div id="contactError" class="text-danger"></div>
+                            </div>
+
+                            <!-- Profile Picture -->
+                            <div class="mb-3">
+                                <label for="photo" class="form-label">Profile Picture</label>
+                                <input type="file" class="form-control" id="photo" name="photo">
+                                <div id="photoError" class="text-danger"></div>
+                            </div>
+
+                            <!-- Password -->
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="password" name="password"
+                                    placeholder="Leave blank if not changing" onkeyup="validatePassword()">
+                                <div id="passwordValidationMessage" class="text-danger"></div>
+                            </div>
+
+                            <!-- Update Button -->
+                            <button type="submit" class="btn btn-warning w-100">Update Profile</button>
+                        </form>
+
+                        <script>
+                            // Real-time validation function
+                            document.addEventListener("DOMContentLoaded", function () {
+                                const form = document.querySelector("form");
+
+                                // Error message elements
+                                const nameError = document.getElementById("nameError");
+                                const emailError = document.getElementById("emailError");
+                                const contactError = document.getElementById("contactError");
+                                const photoError = document.getElementById("photoError");
+                                const passwordValidationMessage = document.getElementById("passwordValidationMessage");
+
+                                // Name validation
+                                document.getElementById("name").addEventListener("input", function () {
+                                    if (this.value.trim() === "") {
+                                        nameError.textContent = "Name is required.";
+                                    } else {
+                                        nameError.textContent = "";
+                                    }
+                                });
+
+                                // Email validation
+                                document.getElementById("email").addEventListener("input", function () {
+                                    const email = this.value.trim();
+                                    if (email === "") {
+                                        emailError.textContent = "Email is required.";
+                                    } else if (!/\S+@\S+\.\S+/.test(email)) {
+                                        emailError.textContent = "Please enter a valid email.";
+                                    } else {
+                                        emailError.textContent = "";
+                                    }
+                                });
+
+                                // Phone validation
+                                document.getElementById("contact").addEventListener("input", function () {
+                                    const contact = this.value.trim();
+                                    if (contact === "") {
+                                        contactError.textContent = "Phone number is required.";
+                                    } else if (!/^\d+$/.test(contact)) {
+                                        contactError.textContent = "Phone number must contain only numbers.";
+                                    } else {
+                                        contactError.textContent = "";
+                                    }
+                                });
+
+                                // Profile picture validation
+                                document.getElementById("photo").addEventListener("change", function () {
+                                    const file = this.files[0];
+                                    if (file) {
+                                        const fileType = file.type.split("/")[0];
+                                        if (fileType !== "image") {
+                                            photoError.textContent = "Please upload a valid image file.";
+                                        } else {
+                                            photoError.textContent = "";
+                                        }
+                                    }
+                                });
+
+                                // Password validation (real-time)
+                                document.getElementById("password").addEventListener("input", function () {
+                                    const password = this.value;
+                                    const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+                                    if (password && !regex.test(password)) {
+                                        passwordValidationMessage.textContent = "Password must be at least 6 characters long, include one uppercase letter, one number, and one special character.";
+                                    } else {
+                                        passwordValidationMessage.textContent = "";
+                                    }
+                                });
+
+                                // Form submission validation
+                                form.addEventListener("submit", function (event) {
+                                    let valid = true;
+
+                                    // Reset all error messages before submission
+                                    nameError.textContent = "";
+                                    emailError.textContent = "";
+                                    contactError.textContent = "";
+                                    photoError.textContent = "";
+                                    passwordValidationMessage.textContent = "";
+
+                                    // Validate all fields
+                                    if (document.getElementById("name").value.trim() === "") {
+                                        nameError.textContent = "Name is required.";
+                                        valid = false;
+                                    }
+
+                                    if (document.getElementById("email").value.trim() === "") {
+                                        emailError.textContent = "Email is required.";
+                                        valid = false;
+                                    }
+
+                                    if (document.getElementById("contact").value.trim() === "") {
+                                        contactError.textContent = "Phone number is required.";
+                                        valid = false;
+                                    }
+
+                                    if (document.getElementById("photo").files.length > 0) {
+                                        const file = document.getElementById("photo").files[0];
+                                        const fileType = file.type.split("/")[0];
+                                        if (fileType !== "image") {
+                                            photoError.textContent = "Please upload a valid image file.";
+                                            valid = false;
+                                        }
+                                    }
+
+                                    const password = document.getElementById("password").value;
+                                    const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+                                    if (password && !regex.test(password)) {
+                                        passwordValidationMessage.textContent = "Password must be at least 6 characters long, include one uppercase letter, one number, and one special character.";
+                                        valid = false;
+                                    }
+
+                                    // If form is not valid, prevent submission
+                                    if (!valid) {
+                                        event.preventDefault();
+                                    }
+                                });
+                            });
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="container mt-5">
+            <h2 class="text-center mb-4">Claimed Food</h2>
+
+            <!-- Search Bar -->
+            <div class="input-group mb-4">
+                <input type="text" id="searchInput" class="form-control" placeholder="Search food by name or token..."
+                    oninput="searchFood()">
+                <button class="btn btn-primary" type="button">Search</button>
+            </div>
+
+            <!-- List of Donated Foods -->
+            <div class="row">
+                <% donatedFoods.forEach(food=> { %>
+                    <div class="col-md-4 mb-4 food-card" data-name="<%= food.name.toLowerCase() %>"
+                        data-token="<%= food.claimedToken.toLowerCase() %>">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="card-title">Donated By: <%= food.name %>
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Claim Token:</strong>
+                                    <span class="badge bg-danger fs-6">
+                                        <%= food.claimedToken %>
+                                    </span>
+                                </p>
+
+                                <% if (food.claimedBy) { %>
+                                    <p><strong>Claimed By:</strong>
+                                        <%= food.claimedBy.name %>
+                                    </p>
+                                    <% } else { %>
+                                        <p><strong>Claimed By:</strong> Not yet claimed</p>
+                                        <% } %>
+
+                                            <button class="btn btn-success confirm-pickup"
+                                                data-id="<%= food._id %>">Confirm
+                                                Pickup</button>
+                            </div>
+                        </div>
+                    </div>
+                    <% }); %>
+            </div>
+        </div>
+
+        <div class="container">
+            <h2 class="text-center">Food Requests</h2>
+            <div class="row">
+                <% requests.forEach(request=> { %>
+                    <div class="col-md-4" id="request-<%= request._id %>">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <%= request.user.name %>
+                                </h5>
+                                <p class="card-text">Food Type: <%= request.foodType %>
+                                </p>
+                                <p class="card-text">Quantity Needed: <%= request.quantity %> servings</p>
+                                <p class="card-text">Delivery Option: <%= request.deliveryOption %>
+                                </p>
+
+                                <!-- Delete Button -->
+                                <button class="btn btn-danger delete-request" data-id="<%= request._id %>">
+                                    Delete Request
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <% }) %>
+            </div>
+        </div>
+
+
+
+
+
+
+
+
+        <script>
+            function searchFood() {
+                let input = document.getElementById("searchInput").value.toLowerCase();
+                let cards = document.querySelectorAll(".food-card");
+
+                cards.forEach(card => {
+                    let name = card.getAttribute("data-name");
+                    let token = card.getAttribute("data-token");
+
+                    // Show card if name or token matches the search input
+                    if (name.includes(input) || token.includes(input)) {
+                        card.style.display = "block";
+                    } else {
+                        card.style.display = "none";
+                    }
+                });
+            }
+
+            document.querySelectorAll(".confirm-pickup").forEach(button => {
+                button.addEventListener("click", async () => {
+                    const foodId = button.getAttribute("data-id");
+                    const response = await fetch("/users/confirmPickup", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ foodId })
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        alert("Pickup confirmed!");
+                        button.closest('.card').remove();
+                    } else {
+                        alert(result.message);
+                    }
+                });
+            });
+        </script>
+
+        <script>
+            document.querySelectorAll(".delete-request").forEach(button => {
+                button.addEventListener("click", async () => {
+                    const requestId = button.getAttribute("data-id");
+
+                    if (!confirm("Are you sure you want to delete this request?")) return;
+
+                    const response = await fetch(`/request/${requestId}`, {
+                        method: "DELETE",
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        alert("Request deleted successfully!");
+                        button.closest(".col-md-4").remove(); // Removes the card from DOM
+                    } else {
+                        alert(result.message || "Error deleting request.");
+                    }
+                });
+            });
+        </script>
+
+
+
+
+
+        <%- include('config/footer')%>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

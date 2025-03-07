@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <%- include('config/export')%>
+
+        <style>
+            .modal-backdrop.show {
+                background-color: rgba(0, 0, 0, 0.5);
+            }
+
+            /* Style for the custom alert */
+            .location-alert {
+                background-color: #f8d7da;
+                color: #721c24;
+                padding: 10px;
+                border-radius: 5px;
+                margin-top: 10px;
+            }
+        </style>
+</head>
+
+<body>
+    <%- include('config/nav')%>
+        <div class="container-xxl py-5 bg-dark hero-header mb-5">
+            <div class="container text-center my-5 pt-5 pb-4">
+                <h1 class="display-3 text-white mb-3 animated slideInDown">Request For Food </h1>
+            </div>
+        </div>
+
+
+        <div class="container d-flex justify-content-center align-items-center vh-80 ">
+            <div class="form-container p-4 border rounded bg-white shadow">
+                <h2 class="text-center mb-4">Request Food</h2>
+                <form id="foodRequestForm" action="/request/submit-food-request" method="POST" style="width: 50vw;">
+
+                    <!-- Hidden fields for latitude and longitude -->
+                    <input type="hidden" id="latitude" name="latitude">
+                    <input type="hidden" id="longitude" name="longitude">
+
+                    <div class="mb-3">
+                        <label for="foodType" class="form-label">Type of Food Needed</label>
+                        <select class="form-select" id="foodType" name="foodType" required>
+                            <option value="">Select food type</option>
+                            <option value="Vegetarian">Vegetarian</option>
+                            <option value="Non-Vegetarian">Non-Vegetarian</option>
+                            <option value="Vegan">Vegan</option>
+                            <option value="Gluten-Free">Gluten-Free</option>
+                        </select>
+                        <div class="invalid-feedback">Please select a food type.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Additional Message</label>
+                        <textarea class="form-control" id="message" name="message" rows="3"
+                            placeholder="Any special requests?"></textarea>
+                        <div class="invalid-feedback">Message must be at least 5 words.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="quantity" class="form-label">Quantity (in servings)</label>
+                        <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
+                        <div class="invalid-feedback">Enter a valid quantity.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Delivery Option</label>
+                        <select class="form-select" id="deliveryOption" name="deliveryOption" required>
+                            <option value="">Select an option</option>
+                            <option value="pickup">Pickup</option>
+                            <option value="delivery">Delivery</option>
+                        </select>
+                        <div class="invalid-feedback">Please select a delivery option.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Proper Address</label>
+                        <input type="text" class="form-control" name="address" placeholder="Additional Location"
+                            required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">Submit Request</button>
+
+                    <button type="button" id="useMyLocation" class="btn btn-info mt-2">
+                        Allow Location Tracking
+                    </button>
+                    <!-- Geolocation alert below textarea -->
+                    <div class="location-alert">
+                        We accept the live location to track your location for the Receipent
+                        to receive the food.
+                    </div>
+                </form>
+
+            </div>
+        </div>
+        <%- include('config/footer')%>
+
+
+            <script>
+                document.getElementById("useMyLocation").addEventListener("click", function () {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(
+                            (position) => {
+                                document.getElementById("latitude").value = position.coords.latitude;
+                                document.getElementById("longitude").value = position.coords.longitude;
+                            },
+                            () => alert("Failed to get location. Please enable GPS.")
+                        );
+                    } else {
+                        alert("Geolocation is not supported by your browser.");
+                    }
+                });
+            </script>
+
+
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    const form = document.getElementById("foodRequestForm");
+
+                    // Input fields
+                    const foodType = document.getElementById("foodType");
+                    const message = document.getElementById("message");
+                    const quantity = document.getElementById("quantity");
+                    const deliveryOption = document.getElementById("deliveryOption");
+                    const address = document.getElementById("address");
+
+                    // Live validation function
+                    function validateField(field, condition, errorMessage) {
+                        if (condition) {
+                            field.classList.add("is-invalid");
+                            field.nextElementSibling.textContent = errorMessage;
+                        } else {
+                            field.classList.remove("is-invalid");
+                            field.classList.add("is-valid");
+                        }
+                    }
+
+                    // Validate food type
+                    foodType.addEventListener("change", function () {
+                        validateField(foodType, !foodType.value, "Please select a food type.");
+                    });
+
+                    // Validate message (minimum 5 words)
+                    message.addEventListener("input", function () {
+                        const wordCount = message.value.trim().split(/\s+/).length;
+                        validateField(message, wordCount < 5, "Message must be at least 5 words.");
+                    });
+
+                    // Validate quantity (must be at least 1)
+                    quantity.addEventListener("input", function () {
+                        validateField(quantity, quantity.value < 1, "Enter a valid quantity.");
+                    });
+
+                    // Validate delivery option
+                    deliveryOption.addEventListener("change", function () {
+                        validateField(deliveryOption, !deliveryOption.value, "Please select a delivery option.");
+                    });
+
+                    // Validate address (must not be empty)
+                    address.addEventListener("input", function () {
+                        validateField(address, address.value.trim().length < 5, "Please enter a valid address.");
+                    });
+
+                    // Prevent form submission if there are errors
+                    form.addEventListener("submit", function (event) {
+                        if (document.querySelectorAll(".is-invalid").length > 0) {
+                            event.preventDefault();
+                        }
+                    });
+                });
+            </script>
+
+
+
+
+</body>
+
+</html>

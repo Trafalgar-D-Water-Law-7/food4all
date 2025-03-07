@@ -1,0 +1,242 @@
+<style>
+    /* Background dimmer - initially hidden */
+    .background-dimmer {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        /* Semi-transparent black */
+        display: none;
+        /* Hidden by default */
+        z-index: 99;
+        /* Place behind the feedback form */
+    }
+
+    /* Initially hide the feedback form */
+    .feedback-form-container {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        width: 400px;
+        z-index: 100;
+        /* Form above the dimmed background */
+    }
+
+    /* Feedback form input styling */
+    .feedback-form-container textarea {
+        width: 100%;
+        padding: 10px;
+        font-size: 14px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+    }
+
+    /* Button styling */
+    .feedback-form-container button {
+        width: 48%;
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 5px;
+    }
+
+
+    .feedback-form-container button[type="button"] {
+        background-color: #ccc;
+        color: white;
+    }
+
+    .feedback-form-container button[type="button"]:hover {
+        background-color: #999;
+    }
+</style>
+
+<!-- Footer Start -->
+<div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
+    <div class="container py-5">
+        <div class="row g-5">
+            <div class="col-lg-3 col-md-6">
+                <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Company</h4>
+                <a class="btn btn-link" href="">About Us</a>
+                <a class="btn btn-link" href="">Contact Us</a>
+                <a class="btn btn-link" href="">Reservation</a>
+                <a class="btn btn-link" href="">Privacy Policy</a>
+                <a class="btn btn-link" href="">Terms & Condition</a>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Contact</h4>
+                <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>123 Street, New York, USA</p>
+                <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+012 345 67890</p>
+                <p class="mb-2"><i class="fa fa-envelope me-3"></i>info@example.com</p>
+                <div class="d-flex pt-2">
+                    <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-twitter"></i></a>
+                    <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-facebook-f"></i></a>
+                    <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-youtube"></i></a>
+                    <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Opening</h4>
+                <h5 class="text-light fw-normal">Monday - Saturday</h5>
+                <p>09AM - 09PM</p>
+                <h5 class="text-light fw-normal">Sunday</h5>
+                <p>10AM - 08PM</p>
+            </div>
+            <!-- Background Dimmer (Initially hidden) -->
+            <div id="backgroundDimmer" class="background-dimmer"></div>
+
+            <div class="col-lg-3 col-md-6">
+                <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Newsletter</h4>
+                <p>If you want to send us feedback, yes you can</p>
+                <div class="position-relative mx-auto" style="max-width: 400px;">
+                    <input class="form-control border-primary w-100 py-3 ps-4 pe-5" type="text" id="feedbackInput"
+                        placeholder="Write Feedback" readonly>
+                    <button type="button" class="btn btn-primary py-2 position-absolute top-0 end-0 mt-2 me-2"
+                        id="openFeedbackFormBtn">
+                        <i class="fas fa-arrow-right"></i> <!-- Font Awesome Right Arrow Icon -->
+                    </button>
+
+                </div>
+            </div>
+
+            <!-- Feedback Form (Initially hidden) -->
+            <div id="feedbackForm" class="feedback-form-container">
+                <form id="feedbackForm" action="/testimonial" method="POST">
+                    <div class="form-group">
+                        <label for="feedbackMessage">Your Feedback:</label>
+                        <textarea id="feedbackMessage" name="message" class="form-control" rows="4" required
+                            placeholder="Write your feedback 🥲"></textarea>
+                    </div>
+                    <br>
+                    <div id="errorMessage" class="alert alert-danger d-none" role="alert">
+                        Your feedback must be between 5 and 20 words.
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit Feedback</button>
+                    <button type="button" class="btn btn-secondary" id="closeFeedbackFormBtn">Cancel</button>
+                </form>
+
+            </div>
+
+
+        </div>
+    </div>
+    <div class="container">
+        <div class="copyright">
+            <div class="row">
+                <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                    &copy; <a class="border-bottom" href="#">Your Site Name</a>, All Right Reserved.
+
+                    <!--/*** This template is free as long as you keep the footer author’s credit link/attribution link/backlink. If you'd like to use the template without the footer author’s credit link/attribution link/backlink, you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". Thank you for your support. ***/-->
+                    Designed By <a class="border-bottom" href="https://htmlcodex.com">HTML Codex</a>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <div class="footer-menu">
+                        <a href="">Home</a>
+                        <a href="">Cookies</a>
+                        <a href="">Help</a>
+                        <a href="">FQAs</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Footer End -->
+
+
+<!-- Back to Top -->
+<a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+</div>
+
+<!-- JavaScript Libraries -->
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="/https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/lib/wow/wow.min.js"></script>
+<script src="/lib/easing/easing.min.js"></script>
+<script src="/lib/waypoints/waypoints.min.js"></script>
+<script src="/lib/counterup/counterup.min.js"></script>
+<script src="/lib/owlcarousel/owl.carousel.min.js"></script>
+<script src="/lib/tempusdominus/js/moment.min.js"></script>
+<script src="/lib/tempusdominus/js/moment-timezone.min.js"></script>
+<script src="/lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Template Javascript -->
+<script src="/js/main.js"></script>
+<script src="/js/success.js"></script>
+
+<script>
+    // Get elements
+    const openFeedbackFormBtn = document.getElementById("openFeedbackFormBtn");
+    const feedbackForm = document.getElementById("feedbackForm");
+    const closeFeedbackFormBtn = document.getElementById("closeFeedbackFormBtn");
+    const feedbackInput = document.getElementById("feedbackInput");
+    const backgroundDimmer = document.getElementById("backgroundDimmer");
+    const errorMessage = document.getElementById("errorMessage");
+
+
+    // Submit validation for the feedback form
+    // Form validation on submit
+    // Real-time validation while typing
+    feedbackMessage.addEventListener("input", function () {
+        const message = feedbackMessage.value.trim();
+
+        // Count words in the feedback message
+        const wordCount = message.split(/\s+/).length;
+
+        // Validate the word count (between 5 and 20 words)
+        if (wordCount < 5 || wordCount > 20) {
+            // Display error message
+            errorMessage.classList.remove("d-none");
+        } else {
+            // Hide error message if word count is valid
+            errorMessage.classList.add("d-none");
+        }
+    });
+
+    // Form submission validation
+    feedbackForm.addEventListener("submit", function (event) {
+        const message = feedbackMessage.value.trim();
+
+        // Count words in the feedback message
+        const wordCount = message.split(/\s+/).length;
+
+        // Validate the word count (between 5 and 20 words)
+        if (wordCount < 5 || wordCount > 20) {
+            // Prevent form submission
+            event.preventDefault();
+
+            // Display error message if not already displayed
+            if (errorMessage.classList.contains("d-none")) {
+                errorMessage.classList.remove("d-none");
+            }
+        }
+    });
+
+
+    // Show the feedback form and dim the background when the button is clicked
+    openFeedbackFormBtn.addEventListener("click", function () {
+        feedbackForm.style.display = "block"; // Show the form
+        backgroundDimmer.style.display = "block"; // Show the dimmed background
+    });
+
+    // Show the feedback form and dim the background when the input field is clicked
+    feedbackInput.addEventListener("click", function () {
+        feedbackForm.style.display = "block"; // Show the form
+        backgroundDimmer.style.display = "block"; // Show the dimmed background
+    });
+
+    // Hide the feedback form and remove the dimmed background when the cancel button is clicked
+    closeFeedbackFormBtn.addEventListener("click", function () {
+        feedbackForm.style.display = "none"; // Hide the form
+        backgroundDimmer.style.display = "none"; // Remove the dimmed background
+    });
+
+</script>

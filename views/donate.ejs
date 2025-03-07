@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Restoran - Bootstrap Restaurant Template</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="" name="keywords">
+    <meta content="" name="description">
+    <%- include('config/export') %>
+        <style>
+            .error {
+                color: red;
+                font-size: 14px;
+                display: none;
+            }
+        </style>
+</head>
+
+<body>
+    </div>
+
+
+    <!-- Blur Overlay -->
+    <div id="overlay" style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.5s ease-in-out;
+">
+        <div class="alert alert-warning text-center p-5 bg-white rounded shadow-lg"
+            style="z-index: 10000; max-width: 400px;">
+            <h4><strong>🌍 Location Required!</strong></h4>
+            <p>We need your location to track and donate food 🍲. Your help is important! 🙌</p>
+            <div class="d-flex justify-content-center">
+                <button id="location-yes" class="btn btn-success m-2">✔️ Okay</button>
+                <button id="location-no" class="btn btn-danger m-2">❌ No</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+    </style>
+
+
+    <div class="modal fade" id="locationModal" tabindex="-1" aria-labelledby="locationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content">
+                <div class="modal-body text-center d-flex flex-column justify-content-center align-items-center"
+                    style="height: 100vh;">
+                    <h2 class="mb-3">📍 Live Location Required</h2>
+                    <p class="fs-5">We will use your live location to track the food address.</p>
+                    <button class="btn btn-danger mt-3" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-xxl bg-white p-0">
+        <!-- Navbar & Hero Start -->
+        <div class="container-xxl position-relative p-0">
+            <%- include('config/nav') %>
+
+                <div class="container-xxl py-5 bg-dark hero-header mb-5">
+                    <div class="container text-center my-5 pt-5 pb-4">
+                        <h1 class="display-3 text-white mb-3 animated slideInDown">Donate Food</h1>
+                    </div>
+                </div>
+        </div>
+        <!-- Navbar & Hero End -->
+
+        <!-- Donation Form Start -->
+        <div class="container-xxl py-5">
+            <div class="container">
+                <div class="row g-4">
+                    <!-- Donation Form -->
+                    <div class="col-md-6">
+                        <div class="wow fadeInUp" data-wow-delay="0.2s">
+                            <form action="/users/donate" enctype="multipart/form-data" method="post" id="donationForm"
+                                novalidate>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control" id="name" placeholder="Your Name"
+                                                value="<%=user.name%>" name="name">
+                                            <label for="name">Your Name</label>
+                                            <small class="error" id="nameError">Name is required</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input type="email" class="form-control" id="email" placeholder="Your Email"
+                                                value="<%=user.email%>" name="email">
+                                            <label for="email">Your Email</label>
+                                            <small class="error" id="emailError">Valid email is required</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-floating">
+                                            <input type="file" class="form-control" id="photoInput" accept="image/*"
+                                                capture="environment" name="photos" multiple>
+                                            <label for="photoInput">Capture Up to 5 Photos</label>
+                                            <small class="error" id="photoError">At least one photo is required</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control" id="subject" placeholder="Subject"
+                                                name="subject">
+                                            <label for="subject">Title for the food</label>
+                                            <small class="error" id="subjectError">Title is required</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-floating">
+                                            <textarea class="form-control" placeholder="Leave a message here"
+                                                id="message" name="message" style="height: 150px"></textarea>
+                                            <label for="message">Description</label>
+                                            <small class="error" id="messageError">Description is required</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="form-floating">
+                                            <input type="number" class="form-control" id="expiryTime"
+                                                placeholder="Expiry Time (in hours)" name="expiryTime" required>
+                                            <label for="expiryTime">Expiry Time (in hours)</label>
+                                            <small class="error" id="expiryTimeError">Expiry time is required</small>
+                                        </div>
+                                    </div>
+
+
+
+
+                                    <!-- Hidden fields for latitude and longitude -->
+                                    <input type="hidden" id="latitude" name="latitude">
+                                    <input type="hidden" id="longitude" name="longitude">
+                                    <input type="hidden" name="donor" value="<%= user._id %>">
+
+                                    <div class="col-12">
+                                        <button class="btn btn-primary w-100 py-3" type="submit">Send Message</button>
+                                    </div>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                    <!-- Other form fields -->
+                    <input type="text" name="latitude" id="latitude" hidden />
+                    <input type="text" name="longitude" id="longitude" hidden />
+                    <!-- Image Preview Section -->
+                    <div class="col-md-6 wow fadeIn" data-wow-delay="0.1s">
+                        <div class="images text-center">
+                            <p>Captured Images Will Appear Here</p>
+                            <div id="previewContainer" class="d-flex flex-wrap justify-content-center gap-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Donation Form End -->
+
+        <%- include('config/footer') %>
+
+    </div>
+
+    <!-- JavaScript for Image Preview -->
+    <!-- Bootstrap JS (for modal functionality) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+    <script>
+        // Function to validate form fields
+        function validateField(inputElement, errorElement, validationFn) {
+            inputElement.addEventListener("input", function () {
+                if (validationFn(inputElement.value)) {
+                    errorElement.style.display = "none";
+                    inputElement.classList.remove("is-invalid");
+                } else {
+                    errorElement.style.display = "block";
+                    inputElement.classList.add("is-invalid");
+                }
+            });
+        }
+
+        // Validation functions for each field
+        function isNotEmpty(value) {
+            return value.trim() !== "";
+        }
+
+        function isValidEmail(value) {
+            const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            return emailPattern.test(value);
+        }
+
+        function isNumber(value) {
+            return !isNaN(value) && value.trim() !== "";
+        }
+
+        function isValidFile(value) {
+            return value.trim() !== "";
+        }
+
+        // Apply validation to each form field
+        document.addEventListener("DOMContentLoaded", function () {
+            // Name field validation
+            validateField(document.getElementById("name"), document.getElementById("nameError"), isNotEmpty);
+
+            // Email field validation
+            validateField(document.getElementById("email"), document.getElementById("emailError"), isValidEmail);
+
+            // Subject field validation
+            validateField(document.getElementById("subject"), document.getElementById("subjectError"), isNotEmpty);
+
+            // Message field validation
+            validateField(document.getElementById("message"), document.getElementById("messageError"), isNotEmpty);
+
+            // Expiry time validation
+            validateField(document.getElementById("expiryTime"), document.getElementById("expiryTimeError"), isNumber);
+
+            // File field validation (at least one file should be selected)
+            document.getElementById("photoInput").addEventListener("change", function () {
+                const errorElement = document.getElementById("photoError");
+                if (this.files.length > 0) {
+                    errorElement.style.display = "none";
+                } else {
+                    errorElement.style.display = "block";
+                }
+            });
+
+            // Form submission validation
+            document.getElementById("donationForm").addEventListener("submit", function (e) {
+                // Trigger validation on submit
+                let isValid = true;
+
+                // Validate all fields
+                if (!isNotEmpty(document.getElementById("name").value)) {
+                    isValid = false;
+                    document.getElementById("nameError").style.display = "block";
+                }
+
+                if (!isValidEmail(document.getElementById("email").value)) {
+                    isValid = false;
+                    document.getElementById("emailError").style.display = "block";
+                }
+
+                if (!isNotEmpty(document.getElementById("subject").value)) {
+                    isValid = false;
+                    document.getElementById("subjectError").style.display = "block";
+                }
+
+                if (!isNotEmpty(document.getElementById("message").value)) {
+                    isValid = false;
+                    document.getElementById("messageError").style.display = "block";
+                }
+
+                if (!isNumber(document.getElementById("expiryTime").value)) {
+                    isValid = false;
+                    document.getElementById("expiryTimeError").style.display = "block";
+                }
+
+                if (document.getElementById("photoInput").files.length === 0) {
+                    isValid = false;
+                    document.getElementById("photoError").style.display = "block";
+                }
+
+                // If not valid, prevent form submission
+                if (!isValid) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+
+
+
+
+    <script>
+        document.getElementById("location-yes").addEventListener("click", function () {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        document.getElementById("latitude").value = position.coords.latitude;
+                        document.getElementById("longitude").value = position.coords.longitude;
+                        document.getElementById("overlay").style.display = "none"; // Remove blur
+                    },
+                    () => {
+                        alert("Failed to get location. Please enable GPS.");
+                    }
+                );
+            } else {
+                alert("Geolocation is not supported by your browser.");
+            }
+        });
+
+        document.getElementById("location-no").addEventListener("click", function () {
+            window.location.href = "/";
+        });
+    </script>
+
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>
