@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bootstrap Form Validation</title>
+    <%- include("config/export")%>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const form = document.getElementById("userForm");
+                const submitBtn = document.getElementById("submitBtn");
+                const inputs = form.querySelectorAll("input, select");
+                const photoInput = document.getElementById("photo");
+                const photoPreview = document.getElementById("photoPreview");
+                const passwordInput = document.getElementById("password");
+
+                function validateField(field) {
+                    if (!field.checkValidity()) {
+                        field.classList.add("is-invalid");
+                        field.classList.remove("is-valid");
+                    } else {
+                        field.classList.remove("is-invalid");
+                        field.classList.add("is-valid");
+                    }
+                    checkFormValidity();
+                }
+
+                function checkFormValidity() {
+                    submitBtn.disabled = !form.checkValidity();
+                }
+
+                // Live photo preview
+                photoInput.addEventListener("change", function () {
+                    const file = this.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            photoPreview.src = e.target.result;
+                            photoPreview.style.display = "block";
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        photoPreview.style.display = "none";
+                    }
+                });
+
+                // Password validation function
+                function validatePassword() {
+                    const password = passwordInput.value;
+                    const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+                    if (!passwordPattern.test(password)) {
+                        passwordInput.classList.add("is-invalid");
+                        passwordInput.classList.remove("is-valid");
+                    } else {
+                        passwordInput.classList.remove("is-invalid");
+                        passwordInput.classList.add("is-valid");
+                    }
+                    checkFormValidity();
+                }
+
+                // Event listeners
+                inputs.forEach(input => {
+                    input.addEventListener("input", () => validateField(input));
+                });
+
+                passwordInput.addEventListener("input", validatePassword);
+            });
+        </script>
+</head>
+
+<body>
+    <%- include("config/nav")%>
+        <div class="container mt-5">
+            <form action="/ourTeams/signup" id="userForm" class="needs-validation" novalidate
+                enctype="multipart/form-data" method="post">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name</label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                    <div class="invalid-feedback">Name is required.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                    <div class="invalid-feedback">Enter a valid email.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                    <div class="invalid-feedback">
+                        Password must be at least 8 characters long, include a number and a special character.
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="role" class="form-label">Role</label>
+                    <select class="form-select" id="role" required name="role">
+                        <option value="">Select Role</option>
+                        <option value="deliver">Deliver</option>
+                        <option value="pickup">Pickup</option>
+                    </select>
+                    <div class="invalid-feedback">Please select a role.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="phone" class="form-label">Phone Number</label>
+                    <input type="tel" name="phone" class="form-control" id="phone" pattern="[0-9]{10}" required>
+                    <div class="invalid-feedback">Enter a valid 10-digit phone number.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="address" class="form-label">Address</label>
+                    <input type="text" class="form-control" id="address" required name="address">
+                    <div class="invalid-feedback">Address is required.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="photo" class="form-label">Upload Photo</label>
+                    <input type="file" class="form-control" id="photo" name="photo" accept="image/*" required>
+                    <div class="invalid-feedback">Please upload a photo.</div>
+                    <img id="photoPreview" class="mt-3" style="display: none; max-width: 100px; border-radius: 5px;" />
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="submitBtn" disabled>Submit</button>
+            </form>
+        </div>
+        <%- include("config/footer")%>
+
+</body>
+
+</html>

@@ -13,6 +13,7 @@ var userRoutes = require('./routes/users');
 var foodRouter = require('./routes/food')
 var testamonialRouter = require('./routes/testimonial')
 var requestRoutes = require('./routes/request')
+const ourTeamsRouter = require("./routes/ourTeams")
 
 
 const app = express();
@@ -53,6 +54,7 @@ app.use('/users', userRoutes);
 app.use('/food', foodRouter);
 app.use('/testimonial', testamonialRouter);
 app.use('/request', requestRoutes);
+app.use("/ourTeams", ourTeamsRouter);
 
 // Handle 404
 app.use(function (req, res, next) {

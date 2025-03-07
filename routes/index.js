@@ -6,6 +6,7 @@ const Donation = require('../models/donation'); // Import the donation model
 
 const upload = require('../config/storage');
 
+const ourTeam = require('../models/ourTeams');
 
 
 router.get('/', async function (req, res, next) {
@@ -21,6 +22,12 @@ router.get('/', async function (req, res, next) {
     res.status(500).send('Server Error');
   }
 });
+router.get("/who-are-you", (req, res) => {
+  res.render('login', {
+    success: req.flash('success'),
+    error: req.flash('error')
+  })
+})
 
 
 router.get('/about', function (req, res, next) {
@@ -44,11 +51,13 @@ router.get('/service', function (req, res, next) {
     error: req.flash('error')
   });
 });
-router.get('/team', function (req, res, next) {
+router.get('/team', async function (req, res, next) {
+  const team = await ourTeam.find()
   res.render('team', {
     title: 'Express',
     success: req.flash('success'),
-    error: req.flash('error')
+    error: req.flash('error'),
+    team
   });
 });
 

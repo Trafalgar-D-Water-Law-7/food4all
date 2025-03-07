@@ -1,11 +1,9 @@
 const express = require("express");
+const router = express.Router();
 const bcrypt = require("bcryptjs");
-const session = require("express-session");
-const flash = require("connect-flash");
 const Admin = require("../models/admin");
 const User = require("../models/user");
 const Donation = require("../models/donation");
-const router = express.Router();
 const Testimonial = require("../models/testimonial")
 
 // Middleware to check if admin is logged in

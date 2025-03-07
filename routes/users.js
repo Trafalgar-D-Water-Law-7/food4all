@@ -314,7 +314,7 @@ router.get('/signup', function (req, res, next) {
 });
 
 router.get('/login', function (req, res, next) {
-    res.render('login', {
+    res.render('userLogin', {
         title: 'Express',
         error: req.flash('error'),
         success: req.flash('success')
