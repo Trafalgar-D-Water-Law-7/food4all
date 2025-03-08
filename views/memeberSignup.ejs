@@ -72,8 +72,13 @@
 
 <body>
     <%- include("config/nav")%>
+        <div class="container-xxl py-5 bg-dark hero-header mb-5">
+            <div class="container text-center my-5 pt-5 pb-4">
+                <h1 class="display-3 text-white mb-3 animated slideInDown">Ready Collab With Us ?</h1>
+            </div>
+        </div>
         <div class="container mt-5">
-            <form action="/ourTeams/signup" id="userForm" class="needs-validation" novalidate
+            <form action="/ourTeams/memberSignup" id="userForm" class="needs-validation" novalidate
                 enctype="multipart/form-data" method="post">
                 <div class="mb-3">
                     <label for="name" class="form-label">Name</label>
@@ -117,12 +122,44 @@
                     <div class="invalid-feedback">Address is required.</div>
                 </div>
 
+
+                <div class="mb-3">
+                    <label for="latitude" class="form-label">Latitude</label>
+                    <input type="text" class="form-control" id="latitude" required name="latitude"
+                        placeholder="Latitude">
+
+                    <label for="longitude" class="form-label">Longitude</label>
+                    <input type="text" class="form-control" id="longitude" required name="longitude"
+                        placeholder="Longitude">
+                </div>
+
+                <script>
+                    window.onload = function () {
+                        if (navigator.geolocation) {
+                            navigator.geolocation.getCurrentPosition(
+                                function (position) {
+                                    document.getElementById('latitude').value = position.coords.latitude;
+                                    document.getElementById('longitude').value = position.coords.longitude;
+                                },
+                                function (error) {
+                                    console.error("Error getting location: " + error.message);
+                                }
+                            );
+                        } else {
+                            console.error("Geolocation is not supported by this browser.");
+                        }
+                    };
+                </script>
+
+
                 <div class="mb-3">
                     <label for="photo" class="form-label">Upload Photo</label>
                     <input type="file" class="form-control" id="photo" name="photo" accept="image/*" required>
                     <div class="invalid-feedback">Please upload a photo.</div>
                     <img id="photoPreview" class="mt-3" style="display: none; max-width: 100px; border-radius: 5px;" />
                 </div>
+
+
 
                 <button type="submit" class="btn btn-primary" id="submitBtn" disabled>Submit</button>
             </form>

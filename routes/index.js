@@ -3,9 +3,7 @@ var express = require('express');
 var router = express.Router();
 require("dotenv").config();
 const Donation = require('../models/donation'); // Import the donation model
-
 const upload = require('../config/storage');
-
 const ourTeam = require('../models/ourTeams');
 
 
@@ -28,6 +26,7 @@ router.get("/who-are-you", (req, res) => {
     error: req.flash('error')
   })
 })
+
 
 
 router.get('/about', function (req, res, next) {
@@ -103,6 +102,13 @@ router.put('/update/profile', upload.single('photo'), async (req, res) => {
     res.redirect('/users/profile');
   }
 });
+
+router.get('/memeberSignup', function (req, res) {
+  res.render("memeberSignup", {
+    success: req.flash('success'),
+    error: req.flash('error'),
+  })
+})
 
 
 

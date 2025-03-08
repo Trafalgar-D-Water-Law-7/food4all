@@ -5,8 +5,6 @@ const upload = require("../config/storage");
 const ourTeams = require("../models/ourTeams")
 
 
-
-
 router.get("/", function (req, res) {
     res.render("ourTeams", {
         success: req.flash('success'),
@@ -20,10 +18,39 @@ router.get("/login", function (req, res) {
     })
 });
 
-
-router.post("/signup", upload.single("photo"), async (req, res) => {
+router.get('/memberProfile', async (req, res) => {
     try {
-        const { name, email, role, phone, address, password } = req.body;
+        // Assuming member ID is stored in session after login
+        if (!req.session.memberId) {
+            req.flash('error', 'You must log in first.');
+            return res.redirect('/login'); // Redirect to login if not logged in
+        }
+
+        // Find the logged-in member by ID
+        const member = await ourTeams.findById(req.session.memberId);
+
+        if (!member) {
+            req.flash('error', 'Member not found.');
+            return res.redirect('/'); // Redirect to home or error page
+        }
+
+        // Render member profile
+        res.render("memberProfile", {
+            success: req.flash('success'),
+            error: req.flash('error'),
+            member
+        });
+    } catch (error) {
+        console.error("Error fetching member profile:", error);
+        req.flash('error', 'Something went wrong.');
+        res.redirect('/');
+    }
+});
+
+
+router.post("/memberSignup", upload.single("photo"), async (req, res) => {
+    try {
+        const { name, email, role, phone, address, password, latitude, longitude } = req.body;
         const photo = req.file ? req.file.filename : null;
 
         if (!name || !email || !role || !phone || !address || !photo || !password) {
@@ -52,6 +79,8 @@ router.post("/signup", upload.single("photo"), async (req, res) => {
             role,
             phone,
             address,
+            latitude,
+            longitude,
             photo,
             password: hashedPassword
         });
@@ -84,32 +113,15 @@ router.post("/login", async (req, res) => {
             return res.redirect("/ourTeams/login");
         }
 
-        req.session.teamMember = teamMember; // Store user session
+        req.session.memberId = teamMember; // Store user session
         req.flash("success", "Login successful!");
-        res.redirect("/"); // Redirect to a protected page
+        res.redirect("/ourTeams/memberProfile"); // Redirect to a protected page
     } catch (error) {
         console.error(error);
         req.flash("error", "Something went wrong. Please try again.");
         res.redirect("/ourteams/login");
     }
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
