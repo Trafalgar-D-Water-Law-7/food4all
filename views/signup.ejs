@@ -86,9 +86,9 @@
                                     <!-- Contact Field -->
                                     <div class="col-md-6">
                                         <div class="form-floating">
-                                            <input type="tel" class="form-control" id="contact"
+                                            <input type="tel" name="contact" class="form-control" id="contact"
                                                 placeholder="Contact Number" required>
-                                            <input type="hidden" name="contact" id="full_phone">
+                                            <label for="contact">Contact Number</label>
 
                                         </div>
                                         <small class="text-danger" id="contactError"></small>
@@ -328,7 +328,7 @@
                 contact.addEventListener("input", validateContact);
                 photo.addEventListener("change", validatePhoto);
                 street.addEventListener("input", validateStreet);
-                country.addEventListener("change", validateCountry);
+
 
 
 
@@ -350,19 +350,7 @@
         </script>
 
 
-        <!-- phone number with country code -->
-        <script>
-            var input = document.querySelector("#contact");
-            var iti = window.intlTelInput(input, {
-                separateDialCode: true,
-                preferredCountries: ["np", "us", "gb"],
-                utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
-            });
-
-            document.querySelector("form").addEventListener("submit", function () {
-                document.querySelector("#full_phone").value = iti.getNumber();
-            });
-        </script>
+        
 
 
         <%- include('config/footer')%>

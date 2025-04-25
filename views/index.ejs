@@ -13,9 +13,6 @@
 
 <body>
 
-
-
-
   <div class=" container-xxl bg-white p-0 w-full full">
     <!-- Navbar & Hero Start -->
     <div class="container-xxl position-relative p-0">
@@ -39,141 +36,37 @@
           </div>
         </div>
     </div>
-    <!-- Navbar & Hero End -->
+  </div>
+    
+    
+ <!-- Toggle Button -->
+<div style="text-align: right; margin: 10px 2%;">
+  <button id="toggleCardView" class="btn btn-primary btn-sm">
+    Show Donations in Card Format
+  </button>
+</div>
 
-    <h1 style="text-align: center;">Available Foods</h1>
+<!-- Card View Container (Initially Hidden) -->
+<div id="cardViewContainer" class="container d-none" style="margin-bottom: 20px;">
+  <div id="card-list" class="row g-3">
+    <!-- Cards will be dynamically injected here -->
+  </div>
+</div>
 
-    <!-- Service Start -->
-    <div class="container-xxl py-5">
-      <style>
-        .masonry {
-          column-count: 1;
-          column-gap: 1rem;
-        }
+<script src="/js/index-card-view.js"></script>
 
-        @media (min-width: 576px) {
-          .masonry {
-            column-count: 2;
-          }
-        }
+<link rel="stylesheet" href="/css/index-map-view.css">
 
-        @media (min-width: 768px) {
-          .masonry {
-            column-count: 3;
-          }
-        }
+<!-- Map Container -->
+<div id="map"></div>
+<!-- Pass donations data from backend to frontend -->
+<script>
+  const donations = <%- JSON.stringify(donations) %>;
+</script>
 
-        @media (min-width: 992px) {
-          .masonry {
-            column-count: 4;
-          }
-        }
-
-        .masonry-item {
-          break-inside: avoid;
-          margin-bottom: 1rem;
-          display: inline-block;
-          width: 100%;
-        }
-
-        .card {
-          border-radius: 12px;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .card:hover {
-          transform: scale(1.03);
-          box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .card-img-top {
-          width: 100%;
-          height: auto;
-          border-top-left-radius: 12px;
-          border-top-right-radius: 12px;
-        }
-
-        .card-body {
-          padding: 16px;
-        }
-
-        .card-title,
-        .card-text {
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-      </style>
-
-      <div class="container">
-        <div class="masonry">
-          <% donations.reverse().forEach((food)=> { %>
-            <div class="masonry-item">
-              <div class="card">
-                <img src="/<%= food.photos && food.photos.length ? food.photos[0] : '' %>"
-                  onerror="this.src='https://images.pexels.com/photos/85773/pexels-photo-85773.jpeg?auto=compress&cs=tinysrgb&w=1200'"
-                  alt="Food Photo">
-                <div class="card-body">
-                  <h5 class="card-title" title="<%= food.subject %>">
-                    <%= food.subject %>
-                  </h5>
-                  <p class="card-text" title="<%= food.message %>">
-                    <%= food.message %>
-                  </p>
-
-                  <h5 style="opacity: .5;"
-                    class="countdown section-title ff-secondary text-start text-primary fw-normal"
-                    data-expiry="<%= food.expiryTime %>">
-                    <span class="countdown-timer"></span>
-                  </h5>
-
-                  <script>
-                    document.addEventListener('DOMContentLoaded', function () {
-                      const countdownElements = document.querySelectorAll('.countdown');
-
-                      countdownElements.forEach(function (countdownElement) {
-                        const expiryTime = new Date(countdownElement.getAttribute('data-expiry')).getTime(); // Get the expiry time in ms
-                        const countdownTimer = countdownElement.querySelector('.countdown-timer'); // Get the span for updating the time
-
-                        function updateCountdown() {
-                          const now = Date.now();
-                          const timeRemaining = expiryTime - now; // Time left in milliseconds
-
-                          if (timeRemaining <= 0) {
-                            countdownTimer.textContent = 'Expired';
-                            countdownElement.classList.add('expired'); // Optional: Add a class for expired state
-                          } else {
-                            const hours = Math.floor(timeRemaining / 1000 / 60 / 60);
-                            const minutes = Math.floor((timeRemaining / 1000 / 60) % 60);
-                            const seconds = Math.floor((timeRemaining / 1000) % 60);
-
-                            countdownTimer.textContent = `${hours}h ${minutes}m ${seconds}s`;
-                          }
-                        }
-
-                        updateCountdown(); // Initial call to set the timer
-                        setInterval(updateCountdown, 1000); // Update every second
-                      });
-                    });
-                  </script>
+<script src="/js/index-map-view.js"></script>
 
 
-                  <% if (food.status==="claimed" ) { %>
-                    <button class="btn btn-secondary w-100" disabled>Claimed</button>
-                    <% } else { %>
-                      <a href="/food/<%= food._id %>" class="btn btn-primary w-100">Click to Claim</a>
-                      <% } %>
-                        <a href="/food/<%= food._id %>" class="btn btn-primary w-100">View Food</a>
-
-                </div>
-              </div>
-            </div>
-            <% }) %>
-        </div>
-      </div>
-
-    </div>
     <%- include('config/footer') %>
 
 

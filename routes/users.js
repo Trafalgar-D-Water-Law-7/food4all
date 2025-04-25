@@ -2,7 +2,7 @@ const Joi = require('joi');
 var express = require('express');
 const router = express.Router();
 require("dotenv").config();
-const bcrypt = require('bcrypt'); // For password hashing
+const bcrypt = require('bcryptjs'); // For password hashing
 const User = require('../models/user');
 const moment = require("moment");
 const nodemailer = require("nodemailer");
@@ -20,29 +20,14 @@ const ensureAuthenticated = require('../config/ensureAuthenticated');
 
 
 
-// Joi Validation Schema
-const signupSchema = Joi.object({
-    name: Joi.string().min(3).max(50).required(),
-    email: Joi.string().email().required(),
-    password: Joi.string().min(6).required(),
-    confirm_password: Joi.string().valid(Joi.ref('password')).required(),
-    street: Joi.string().required(),
-    contact: Joi.string().pattern(/^\+\d{1,3}\d{7,12}$/).required(),
-    latitude: Joi.number().required(),
-    longitude: Joi.number().required(),
-});
 
 // user creation
 router.post('/signup', upload.single('photo'), async (req, res) => {
+    console.log(req.body)
     try {
-        // Validate Input Data
-        const { error } = signupSchema.validate(req.body);
-        if (error) {
-            req.flash('error', error.details[0].message); // Store error message
-            return res.redirect('/signup'); // Redirect back to signup page
-        }
 
         const { name, email, password, street, contact, latitude, longitude } = req.body;
+
 
         // Check if photo is provided
         if (!req.file) {
@@ -50,7 +35,8 @@ router.post('/signup', upload.single('photo'), async (req, res) => {
             return res.redirect('/users/signup');
         }
 
-        const photo = req.file.path.replace('public/', '');
+        const photo = req.savedFilePath;
+
 
         // Check if email or contact already exists
         const existingUser = await User.findOne({ $or: [{ email }, { contact }] });
@@ -107,7 +93,7 @@ router.post('/update', upload.single('photo'), async (req, res) => {
 
         // Destructure input values
         const { name, email, password, contact } = req.body;
-        let photo = req.file ? req.file.path.replace('public/', '') : user.photo; // Keep old photo if none uploaded
+        let photo = req.file ? req.savedFilePath : user.photo; // Keep old photo if none uploaded
 
         // Validate Password if provided
         if (password) {
@@ -171,23 +157,19 @@ const sendTokenEmail = async (email, name, token) => {
 // Handle form submission
 router.post('/donate', upload.array('photos', 5), async (req, res) => {
     try {
-        // Generate a 6-digit token
         const claimedToken = generateToken();
         const { name, email, subject, message, expiryTime, latitude, longitude } = req.body;
-        const photos = req.files; // Array of uploaded files
 
-        // Find the user by email
         const user = await User.findOne({ email });
-
         if (!user) {
             req.flash('error', '❌ User not found.');
-            return res.redirect('/donate'); // Stop execution & redirect
+            return res.redirect('/donate');
         }
+        const photoPaths = req.savedFilePaths; 
+        console.log(photoPaths)
 
-        // Calculate expiry time: current time + user-selected expiry time in hours
         const expiryDate = moment().add(parseInt(expiryTime), 'hours').toDate();
 
-        // Create new donation entry
         const newDonation = new Donation({
             name,
             email,
@@ -196,32 +178,29 @@ router.post('/donate', upload.array('photos', 5), async (req, res) => {
             expiryTime: expiryDate,
             claimedToken,
             user: user._id,
+            donatedBy: user._id,
             latitude: parseFloat(latitude),
             longitude: parseFloat(longitude),
-            donatedBy: user._id,
-            photos: photos.map(file => file.path.replace('public/', '')),
+            photos: photoPaths, // <- array of file paths
         });
 
         await newDonation.save();
-
-        // Send token email
         await sendTokenEmail(email, name, claimedToken);
 
-        // Increment user's donation count
         user.donationCount = (user.donationCount || 0) + 1;
         user.donations = user.donations || [];
         user.donations.push(newDonation._id);
-
         await user.save();
 
         req.flash('success', '✅ Food donated successfully!');
-        res.redirect('back'); // Redirect to a thank-you page
+        res.redirect('/');
     } catch (error) {
         console.error(error);
         req.flash('error', '❌ Something went wrong. Please try again.');
-        res.redirect('back'); // Redirect back to donation form
+        res.redirect('back');
     }
 });
+
 
 
 

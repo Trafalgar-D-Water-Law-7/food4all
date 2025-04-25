@@ -9,7 +9,12 @@ const ourTeam = require('../models/ourTeams');
 
 router.get('/', async function (req, res, next) {
   try {
-    const donations = await Donation.find();  // Get all donations
+    const now = new Date();
+    const donations = await Donation.find({
+      status: 'claim',
+      expiryTime: { $gte: now }
+    });
+
     res.render('index', {
       donations,
       success: req.flash('success'),
@@ -20,6 +25,7 @@ router.get('/', async function (req, res, next) {
     res.status(500).send('Server Error');
   }
 });
+
 router.get("/who-are-you", (req, res) => {
   res.render('login', {
     success: req.flash('success'),
