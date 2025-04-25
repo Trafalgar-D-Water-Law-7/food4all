@@ -13,6 +13,20 @@
 
 <body>
 
+  <div id="donate-popup" style="z-index: 1009;
+    display: none; position: fixed; top: 20%; left: 50%; transform: translate(-50%, -20%); background: #fff; border: 1px solid #ccc; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.2);">
+    <h3>Donate with eSewa</h3>
+    <form action="/donate" method="POST">
+      <label>Amount (NPR):</label><br/>
+      <input type="number" name="amount" required style="padding: 6px; margin-bottom: 10px; width: 100%;"><br/>
+      
+      <label>Message (optional):</label><br/>
+      <textarea name="message" style="width: 100%; padding: 6px; margin-bottom: 10px;"></textarea><br/>
+      
+      <button type="submit" style="padding: 6px 12px; background-color: green; color: white; border: none; border-radius: 4px;">Proceed to Pay</button>
+      <button type="button" onclick="document.getElementById('donate-popup').style.display='none'" style="margin-left: 10px;">Cancel</button>
+    </form>
+  </div>
   <div class=" container-xxl bg-white p-0 w-full full">
     <!-- Navbar & Hero Start -->
     <div class="container-xxl position-relative p-0">
@@ -26,8 +40,14 @@
                   . Food are Shared here by the different people of the country.
                   Big thank you to the people who donate the food .
                 </p>
-                <a href="/users/donate" class="btn btn-primary py-sm-3 px-sm-5 me-3 animated slideInLeft">Donate
-                  Food</a>
+                
+                  <button  class="btn btn-primary py-sm-3 px-sm-5 me-3 animated slideInLeft"
+                  onclick="document.getElementById('donate-popup').style.display='block'" style="padding: 8px 16px; background-color: green; color: white; border: none; border-radius: 6px;">
+                    💸 Donate via eSewa
+                  </button>
+                  
+
+
               </div>
               <div class="col-lg-6 text-center text-lg-end overflow-hidden">
                 <img class="img-fluid" src="img/hero.png" alt="">

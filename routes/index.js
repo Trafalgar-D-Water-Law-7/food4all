@@ -2,9 +2,54 @@ var express = require('express');
 var express = require('express');
 var router = express.Router();
 require("dotenv").config();
+const crypto = require("crypto");
+const { v4: uuidv4 } = require("uuid");
 const Donation = require('../models/donation'); // Import the donation model
 const upload = require('../config/storage');
 const ourTeam = require('../models/ourTeams');
+
+
+// Test credentials and URLs
+const MERCHANT_CODE = process.env.ESEWA_MERCHANT_CODE;
+const SECRET_KEY = process.env.ESEWA_SECRET_KEY;
+const ESEWA_GATEWAY_URL = process.env.ESEWA_GATEWAY_URL;
+const SUCCESS_URL = process.env.ESEWA_SUCCESS_URL;
+const FAILURE_URL = process.env.ESEWA_FAILURE_URL;
+
+
+// Signature generator
+function generateSignature(total_amount, transaction_uuid, product_code, secret_key) {
+  const message = `total_amount=${total_amount},transaction_uuid=${transaction_uuid},product_code=${product_code}`;
+  const hash = crypto.createHmac("sha256", secret_key).update(message).digest("base64");
+  return hash;
+}
+
+// POST: Donation form submission
+router.post("/donate", (req, res) => {
+  const { amount, message } = req.body;
+  const transaction_uuid = uuidv4();
+  const signature = generateSignature(amount, transaction_uuid, MERCHANT_CODE, SECRET_KEY);
+
+  res.render("esewaForm", {
+    amount,
+    message,
+    transaction_uuid,
+    product_code: MERCHANT_CODE,
+    signature,
+    esewaGatewayUrl: ESEWA_GATEWAY_URL,
+    success_url: SUCCESS_URL,
+    failure_url: FAILURE_URL
+  });
+});
+
+// Success & Failure callbacks
+router.get("/success", (req, res) => {
+  res.send("✅ Payment was successful!");
+});
+
+router.get("/failure", (req, res) => {
+  res.send("❌ Payment failed or was cancelled.");
+});
 
 
 router.get('/', async function (req, res, next) {
