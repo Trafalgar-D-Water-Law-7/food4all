@@ -16,6 +16,11 @@ const SuccessRequestDonation = new mongoose.Schema({
         ref: "FoodRequest", // Reference to the food request
         required: true
     },
+    pickedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "ourTeams" // or your member model
+    }
+    ,
     message: {
         type: String,
         required: true

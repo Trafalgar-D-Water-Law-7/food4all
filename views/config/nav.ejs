@@ -10,25 +10,42 @@
             <a href="/" class="nav-item nav-link">Home</a>
             <a href="/about" class="nav-item nav-link">About</a>
             <a href="/request/requestedForFood" class="nav-item nav-link">Requested For Food</a>
-
-            <a href="/blog" class="nav-item nav-link">blog</a>
+        
+            <% if (memberId) { %>
+              <a href="/ourTeams/readyToPick" class="nav-item nav-link">Ready To Pick</a>
+            <% } %>
+        
             <div class="nav-item dropdown">
-                <a href="#" class="nav-link dropdown-toggle active" data-bs-toggle="dropdown">Pages</a>
-                <div class="dropdown-menu m-0">
-                    <a href="/who-are-you" class="dropdown-item ">Login</a>
-                    <a href="/users/signup" class="dropdown-item ">Sign Up</a>
-                    <a href="/team" class="dropdown-item">Our Team</a>
-                    <a href="/testimonial" class="dropdown-item">Testimonial</a>
-                    <a href="/users/user" class="dropdown-item">User Profile</a>
-                    <a href="/ourTeams/memberProfile" class="dropdown-item">Member Profile</a>
-                    <a href="/service" class="dropdown-item">Services</a>
-                    <a href="/request" class="dropdown-item">Request Food</a>
-                    <a href="/memeberSignup" class="dropdown-item">Signup For Team Member</a>
-                    <a href="/users/logout" class="dropdown-item">Logout</a>
-                </div>
+              <a href="#" class="nav-link dropdown-toggle active" data-bs-toggle="dropdown">Pages</a>
+              <div class="dropdown-menu m-0">
+                <% if (!userId && !memberId) { %>
+                  <!-- Not logged in: show both login/signup options -->
+                  <a href="/users/signup" class="dropdown-item">User Sign Up</a>
+                  <a href="/users/login" class="dropdown-item">User Login</a>
+                  <a href="/memeberSignup" class="dropdown-item">Member Sign Up</a>
+                  <a href="/ourTeams/login" class="dropdown-item">Member Login</a>
+        
+                <% } else if (userId) { %>
+                  <!-- Logged in as user -->
+                  <a href="/users/user" class="dropdown-item">User Profile</a>
+                  <a href="/users/logout" class="dropdown-item">Logout</a>
+                <a href="/request" class="dropdown-item">Request Food</a>
+
+        
+                <% } else if (memberId) { %>
+                  <!-- Logged in as member -->
+                  <a href="/ourTeams/memberProfile" class="dropdown-item">Member Profile</a>
+                  <a href="/ourTeams/logout" class="dropdown-item">Logout</a>
+                <% } %>
+        
+                <a href="/team" class="dropdown-item">Our Team</a>
+                <a href="/testimonial" class="dropdown-item">Testimonial</a>
+                <a href="/service" class="dropdown-item">Services</a>
+              </div>
             </div>
+        
             <a href="/contact" class="nav-item nav-link">Contact</a>
-        </div>
+          </div>
         <a href="/users/donate" class="btn btn-primary py-2 px-4">Donate Food</a>
     </div>
 </nav>

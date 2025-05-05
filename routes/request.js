@@ -1,4 +1,5 @@
 const express = require('express');
+const moment = require('moment');
 const router = express.Router();
 const ensureAuthenticated = require("../config/ensureAuthenticated")
 const User = require("../models/user")
@@ -25,112 +26,149 @@ router.get("/", ensureAuthenticated, async (req, res) => {
 
 
 // Handle food request submission
+// Handle food request submission
 router.post("/submit-food-request", ensureAuthenticated, async (req, res) => {
     try {
-        const userId = req.session.userId; // Get logged-in user ID
+        const { message, address, latitude, longitude } = req.body;
+        const userId = req.session.userId;
+
         if (!userId) {
-            req.flash("error", "You must be logged in to request food.");
-            return res.redirect("/users/login"); // Redirect to login if not logged in
-        }
-        const { foodType, message, quantity, deliveryOption, latitude, longitude, address } = req.body;
-        // Validate message length
-        const wordCount = message.trim().split(/\s+/).length;
-        if (wordCount < 5) {
-            req.flash("error", "Request for food  must be at least 5 words.");
-            return res.redirect("back"); // Redirect back with error
+            req.flash("error", "Please log in to submit a food request.");
+            return res.redirect("/users/login");
         }
 
-
-        // Validate required fields
-        if (!foodType || !quantity || !deliveryOption) {
-            req.flash("error", "All fields must be filled.");
+        if (!message || !address) {
+            req.flash("error", "Message and address are required.");
             return res.redirect("back");
         }
 
-        // Create and save the food request
+        const wordCount = message.trim().split(/\s+/).length;
+        if (wordCount < 5) {
+            req.flash("error", "Message must be at least 5 words.");
+            return res.redirect("back");
+        }
+
+        // ❗ Check if the user already has a previous request
+        const previousRequest = await FoodRequest.findOne({ user: userId });
+
+        if (previousRequest) {
+            await FoodRequest.deleteOne({ _id: previousRequest._id });
+            req.flash("warning", "Your previous food request was removed to submit a new one.");
+        }
+
         const newRequest = new FoodRequest({
             user: userId,
-            foodType,
             message,
-            quantity,
             address,
-            deliveryOption,
             latitude: latitude ? parseFloat(latitude) : undefined,
-            longitude: longitude ? parseFloat(longitude) : undefined
+            longitude: longitude ? parseFloat(longitude) : undefined,
         });
 
-        await newRequest.save(); // Save to database
+        await newRequest.save();
 
-        req.flash("success", "Your food request has been submitted successfully!");
-        res.redirect("back"); // Redirect back to the same page
+        req.flash("success", "Food request submitted successfully!");
+        res.redirect("/request/requestedForFood");
+
     } catch (error) {
-        console.error(error);
-        req.flash("error", "Something went wrong. Please try again.");
+        console.error("Error submitting food request:", error);
+        req.flash("error", "An error occurred. Please try again.");
         res.redirect("back");
     }
 });
 
+
+
 router.get("/requestedForFood", async (req, res) => {
     try {
-        // Fetching food requests and populating the associated user details
-        const requests = await FoodRequest.find().populate('user'); // 'user' is the field in FoodRequest model referring to User
+        const userLat = parseFloat(req.query.lat);
+        const userLng = parseFloat(req.query.lng);
 
+        const requests = await FoodRequest.find().populate('user');
 
+        const enrichedRequests = requests.map(req => {
+            const timeAgo = moment(req.createdAt).fromNow();
+            let distanceKm = null;
+
+            if (userLat && userLng && req.latitude && req.longitude) {
+                const distanceMeters = haversine(
+                    { lat: userLat, lng: userLng },
+                    { lat: req.latitude, lng: req.longitude }
+                );
+                distanceKm = (distanceMeters / 1000).toFixed(1); // e.g., "2.3"
+            }
+
+            return {
+                ...req.toObject(),
+                timeAgo,
+                distanceKm
+            };
+        });
 
         res.render("requestedForFood", {
             success: req.flash('success'),
             error: req.flash('error'),
-            requests
+            requests: enrichedRequests
         });
     } catch (error) {
         console.error(error);
-        req.flash('error', 'Something went wrong, ple   ase try again.');
+        req.flash('error', 'Something went wrong, please try again.');
         res.redirect('/');
     }
 });
 
 
 
-// Handle donation submission
 router.post("/i-want-to-donate", ensureAuthenticated, async (req, res) => {
+    const { requestId, message, address, latitude, longitude } = req.body;
+    console.log("Donation Form Submission:", req.body);
+
+    const donorId = req.session.userId;
+    const fallbackRedirect = req.get("Referer") || "/request";
+
     try {
-        const { requestId, message, address, latitude, longitude } = req.body;
-
-        const donorId = req.session.userId; // Logged-in user donating
-        const donor = await User.findById(donorId);
-        // Validation: Ensure all fields are filled
-        if (!requestId || !address || !message) {
-            req.flash("error", "All fields are required, and quantity must be positive.");
-            return res.redirect("back");
+        // Validate basic fields
+        if (!requestId || !message || !address) {
+            req.flash("error", "All fields are required.");
+            return res.redirect(fallbackRedirect);
         }
 
-        const wordCount = message.trim().split(/\s+/).length;
-        if (wordCount < 5) {
-            req.flash("error", "  must be at least 5 words.");
-            return res.redirect("back"); // Redirect back with error
+        if (message.trim().split(/\s+/).length < 5) {
+            req.flash("error", "Message must be at least 5 words.");
+            return res.redirect(fallbackRedirect);
         }
 
-        const addressWordCount = address.trim().split(/\s+/).length;
-        if (addressWordCount < 5) {
-            req.flash("error", "  must be at least 2 words.");
-            return res.redirect("back"); // Redirect back with error
+        if (address.trim().split(/\s+/).length < 2) {
+            req.flash("error", "Address must be at least 2 words.");
+            return res.redirect(fallbackRedirect);
         }
 
-        // Find the food request and populate requester details
-        const foodRequest = await FoodRequest.findById(requestId).populate("user");
-        if (!foodRequest) {
-            req.flash("error", "Food request not found.");
-            return res.redirect("back");
+        // Run DB queries in parallel
+        const [donor, foodRequest] = await Promise.all([
+            User.findById(donorId),
+            FoodRequest.findById(requestId).populate("user")
+        ]);
+
+        if (!donor || !foodRequest) {
+            req.flash("error", "Invalid request.");
+            return res.redirect(fallbackRedirect);
         }
 
-        // Ensure donor is not the same as the requester
         if (foodRequest.user._id.toString() === donorId.toString()) {
             req.flash("error", "You cannot donate to your own request.");
-            return res.redirect("back");
+            return res.redirect(fallbackRedirect);
         }
 
-        // Create a new donation record
-        const successRequestDonation = new SuccessRequestDonation({
+        if (foodRequest.wantToDonate.includes(donorId)) {
+            req.flash("error", "You have already offered to donate for this request.");
+            return res.redirect(fallbackRedirect);
+        }
+
+        // Add donor to the request
+        foodRequest.wantToDonate.push(donorId);
+        await foodRequest.save();
+
+        // Save success donation record
+        const successDonation = new SuccessRequestDonation({
             donor,
             recipient: foodRequest.user._id,
             foodRequest: requestId,
@@ -140,54 +178,46 @@ router.post("/i-want-to-donate", ensureAuthenticated, async (req, res) => {
             longitude: longitude ? parseFloat(longitude) : undefined
         });
 
+        await successDonation.save();
 
-        await successRequestDonation.save();
+        // Respond immediately
+        req.flash("success", "Donation submitted! Recipient notified.");
+        res.redirect(fallbackRedirect);
 
-        // Send an email to the recipient
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: foodRequest.user.email, // Recipient's email
-            subject: "🎉 Someone Wants to Donate Food to You!",
-            html: `
-        <h2>Hello ${foodRequest.user.name},</h2>
-        <p>Great news! <strong>${donor.name}</strong> has offered to donate food to you.</p>
-        <h3>Donation Details:</h3>
-        <ul>
-            <li>
-            <strong>Message from ${donor.name}:</strong> ${message}</li>
-            <li>
-            <strong>Phone Number:</strong> 
-                <a href="tel:${donor.contact}" style="color: blue; text-decoration: none;">
-                    ${donor.contact}
-                </a>
-            </li>
-             <li>
-            <strong>Message from ${donor.name}:</strong> ${message}</li>
-            <li>
-        <li>
-            <strong>Donation Location:</strong>
-            <a href="https://www.google.com/maps?q=${req.body.latitude},${req.body.longitude}" target="_blank" style="color: blue; text-decoration: none;">
-                View on Google Maps
-            </a>
-        </li>
-        </ul>
-        <p>Please log in to your account to accept or decline the donation.</p>
-        <br>
-        <p>Best regards,<br><strong>Your Food Donation Platform</strong></p>
-    `,
-        };
+        // Send email asynchronously (non-blocking)
+        setImmediate(async () => {
+            try {
+                await transporter.sendMail({
+                    from: process.env.EMAIL_USER,
+                    to: foodRequest.user.email,
+                    subject: "🎉 Someone Wants to Donate Food to You!",
+                    html: `
+                        <h2>Hello ${foodRequest.user.name},</h2>
+                        <p><strong>${donor.name}</strong> has offered to donate food to you!</p>
+                        <ul>
+                            <li><strong>Message:</strong> ${message}</li>
+                            <li><strong>Phone:</strong> <a href="tel:${donor.contact}">${donor.contact}</a></li>
+                            <li><strong>Location:</strong> <a href="https://www.google.com/maps?q=${latitude},${longitude}" target="_blank">View on Google Maps</a></li>
+                        </ul>
+                        <p>Please log into your account to accept or decline the donation.</p>
+                        <br>
+                        <p>Best regards,<br><strong>Plate Share Team</strong></p>
+                    `
+                });
+            } catch (emailErr) {
+                console.error("Email sending failed:", emailErr);
+            }
+        });
 
-
-        await transporter.sendMail(mailOptions);
-
-        req.flash("success", "Donation request submitted successfully! The recipient has been notified.");
-        res.redirect("back");
-    } catch (error) {
-        console.error(error);
+    } catch (err) {
+        console.error("Error in donation submission:", err);
         req.flash("error", "Something went wrong. Please try again.");
-        res.redirect("back");
+        res.redirect(fallbackRedirect);
     }
 });
+
+
+
 
 
 router.delete("/:id", ensureAuthenticated, async (req, res) => {

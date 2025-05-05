@@ -4,97 +4,208 @@
 <head>
   <meta charset="utf-8">
   <title>Plate Share</title>
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <meta content="" name="keywords">
-  <meta content="" name="description">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <%- include('config/export') %>
+  <link rel="stylesheet" href="/css/index-map-view.css">
 
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f8f9fa;
+    }
+
+    .card {
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .card img {
+      height: 180px;
+      object-fit: cover;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+    }
+
+    .card-body .btn {
+      font-size: 14px;
+      padding: 6px 12px;
+    }
+
+    .card-text {
+      font-size: 14px;
+    }
+
+    #location-info {
+      font-size: 15px;
+      margin-bottom: 10px;
+      color: #555;
+    }
+
+    @media (max-width: 768px) {
+      .card img {
+        height: 150px;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-  <div id="donate-popup" style="z-index: 1009;
-    display: none; position: fixed; top: 20%; left: 50%; transform: translate(-50%, -20%); background: #fff; border: 1px solid #ccc; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.2);">
+  <!-- Navbar & Hero -->
+  <div class="container-xxl bg-white p-0">
+    <div class="container-xxl position-relative p-0">
+      <%- include('config/nav') %>
+      <div class="container-xxl py-5 bg-dark hero-header mb-5">
+        <div class="container my-5 py-5">
+          <div class="row align-items-center g-5">
+            <div class="col-lg-6 text-center text-lg-start">
+              <h1 class="display-3 text-white">Enjoy Our<br>Delicious Meal</h1>
+              <p class="text-white mb-4 pb-2">
+                All the food is provided by generous individuals from across the country. Big thanks to those who share and donate.
+              </p>
+              <button class="btn btn-success"
+                onclick="document.getElementById('donate-popup').style.display='block'">
+                💸 Donate via eSewa
+              </button>
+            </div>
+            <div class="col-lg-6 text-center text-lg-end overflow-hidden">
+              <img class="img-fluid" src="img/hero.png" alt="Hero Image">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Available Food Donations -->
+  <div class="container py-4">
+    <h4 class="mb-3 fw-semibold">📦 Available Food Donations Near You</h4>
+    <p id="location-info">📍 Determining your location...</p>
+    <button onclick="showMyLocation()" class="btn btn-outline-primary btn-sm mb-3">🔍 Show My Location</button>
+    <div id="card-list" class="row g-4"></div>
+  </div>
+
+  <!-- eSewa Donate Popup -->
+  <div id="donate-popup" style="z-index: 1009; display: none; position: fixed; top: 20%; left: 50%; transform: translate(-50%, -20%); background: #fff; border: 1px solid #ccc; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.2);">
     <h3>Donate with eSewa</h3>
     <form action="/donate" method="POST">
-      <label>Amount (NPR):</label><br/>
-      <input type="number" name="amount" required style="padding: 6px; margin-bottom: 10px; width: 100%;"><br/>
-      
-      <label>Message (optional):</label><br/>
-      <textarea name="message" style="width: 100%; padding: 6px; margin-bottom: 10px;"></textarea><br/>
-      
+      <label>Amount (NPR):</label><br />
+      <input type="number" name="amount" required style="padding: 6px; margin-bottom: 10px; width: 100%;"><br />
+      <label>Message (optional):</label><br />
+      <textarea name="message" style="width: 100%; padding: 6px; margin-bottom: 10px;"></textarea><br />
       <button type="submit" style="padding: 6px 12px; background-color: green; color: white; border: none; border-radius: 4px;">Proceed to Pay</button>
       <button type="button" onclick="document.getElementById('donate-popup').style.display='none'" style="margin-left: 10px;">Cancel</button>
     </form>
   </div>
-  <div class=" container-xxl bg-white p-0 w-full full">
-    <!-- Navbar & Hero Start -->
-    <div class="container-xxl position-relative p-0">
-      <%- include('config/nav') %>
-        <div class="container-xxl py-5 bg-dark hero-header mb-5">
-          <div class="container my-5 py-5">
-            <div class="row align-items-center g-5">
-              <div class="col-lg-6 text-center text-lg-start">
-                <h1 class="display-3 text-white animated slideInLeft">Enjoy Our<br>Delicious Meal</h1>
-                <p class="text-white animated slideInLeft mb-4 pb-2">All the food are are provided by the Heartly people
-                  . Food are Shared here by the different people of the country.
-                  Big thank you to the people who donate the food .
-                </p>
-                
-                  <button  class="btn btn-primary py-sm-3 px-sm-5 me-3 animated slideInLeft"
-                  onclick="document.getElementById('donate-popup').style.display='block'" style="padding: 8px 16px; background-color: green; color: white; border: none; border-radius: 6px;">
-                    💸 Donate via eSewa
-                  </button>
-                  
 
+  <!-- Server-side Data -->
+  <script>
+    const donations = <%- JSON.stringify(donations) %>;
+  </script>
 
-              </div>
-              <div class="col-lg-6 text-center text-lg-end overflow-hidden">
-                <img class="img-fluid" src="img/hero.png" alt="">
+  <!-- Main App Script -->
+  <script>
+    const locationInfo = document.getElementById('location-info');
+    const cardList = document.getElementById('card-list');
+
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        locationInfo.textContent = `📍 Your location: ${lat.toFixed(4)}, ${lon.toFixed(4)} (via GPS)`;
+        processNearbyFood(lat, lon);
+      },
+      async () => {
+        try {
+          const res = await fetch("https://ipapi.co/json/");
+          const data = await res.json();
+          const lat = data.latitude;
+          const lon = data.longitude;
+          locationInfo.textContent = `📍 Your location: ${lat.toFixed(4)}, ${lon.toFixed(4)} (via IP)`;
+          processNearbyFood(lat, lon);
+        } catch (err) {
+          locationInfo.textContent = "⚠️ Failed to detect location.";
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+
+    function showMyLocation() {
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          alert(`Your real-time location:\nLatitude: ${pos.coords.latitude}\nLongitude: ${pos.coords.longitude}`);
+        },
+        () => {
+          alert("Unable to retrieve your current location.");
+        }
+      );
+    }
+
+    function processNearbyFood(userLat, userLon) {
+      const sorted = donations
+        .filter(d => d.status === 'claim' && d.latitude && d.longitude)
+        .map(d => ({
+          ...d,
+          distance: getDistance(userLat, userLon, d.latitude, d.longitude)
+        }))
+        .sort((a, b) => a.distance - b.distance);
+
+      sorted.forEach(d => {
+        const { _id, subject, message, photos, latitude, longitude, expiryTime, distance } = d;
+        const imageUrl = photos?.[0] || 'https://via.placeholder.com/300x180?text=No+Image';
+        const timeLeft = getTimeLeft(expiryTime);
+        const foodDetailsUrl = `/food/${_id}`;
+        const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
+
+        const col = document.createElement('div');
+        col.className = 'col-lg-4 col-md-6 col-12';
+        col.innerHTML = `
+          <div class="card h-100">
+            <img src="${imageUrl}" class="card-img-top" alt="${subject}">
+            <div class="card-body">
+              <h5 class="card-title">${subject}</h5>
+              <p class="card-text small text-muted">${message || 'No description provided'}</p>
+              <p class="text-muted small">⏳ ${timeLeft} | 📍 ${distance} km</p>
+              <div class="d-flex gap-2">
+                <a href="${foodDetailsUrl}" class="btn btn-sm btn-primary w-50">Details</a>
+                <a href="${directionsUrl}" target="_blank" class="btn btn-sm btn-outline-success w-50">Directions</a>
               </div>
             </div>
-          </div>
-        </div>
-    </div>
-  </div>
-    
-    
- <!-- Toggle Button -->
-<div style="text-align: right; margin: 10px 2%;">
-  <button id="toggleCardView" class="btn btn-primary btn-sm">
-    Show Donations in Card Format
-  </button>
-</div>
+          </div>`;
+        cardList.appendChild(col);
+      });
+    }
 
-<!-- Card View Container (Initially Hidden) -->
-<div id="cardViewContainer" class="container d-none" style="margin-bottom: 20px;">
-  <div id="card-list" class="row g-3">
-    <!-- Cards will be dynamically injected here -->
-  </div>
-</div>
+    function getDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat / 2) ** 2 +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon / 2) ** 2;
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return (R * c).toFixed(2);
+    }
 
-<script src="/js/index-card-view.js"></script>
+    function getTimeLeft(expiryTime) {
+      const now = new Date();
+      const expiry = new Date(expiryTime);
+      const diffMs = expiry - now;
+      if (diffMs <= 0) return "Expired";
+      const mins = Math.floor((diffMs / 1000 / 60) % 60);
+      const hrs = Math.floor(diffMs / 1000 / 60 / 60);
+      return `${hrs}h ${mins}m`;
+    }
+  </script>
 
-<link rel="stylesheet" href="/css/index-map-view.css">
-
-<!-- Map Container -->
-<div id="map"></div>
-<!-- Pass donations data from backend to frontend -->
-<script>
-  const donations = <%- JSON.stringify(donations) %>;
-</script>
-
-<script src="/js/index-map-view.js"></script>
-
-
-    <%- include('config/footer') %>
-
-
-      <div>
-        <%= success %> <!-- Flash message -->
-      </div>
-
+  <%- include('config/footer') %>
+  <div><%= success %></div>
 
 </body>
-
 </html>

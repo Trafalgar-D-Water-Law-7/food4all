@@ -14,18 +14,6 @@ const ourTeamMemberSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    role: {
-        type: String,
-        enum: ["deliver", "pickup"],
-        required: true
-    },
-    latitude: {
-        type: Number,
-    },
-    longitude: {
-        type: Number,
-    },
-
     phone: {
         type: String,
         required: true,

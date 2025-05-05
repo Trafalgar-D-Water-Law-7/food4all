@@ -1,73 +1,101 @@
-var express = require('express');
-var createError = require('http-errors');
-const mongoose = require("mongoose");
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var session = require("express-session");
-var flash = require('express-flash');
+// Core Modules & Third-Party Libraries
+const express = require('express');
+const path = require('path');
+const mongoose = require('mongoose');
+const morgan = require('morgan');
+const cookieParser = require('cookie-parser');
+const session = require('express-session');
+const flash = require('express-flash');
+const methodOverride = require('method-override');
+const createError = require('http-errors');
 
-var indexRouter = require('./routes/index');
-var adminRoutes = require('./routes/admin');
-var userRoutes = require('./routes/users');
-var foodRouter = require('./routes/food')
-var testamonialRouter = require('./routes/testimonial')
-var requestRoutes = require('./routes/request')
-const ourTeamsRouter = require("./routes/ourTeams")
+// Route Imports
+const indexRouter = require('./routes/index');
+const adminRouter = require('./routes/admin');
+const userRouter = require('./routes/users');
+const foodRouter = require('./routes/food');
+const testimonialRouter = require('./routes/testimonial');
+const requestRouter = require('./routes/request');
+const ourTeamsRouter = require('./routes/ourTeams');
 
-
+// Initialize Express App
 const app = express();
 
+// --------------------
 // Database Connection
+// --------------------
 mongoose.connect('mongodb://localhost/plateshare', {
   useNewUrlParser: true,
   useUnifiedTopology: true
-}).then(() => console.log("MongoDB connected"))
-  .catch(err => console.error("MongoDB connection error:", err));
+})
+  .then(() => console.log("✅ MongoDB connected successfully"))
+  .catch(err => console.error("❌ MongoDB connection error:", err));
 
+// --------------------
 // View Engine Setup
+// --------------------
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
+// --------------------
 // Middleware Setup
-app.use(logger('dev'));
+// --------------------
+app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-const methodOverride = require('method-override');
 app.use(methodOverride('_method'));
 
-
+// --------------------
 // Session & Flash
+// --------------------
 app.use(session({
-  secret: 'your-secret-key',
+  secret: 'your-secret-key', // 🔒 Replace with env var in production
   resave: false,
-  saveUninitialized: true
+  saveUninitialized: false
 }));
 app.use(flash());
 
-// Set up routers
-app.use('/', indexRouter);
-app.use('/admin', adminRoutes);
-app.use('/users', userRoutes);
-app.use('/food', foodRouter);
-app.use('/testimonial', testamonialRouter);
-app.use('/request', requestRoutes);
-app.use("/ourTeams", ourTeamsRouter);
+// --------------------
+// Global Template Variables
+// --------------------
+app.use((req, res, next) => {
+  res.locals.userId = req.session.userId || null;
+  res.locals.memberId = req.session.memberId || null;
+  next();
+});
 
-// Handle 404
-app.use(function (req, res, next) {
+
+// --------------------
+// Routes
+// --------------------
+app.use('/', indexRouter);
+app.use('/admin', adminRouter);
+app.use('/users', userRouter);
+app.use('/food', foodRouter);
+app.use('/testimonial', testimonialRouter);
+app.use('/request', requestRouter);
+app.use('/ourTeams', ourTeamsRouter);
+
+// --------------------
+// Error Handling
+// --------------------
+
+// 404 - Not Found
+app.use((req, res, next) => {
   next(createError(404));
 });
 
-// Global Error Handler
-app.use(function (err, req, res, next) {
+// 500 - Global Error Handler
+app.use((err, req, res, next) => {
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
   res.status(err.status || 500);
   res.render('error');
 });
 
+// --------------------
 // Export App
+// --------------------
 module.exports = app;
