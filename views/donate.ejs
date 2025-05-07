@@ -38,9 +38,11 @@
                     <div class="col-md-6">
                         <div class="wow fadeInUp" data-wow-delay="0.2s">
                             <h3 class="mb-4 text-primary">🍛 Share a Meal. Spread Kindness.</h3>
-                            <p class="text-muted mb-4">Fill in the details below to donate leftover or extra food. Your small effort can make a big difference in someone's life.</p>
-        
-                            <form action="/users/donate" enctype="multipart/form-data" method="post" id="donationForm" novalidate>
+                            <p class="text-muted mb-4">Fill in the details below to donate leftover or extra food. Your
+                                small effort can make a big difference in someone's life.</p>
+
+                            <form action="/users/donate" enctype="multipart/form-data" method="post" id="donationForm"
+                                novalidate>
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <div class="form-floating">
@@ -58,7 +60,7 @@
                                             <small class="error" id="emailError">Valid email is required</small>
                                         </div>
                                     </div>
-        
+
                                     <div class="col-12">
                                         <div class="form-floating">
                                             <input type="text" class="form-control" id="subject" placeholder="Subject"
@@ -67,16 +69,17 @@
                                             <small class="error" id="subjectError">Title is required</small>
                                         </div>
                                     </div>
-        
+
                                     <div class="col-12">
                                         <div class="form-floating">
                                             <textarea class="form-control" placeholder="Leave a message here"
                                                 id="message" name="message" style="height: 150px"></textarea>
-                                            <label for="message">Description (e.g. contents, condition, special notes)</label>
+                                            <label for="message">Description (e.g. contents, condition, special
+                                                notes)</label>
                                             <small class="error" id="messageError">Description is required</small>
                                         </div>
                                     </div>
-        
+
                                     <div class="col-12">
                                         <div class="form-floating">
                                             <input type="number" class="form-control" id="expiryTime"
@@ -85,26 +88,32 @@
                                             <small class="error" id="expiryTimeError">Expiry time is required</small>
                                         </div>
                                     </div>
-        
+
                                     <div class="col-12">
                                         <div class="form-floating">
                                             <input type="file" class="form-control" id="photoInput" accept="image/*"
                                                 capture="environment" name="photos" multiple>
                                             <label for="photoInput">Capture Up to 5 Photos</label>
-                                            <div id="previewContainer" class="d-flex flex-wrap justify-content-left gap-2 mt-3"></div>
+                                            <div id="previewContainer"
+                                                class="d-flex flex-wrap justify-content-left gap-2 mt-3"></div>
                                             <small class="error" id="photoError">At least one photo is required</small>
                                         </div>
                                     </div>
-        
-                                    <!-- Hidden fields for geolocation -->
-                                    <input type="hidden" id="latitude" name="latitude">
-                                    <input type="hidden" id="longitude" name="longitude">
-                                    <input type="hidden" name="donor" value="<%= user._id %>">
-        
+
+                            
+                              
+                                    <input type="text" name="latitude" id="latitude">
+                                    <input type="text" name="longitude" id="longitude">
+
+                                        
+                                        
+
+                                    <input type="text" name="donor" value="<%= user._id %>">
+
                                     <div class="col-12">
                                         <button class="btn btn-primary w-100 py-3" type="submit">Donate Now</button>
                                     </div>
-        
+
                                     <div class="col-12 text-muted small text-center">
                                         📍 Location will be captured automatically for nearby pickup.
                                     </div>
@@ -112,7 +121,7 @@
                             </form>
                         </div>
                     </div>
-        
+
                     <!-- Right: Static Image and Info -->
                     <div class="col-md-6 text-center">
                         <img src="/img/about-2.jpg" alt="Donate Food" class="img-fluid rounded shadow"
@@ -120,26 +129,27 @@
                         <div class="mt-4 px-3">
                             <h4 class="text-dark fw-bold">🥗 Feed the Hungry</h4>
                             <p class="mb-2">Every meal you donate helps someone avoid going to bed hungry.</p>
-                            <p class="text-muted fst-italic">“If you can’t feed a hundred people, then feed just one.” – Mother Teresa</p>
-        
+                            <p class="text-muted fst-italic">“If you can’t feed a hundred people, then feed just one.” –
+                                Mother Teresa</p>
+
                             <div class="d-inline-block mt-3 px-4 py-2 bg-light rounded shadow-sm">
                                 <strong>✅ Meals Donated So Far: <%=totalDonations%></strong>
-                                
+
                             </div>
-        
-                     
-        
+
+
+
                             <!-- CTA -->
                             <div class="mt-3">
                                 <a href="/about" class="btn btn-outline-primary btn-sm">Learn How You Help ➜</a>
                             </div>
                         </div>
                     </div>
-        
+
                 </div>
             </div>
         </div>
-        
+
 
         <%- include('config/footer') %>
     </div>
@@ -149,6 +159,27 @@
     <!-- Bootstrap JS (for modal functionality) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+
+    <script>
+        // Try to get browser GPS location
+        navigator.geolocation.getCurrentPosition(
+          position => {
+            document.getElementById('latitude').value = position.coords.latitude;
+            document.getElementById('longitude').value = position.coords.longitude;
+          },
+          error => {
+            console.warn("Geolocation blocked. Falling back to IP...");
+            // Fallback using IP
+            fetch('https://ipapi.co/json/')
+              .then(res => res.json())
+              .then(data => {
+                document.getElementById('latitude').value = data.latitude;
+                document.getElementById('longitude').value = data.longitude;
+              })
+              .catch(err => console.error("IP location error:", err));
+          }
+        );
+      </script>
 
     <script>
         // Function to validate form fields
@@ -256,24 +287,6 @@
 
 
 
-    <script>
-        // Auto capture location
-        window.addEventListener("DOMContentLoaded", () => {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        document.getElementById("latitude").value = position.coords.latitude;
-                        document.getElementById("longitude").value = position.coords.longitude;
-                    },
-                    (error) => {
-                        console.warn("Could not retrieve location:", error.message);
-                    }
-                );
-            } else {
-                console.warn("Geolocation not supported by browser.");
-            }
-        });
-    </script>
 
 
 

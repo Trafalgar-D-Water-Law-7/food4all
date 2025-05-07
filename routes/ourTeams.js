@@ -3,8 +3,14 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");
 const upload = require("../config/storage");
 const ourTeams = require("../models/ourTeams")
-const FoodRequest = require("../models/request")
 const successRequestDonation = require("../models/successRequestDonation")
+const crypto = require('crypto');
+const transporter = require('../config/mailer');
+const nodemailer = require("nodemailer");
+
+const { ensureUserLoggedIn,preventUserIfLoggedIn,preventMemberIfLoggedIn } = require('../middleware/auth');
+
+
 
 
 router.get("/", function (req, res) {
@@ -13,7 +19,7 @@ router.get("/", function (req, res) {
     error: req.flash('error')
   })
 })
-router.get("/login", function (req, res) {
+router.get("/login",preventMemberIfLoggedIn, function (req, res) {
   res.render("memberLogin", {
     success: req.flash('success'),
     error: req.flash('error')
@@ -21,7 +27,7 @@ router.get("/login", function (req, res) {
 });
 
 
-router.get('/readyToPick', async (req, res) => {
+router.get('/readyToPick',preventUserIfLoggedIn, async (req, res) => {
   try {
     if (!req.session.memberId) {
       req.flash('error', 'You must log in first.');
@@ -60,7 +66,7 @@ router.get('/readyToPick', async (req, res) => {
 
 
 
-router.get('/memberProfile', async (req, res) => {
+router.get('/memberProfile',preventUserIfLoggedIn,  async (req, res) => {
   try {
     if (!req.session.memberId) {
       req.flash('error', 'You must log in first.');
@@ -100,7 +106,7 @@ router.get('/memberProfile', async (req, res) => {
 
 
 
-router.post('/markPicked/:id', async (req, res) => {
+router.post('/markPicked/:id',preventUserIfLoggedIn,  async (req, res) => {
   try {
     if (!req.session.memberId) return res.redirect('/login');
 
@@ -121,56 +127,115 @@ router.post('/markPicked/:id', async (req, res) => {
 
 
 
-router.post("/memberSignup", upload.single("photo"), async (req, res) => {
+
+
+
+router.get("/verify-member-otp", preventUserIfLoggedIn, preventMemberIfLoggedIn, (req, res) => {
+  res.render("verify-member-otp", {
+    title: "Verify Member OTP",
+    success: req.flash('success'),
+    error: req.flash('error')
+  });
+});
+
+
+router.post("/memberSignup", preventMemberIfLoggedIn, preventUserIfLoggedIn, upload.single("photo"), async (req, res) => {
   try {
     const { name, email, phone, address, password } = req.body;
     const photo = req.file ? req.file.filename : null;
 
-    // Basic validations
     if (!name || !email || !phone || !address || !photo || !password) {
       req.flash("error", "All fields are required!");
-      return res.redirect("/ourTeams/memberSignup");
+      return res.redirect("/memberSignup");
     }
 
     if (!/^[0-9]{10}$/.test(phone)) {
       req.flash("error", "Invalid phone number format!");
-      return res.redirect("/ourTeams/memberSignup");
+      return res.redirect("/memberSignup");
     }
 
-    // Check if email already exists
     const existingUser = await ourTeams.findOne({ email });
     if (existingUser) {
       req.flash("error", "Email already in use!");
-      return res.redirect("/ourTeams/memberSignup");
+      return res.redirect("/memberSignup");
     }
 
-    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Save new member
+    // Generate OTP
+    const otp = crypto.randomInt(100000, 999999).toString();
+    req.session.memberOTP = otp;
+    req.session.memberData = { name, email, phone, address, photo, password: hashedPassword };
+
+    // Send OTP via email
+    const mailOptions = {
+      from: process.env.EMAIL,
+      to: email,
+      subject: "🔐 Plate Share Member Email Verification",
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px;">
+          <h2 style="color: #4CAF50;">Plate Share - Member Email Verification</h2>
+          <p>Hello ${name},</p>
+          <p>Thank you for signing up as a team member. Use the OTP below to verify your email:</p>
+          <h1 style="text-align: center; color: #333;">${otp}</h1>
+          <p>If you didn't request this, you can ignore this email.</p>
+        </div>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+    req.flash("success", "✅ OTP sent to your email. Please verify.");
+    res.redirect("/ourTeams/verify-member-otp");
+
+  } catch (err) {
+    console.error("Error during member signup:", err);
+    req.flash("error", "Something went wrong. Please try again.");
+    res.redirect("/memberSignup");
+  }
+});
+
+
+
+
+
+
+
+router.post('/verify-member-otp', async (req, res) => {
+  const { otp } = req.body;
+
+  if (otp === req.session.memberOTP) {
+    const { name, email, phone, address, photo, password } = req.session.memberData;
+
     const newTeamMember = new ourTeams({
       name,
       email,
       phone,
       address,
       photo,
-      password: hashedPassword
+      password
     });
 
-    await newTeamMember.save();
-
-    req.flash("success", "You have successfully registered! Please login.");
-    res.redirect("/ourTeams/login"); // now you redirect to login cleanly after success
-  } catch (err) {
-    console.error("Error during signup:", err);
-    req.flash("error", "Something went wrong. Please try again.");
-    res.redirect("/ourTeams/memberSignup");
+    try {
+      await newTeamMember.save();
+      delete req.session.memberOTP;
+      delete req.session.memberData;
+      req.flash("success", "✅ Registration complete. You can now log in.");
+      res.redirect("/ourTeams/login");
+    } catch (err) {
+      console.error("Error saving member:", err);
+      req.flash("error", "❌ Could not save member. Try again.");
+      res.redirect("/ourTeams/memberSignup");
+    }
+  } else {
+    req.flash("error", "❌ Invalid OTP. Please try again.");
+    res.redirect("/ourTeams/verify-member-otp");
   }
 });
 
 
 
-router.post("/login", async (req, res) => {
+
+router.post("/login",preventUserIfLoggedIn,  async (req, res) => {
   const { email, password } = req.body;
 
   try {

@@ -18,6 +18,12 @@ const donationSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
+    city: {
+        type: String,
+        default: 'Unknown'
+      },
+      
+    
     recipient: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 
     foodRequest: { type: mongoose.Schema.Types.ObjectId, ref: "FoodRequest" },

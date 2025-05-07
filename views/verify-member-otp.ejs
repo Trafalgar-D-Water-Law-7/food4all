@@ -1,0 +1,47 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%=title%></title>
+  <%- include('config/export') %>
+
+
+
+</head>
+<body>
+  <%- include('config/nav') %>
+  <div class="container-xxl py-5 bg-dark hero-header mb-5">
+    <div class="container text-center my-5 pt-5 pb-4">
+        <h1 class="display-3 text-white mb-3 animated slideInDown">🔐 Verify Your Email</h1>
+    </div>
+</div>
+
+    <div style="max-width: 400px; margin: 50px auto; padding: 30px; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+        <form action="/ourTeams/verify-member-otp" method="POST">
+            <div style="margin-bottom: 20px;">
+                <label for="otp" style="display: block; margin-bottom: 8px; font-weight: 500;">Enter the OTP sent to your email:</label>
+                <input 
+                    type="text" 
+                    id="otp" 
+                    name="otp" 
+                    required 
+                    style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px;"
+                >
+            </div>
+            <button 
+                type="submit" 
+                style="width: 100%; padding: 12px; background-color: #4CAF50; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer;"
+            >
+                ✅ Verify OTP
+            </button>
+        </form>
+    </div>
+    
+
+  <%- include('config/footer') %>
+
+</body>
+</html>

@@ -132,7 +132,7 @@ router.get('/team', async (req, res) => {
 // ------------------
 // Member Signup Page
 // ------------------
-router.get('/memeberSignup', (req, res) => {
+router.get('/memberSignup', (req, res) => {
   res.render('memeberSignup', {
     success: req.flash('success'),
     error: req.flash('error')

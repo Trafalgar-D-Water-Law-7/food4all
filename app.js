@@ -9,6 +9,7 @@ const flash = require('express-flash');
 const methodOverride = require('method-override');
 const createError = require('http-errors');
 
+
 // Route Imports
 const indexRouter = require('./routes/index');
 const adminRouter = require('./routes/admin');
@@ -46,6 +47,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(methodOverride('_method'));
+
+
+const requestIp = require('request-ip');
+app.use(requestIp.mw());
 
 // --------------------
 // Session & Flash
