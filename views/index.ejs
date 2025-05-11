@@ -6,13 +6,7 @@
   <title>Plate Share</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <%- include('config/export') %>
-    <link rel="stylesheet" href="/css/index-map-view.css">
-
     <style>
-      body {
-        font-family: 'Segoe UI', sans-serif;
-        background-color: #f8f9fa;
-      }
 
       .card {
         border: none;
@@ -57,7 +51,8 @@
 
 <body>
 
-  <!-- Navbar & Hero -->
+
+
   <div class="container-xxl bg-white p-0">
     <div class="container-xxl position-relative p-0">
       <%- include('config/nav') %>
@@ -83,21 +78,27 @@
     </div>
   </div>
 
+
+  <% if (!memberId) { %>
   <!-- Available Food Donations -->
   <div class="container py-4">
     <h4 class="mb-3 fw-semibold">📦 Available Food Donations Near You</h4>
-
-    <!-- Location Info (for displaying user's location status) -->
     <div id="location-info" class="mb-3">Loading location...</div>
-
     <div id="card-list" class="row g-4">
       <!-- Donation Cards will be appended here by JavaScript -->
     </div>
   </div>
+<% } %>
+
+
+
+
+
 
   <script>
 
-    const donations = <%- JSON.stringify(donations) %>;
+    const donations = <%- JSON.stringify(donations || []) %>;
+
 
     const locationInfo = document.getElementById('location-info');
     const cardList = document.getElementById('card-list');
@@ -110,7 +111,7 @@
         const lat = pos.coords.latitude;
         const lon = pos.coords.longitude;
         locationInfo.textContent = `📍 Your location: ${lat.toFixed(4)}, ${lon.toFixed(4)} (via GPS)`;
-
+       
         processNearbyFood(lat, lon);
       },
       async (err) => {
@@ -124,9 +125,10 @@
           const lat = data.latitude;
           const lon = data.longitude;
           locationInfo.textContent = `📍 Your location: ${lat.toFixed(4)}, ${lon.toFixed(4)} (via IP)`;
-
+       
           processNearbyFood(lat, lon);
         } catch (ipErr) {
+          console.error("IP Location fetch error:", ipErr);
           locationInfo.textContent = "⚠️ Failed to detect location.";
         }
       },
@@ -135,6 +137,8 @@
 
     // Function to process and display nearby food donations
     function processNearbyFood(userLat, userLon) {
+      // Log the location data and donation status
+      
 
       // Check if donations exist and log the filtered data
       if (!donations || donations.length === 0) {
@@ -163,7 +167,7 @@
         const imageUrl = photos?.[0] || 'https://via.placeholder.com/300x180?text=No+Image';
         const timeLeft = getTimeLeft(expiryTime);
         const foodDetailsUrl = `/food/${_id}`;
-
+        const directionsUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLon}&destination=${latitude},${longitude}`;
 
 
         const col = document.createElement('div');
@@ -178,8 +182,7 @@
       <p class="text-muted small">⏳ ${timeLeft} | 📌 ${distance} km away</p>
       <div class="d-flex gap-2">
         <a href="${foodDetailsUrl}" class="btn btn-sm btn-primary w-50">Details</a>
-    <a href="https://www.google.com/maps/dir/?api=1&destination=${latitude.toFixed(4)},${longitude.toFixed(4)}" target="_blank" class="btn btn-sm btn-outline-success w-50">Directions</a>
-
+        <a href="${directionsUrl}" target="_blank" class="btn btn-sm btn-outline-success w-50">Directions</a>
       </div>
     </div>
   </div>`;
@@ -211,7 +214,6 @@
       return `${hrs}h ${mins}m`;
     }
   </script>
-
 
   <!-- eSewa Donate Popup -->
   <div id="donate-popup"

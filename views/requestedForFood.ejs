@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>PlateShare - Food Requests</title>
+    <title>PlateShare - Requested For Food</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <%- include('config/export') %>
         <style>
@@ -45,7 +45,6 @@
                         <div class="col-md-4">
                             <div class="card h-100 shadow-sm request-card" data-lat="<%= request.latitude %>"
                                 data-lng="<%= request.longitude %>">
-
                                 <img src="/<%= request.user.photo %>" class="card-img-top"
                                     alt="<%= request.subject || 'Food Request' %>">
 
@@ -59,26 +58,43 @@
                                                 : request.message || 'No description provided' %>
                                         </p>
                                         <p class="text-muted small">
-                                            ⏳ Requested <%= request.timeAgo %> | <span class="distance-display">📍
-                                                    Calculating...</span>
+                                            ⏳ Requested <span class="timeago"
+                                                data-time="<%= request.createdAt.toISOString() %>"></span> |
+                                            <span class="distance-display">📍 Calculating...</span>
                                         </p>
                                     </div>
-
 
                                     <div class="d-flex gap-2 mt-3">
                                         <button class="btn btn-sm btn-primary w-50"
                                             onclick="showRequestDetails('<%= request._id %>')">Details</button>
                                         <a href="https://www.google.com/maps/dir/?api=1&destination=<%= request.latitude %>,<%= request.longitude %>"
                                             target="_blank" class="btn btn-sm btn-outline-success w-50">Directions</a>
-
                                     </div>
-                                    <button class="btn btn-sm btn-warning w-100 mt-2"
-                                        onclick="showDonationForm('<%= request._id %>')">I Want to Donate</button>
 
+                                    <% if (!session.userId) { %>
+                                        <a href="/users/login" class="btn btn-sm btn-secondary w-100 mt-2">Login to
+                                            Donate</a>
+
+                                        <% } else if (request.user._id.toString()===session.userId.toString()) { %>
+                                            <!-- No button shown if it's the user's own request -->
+
+                                            <% } else if (request.wantToDonate.includes(session.userId)) { %>
+                                                <button class="btn btn-sm btn-outline-success w-100 mt-2" disabled>✅
+                                                    You’ve already donated</button>
+
+                                                <% } else if (request.wantToDonate.length>= 5) { %>
+                                                    <button class="btn btn-sm btn-danger w-100 mt-2" disabled>🚫 Max
+                                                        donation limit reached</button>
+
+                                                    <% } else { %>
+                                                        <button class="btn btn-sm btn-warning w-100 mt-2"
+                                                            onclick="showDonationForm('<%= request._id %>')">
+                                                            I Want to Donate
+                                                        </button>
+                                                        <% } %>
                                 </div>
                             </div>
                         </div>
-
 
                         <!-- Donation Modal -->
                         <div class="modal fade" id="donationModal-<%= request._id %>" tabindex="-1" aria-hidden="true">
@@ -118,17 +134,14 @@
                             </div>
                         </div>
 
-
-                        <!-- Modal for Full Details -->
+                        <!-- Request Detail Modal -->
                         <div class="modal fade" id="requestDetailModal-<%= request._id %>" tabindex="-1"
                             aria-labelledby="requestDetailModalLabel-<%= request._id %>" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered">
                                 <div class="modal-content border-0 shadow">
                                     <div class="modal-header bg-light">
                                         <h5 class="modal-title fw-semibold text-primary"
-                                            id="requestDetailModalLabel-<%= request._id %>">
-                                            🥗 Food Request Details
-                                        </h5>
+                                            id="requestDetailModalLabel-<%= request._id %>">🥗 Food Request Details</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                                             aria-label="Close"></button>
                                     </div>
@@ -171,136 +184,168 @@
                             </div>
                         </div>
 
-                        <% }); %>
+                        <% }) %>
                 </div>
+
             </div>
 
 
-            <%- include('config/footer') %>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function showDonationForm(requestId) {
-            const modal = new bootstrap.Modal(document.getElementById('donationModal-' + requestId));
-            modal.show();
-        }
 
-        function captureLocation(requestId) {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(position => {
-                    document.getElementById('latitude-' + requestId).value = position.coords.latitude;
-                    document.getElementById('longitude-' + requestId).value = position.coords.longitude;
-                    alert('Location captured successfully.');
-                }, () => {
-                    alert('Failed to capture location. Please enable GPS.');
-                });
-            } else {
-                alert('Geolocation is not supported by your browser.');
+
+
+
+
+
+    <%- include('config/footer') %>
+        <script>
+            // Show full request details in a modal
+            function showRequestDetails(id) {
+                const modal = new bootstrap.Modal(document.getElementById('requestDetailModal-' + id));
+                modal.show();
             }
-        }
 
-        document.addEventListener("DOMContentLoaded", () => {
-            document.querySelectorAll('form').forEach(form => {
-                form.addEventListener('input', () => {
-                    const message = form.querySelector('textarea').value.trim().split(/\s+/).length;
-                    const address = form.querySelector('input[type="text"]').value.trim().split(/\s+/).length;
-                    const donateButton = form.querySelector('button[type="submit"]');
+            // Show donation form and autofill geolocation
+            function showDonationForm(id) {
+                const modal = new bootstrap.Modal(document.getElementById('donationModal-' + id));
+                modal.show();
 
-                    if (message >= 5 && address >= 2) {
-                        donateButton.disabled = false;
-                    } else {
-                        donateButton.disabled = true;
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        pos => {
+                            document.getElementById('latitude-' + id).value = pos.coords.latitude;
+                            document.getElementById('longitude-' + id).value = pos.coords.longitude;
+                        },
+                        err => {
+                            alert("Could not retrieve location. Please allow location access.");
+                        }
+                    );
+                }
+            }
+
+            // Validate donation form input
+            function validateDonationForm(id) {
+                const form = document.querySelector(`#donationModal-${id} form`);
+                const message = form.querySelector('textarea[name="message"]').value.trim();
+                const address = form.querySelector('input[name="address"]').value.trim();
+
+                if (message.split(/\s+/).length < 5) {
+                    alert("Please enter at least 5 words in the message.");
+                    return false;
+                }
+
+                if (address.split(/\s+/).length < 2) {
+                    alert("Please enter a more detailed address.");
+                    return false;
+                }
+
+                return true;
+            }
+
+            // Function to format the time as "X minutes ago", "X hours ago", etc.
+            function timeAgo(dateTime) {
+                const now = new Date();
+                const diffInSeconds = Math.floor((now - new Date(dateTime)) / 1000);
+                const diffInMinutes = Math.floor(diffInSeconds / 60);
+                const diffInHours = Math.floor(diffInMinutes / 60);
+                const diffInDays = Math.floor(diffInHours / 24);
+
+                if (diffInSeconds < 60) {
+                    return `${diffInSeconds} second${diffInSeconds > 1 ? 's' : ''} ago`;
+                } else if (diffInMinutes < 60) {
+                    return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
+                } else if (diffInHours < 24) {
+                    return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+                } else if (diffInDays < 30) {
+                    return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+                } else {
+                    return `${Math.floor(diffInDays / 30)} month${Math.floor(diffInDays / 30) > 1 ? 's' : ''} ago`;
+                }
+            }
+
+            // Function to update all timeago elements on the page
+            function updateTimeAgo() {
+                document.querySelectorAll('.timeago').forEach(element => {
+                    const time = element.getAttribute('data-time');
+                    const formattedTime = timeAgo(time);
+                    element.textContent = formattedTime;
+                });
+            }
+
+            // Helper: Calculate distance using Haversine formula
+            function calculateDistance(lat1, lon1, lat2, lon2) {
+                const R = 6371; // Earth radius in km
+                const dLat = (lat2 - lat1) * Math.PI / 180;
+                const dLon = (lon2 - lon1) * Math.PI / 180;
+                const a =
+                    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                return (R * c).toFixed(1); // distance in km
+            }
+
+            // Function to update all distances on the page based on the user's location
+            function updateDistances(userLat, userLon) {
+                document.querySelectorAll('.request-card').forEach(card => {
+                    const destLat = parseFloat(card.dataset.lat);
+                    const destLon = parseFloat(card.dataset.lng);
+
+                    const distance = calculateDistance(userLat, userLon, destLat, destLon);
+                    const displayEl = card.querySelector('.distance-display');
+                    if (displayEl) {
+                        displayEl.textContent = `📍 ${distance} km away`;
                     }
                 });
+            }
 
-                form.addEventListener('submit', (e) => {
-                    const message = form.querySelector('textarea').value.trim().split(/\s+/).length;
-                    const address = form.querySelector('input[type="text"]').value.trim().split(/\s+/).length;
+            // Fallback using IP location if geolocation is not available
+            function fallbackToIP() {
+                fetch('https://ipapi.co/json/')
+                    .then(res => res.json())
+                    .then(data => {
+                        const lat = parseFloat(data.latitude);
+                        const lon = parseFloat(data.longitude);
+                        updateDistances(lat, lon);
+                    })
+                    .catch(err => {
+                        document.querySelectorAll('.distance-display').forEach(el => {
+                            el.textContent = '📍 Location not available';
+                        });
+                    });
+            }
 
-                    if (message < 5 || address < 2) {
-                        e.preventDefault();
-                        alert('Please complete the form properly.');
-                    }
-                });
+            // Get user's location and update distances
+            function fetchUserLocation() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        pos => {
+                            const lat = pos.coords.latitude;
+                            const lon = pos.coords.longitude;
+                            updateDistances(lat, lon);
+                        },
+                        err => {
+                            console.warn("Geolocation error:", err.message);
+                            fallbackToIP(); // Fallback to IP if geolocation fails
+                        },
+                        {
+                            enableHighAccuracy: true,
+                            timeout: 10000,
+                            maximumAge: 0
+                        }
+                    );
+                } else {
+                    fallbackToIP(); // Fallback if geolocation is not available
+                }
+            }
+
+            // Run these functions when the page is loaded
+            document.addEventListener('DOMContentLoaded', () => {
+                updateTimeAgo(); // Update time ago labels
+                fetchUserLocation(); // Fetch user location for distance calculation
             });
-        });
-    </script>
-
-
-    <script>
-        function showRequestDetails(requestId) {
-            const modal = new bootstrap.Modal(document.getElementById(`requestDetailModal-${requestId}`));
-            modal.show();
-        }
-
-        function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371; // km
-            const toRad = deg => deg * Math.PI / 180;
-            const dLat = toRad(lat2 - lat1);
-            const dLon = toRad(lon2 - lon1);
-            const a = Math.sin(dLat / 2) ** 2 +
-                Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-                Math.sin(dLon / 2) ** 2;
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            return (R * c).toFixed(1);
-        }
-
-        function updateDistances() {
-            if (!navigator.geolocation) return;
-
-            navigator.geolocation.getCurrentPosition(position => {
-                const userLat = position.coords.latitude;
-                const userLng = position.coords.longitude;
-
-                document.querySelectorAll(".request-card").forEach(card => {
-                    const reqLat = parseFloat(card.dataset.lat);
-                    const reqLng = parseFloat(card.dataset.lng);
-                    if (!isNaN(reqLat) && !isNaN(reqLng)) {
-                        const dist = calculateDistance(userLat, userLng, reqLat, reqLng);
-                        const distElem = card.querySelector(".distance-display");
-                        if (distElem) distElem.textContent = `📍 ${dist} km away`;
-                    }
-                });
-            }, () => {
-                console.warn("User denied location or it failed.");
-            });
-        }
-
-        window.addEventListener("DOMContentLoaded", updateDistances);
-    </script>
-
-    <script>
-        function showDonationForm(requestId) {
-            const modal = new bootstrap.Modal(document.getElementById('donationModal-' + requestId));
-            modal.show();
-
-            // Auto-capture location
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(position => {
-                    document.getElementById('latitude-' + requestId).value = position.coords.latitude;
-                    document.getElementById('longitude-' + requestId).value = position.coords.longitude;
-                }, () => {
-                    alert("⚠️ Location access failed. Please enable GPS.");
-                });
-            } else {
-                alert("Geolocation not supported.");
-            }
-        }
-
-        function validateDonationForm(requestId) {
-            const form = document.querySelector(`#donationModal-${requestId} form`);
-            const message = form.querySelector("textarea").value.trim().split(/\s+/);
-            const address = form.querySelector("input[name='address']").value.trim().split(/\s+/);
-
-            if (message.length < 5 || address.length < 2) {
-                alert("⚠️ Message must be at least 5 words and address at least 2 words.");
-                return false;
-            }
-            return true;
-        }
-
-    </script>
+        </script>
 
 
 

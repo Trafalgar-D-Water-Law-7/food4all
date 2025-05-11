@@ -27,7 +27,7 @@ router.get("/login",preventMemberIfLoggedIn, function (req, res) {
 });
 
 
-router.get('/readyToPick',preventUserIfLoggedIn, async (req, res) => {
+router.get('/readyToPick', preventUserIfLoggedIn, async (req, res) => {
   try {
     if (!req.session.memberId) {
       req.flash('error', 'You must log in first.');
@@ -40,8 +40,8 @@ router.get('/readyToPick',preventUserIfLoggedIn, async (req, res) => {
       return res.redirect('/');
     }
 
-    // Only fetch donations that are not yet picked by anyone
-    const donations = await successRequestDonation.find({ pickedBy: null })
+    // Fetch unpicked donations and populate needed fields
+    const donationsRaw = await successRequestDonation.find({ pickedBy: null })
       .populate('donor')
       .populate('recipient')
       .populate({
@@ -49,11 +49,14 @@ router.get('/readyToPick',preventUserIfLoggedIn, async (req, res) => {
         populate: { path: 'user' }
       });
 
+    // ✅ Filter out those with missing foodRequest (null)
+    const donations = donationsRaw.filter(d => d.foodRequest);
+
     res.render("readyToPick", {
       success: req.flash('success'),
       error: req.flash('error'),
       member,
-      donations  // ✅ Only unpicked donations sent to view
+      donations
     });
 
   } catch (error) {
@@ -62,6 +65,7 @@ router.get('/readyToPick',preventUserIfLoggedIn, async (req, res) => {
     res.redirect('/');
   }
 });
+
 
 
 
@@ -268,6 +272,121 @@ router.get('/logout', (req, res) => {
       }
       res.redirect("/ourTeams/login")
   });
+});
+
+
+// Step 1: Render forget password page
+router.get('/cpm-forgot-password', (req, res) => {
+  res.render('forgetPassword/cpm-forget-password', {
+    error: req.flash('error'),
+    success: req.flash('success'),
+  });
+});
+
+// Step 1: Handle email + send OTP
+router.post('/cpm-forgot-password', async (req, res) => {
+  const { email } = req.body;
+  const user = await ourTeams.findOne({ email });
+
+  if (!user) {
+    req.flash('error', 'User not found');
+    return res.redirect('/ourTeams/cpm-forgot-password');
+  }
+
+  const otp = Math.floor(100000 + Math.random() * 900000);
+  req.session.otp = otp;
+  req.session.email = email;
+  req.session.otpExpiry = Date.now() + 10 * 60 * 1000; // 10 minutes
+  req.session.otpVerified = false; // enforce verification
+
+  try {
+    await transporter.sendMail({
+      from: process.env.EMAIL,
+      to: email,
+      subject: 'Your OTP for Password Reset',
+      text: `Your OTP is: ${otp}. It will expire in 10 minutes.`,
+    });
+
+    req.flash('success', 'OTP sent to your email');
+    res.redirect('/ourTeams/cpm-verify-otp');
+  } catch (err) {
+    console.error('Email send error:', err);
+    req.flash('error', 'Failed to send OTP');
+    res.redirect('/ourTeams/cpm-forgot-password');
+  }
+});
+
+// Step 2: Render OTP verification page
+router.get('/cpm-verify-otp', (req, res) => {
+  res.render('forgetPassword/cpm-verify-otp', {
+    error: req.flash('error'),
+    success: req.flash('success'),
+  });
+});
+
+// Step 2: Verify OTP
+router.post('/cpm-verify-otp', (req, res) => {
+  const { otp } = req.body;
+
+  if (
+    req.session.otp &&
+    otp == req.session.otp &&
+    Date.now() < req.session.otpExpiry
+  ) {
+    req.session.otpVerified = true; // ✅ mark as verified
+    req.flash('success', 'OTP verified. Please reset your password.');
+    res.redirect('/ourTeams/cpm-change-password');
+  } else {
+    req.flash('error', 'Invalid or expired OTP');
+    res.redirect('/ourTeams/cpm-verify-otp');
+  }
+});
+
+// Step 3: Render password reset page — only if OTP is verified
+router.get('/cpm-change-password', (req, res) => {
+  if (!req.session.otpVerified) {
+    req.flash('error', 'Please verify OTP first');
+    return res.redirect('/ourTeams/cpm-forgot-password');
+  }
+
+  res.render('forgetPassword/cpm-change-password', {
+    error: req.flash('error'),
+    success: req.flash('success'),
+  });
+});
+
+// Step 3: Handle new password — only if OTP is verified
+router.post('/cpm-change-password', async (req, res) => {
+  if (!req.session.otpVerified) {
+    req.flash('error', 'Unauthorized access');
+    return res.redirect('/ourTeams/cpm-forgot-password');
+  }
+
+  const { password, confirmPassword } = req.body;
+
+  if (password !== confirmPassword) {
+    req.flash('error', 'Passwords do not match');
+    return res.redirect('/ourTeams/cpm-change-password');
+  }
+
+  const user = await ourTeams.findOne({ email: req.session.email });
+
+  if (!user) {
+    req.flash('error', 'User not found');
+    return res.redirect('/ourTeams/cpm-change-password');
+  }
+
+  user.password = await bcrypt.hash(password, 10);
+  await user.save();
+
+  // ✅ Clear session on completion
+  req.session.otp = null;
+  req.session.email = null;
+  req.session.otpExpiry = null;
+  req.session.otpVerified = null;
+
+  req.flash('success', 'Password changed successfully');
+  res.redirect('/ourTeams/login');
 });
 
 

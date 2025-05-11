@@ -25,7 +25,6 @@ const userSchema = new mongoose.Schema({
     },
     photo: {
         type: String, // File path of uploaded photo
-        required: true
     },
     donationCount: {
         type: Number,

@@ -6,14 +6,14 @@ const FoodRequestSchema = new mongoose.Schema({
     longitude: { type: Number },
     latitude: { type: Number },
     address: { type: String, required: true },
-    
+
     wantToDonate: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
-        // No limit anymore
-    }],
-
-    createdAt: { type: Date, default: Date.now }
+    }]
+}, {
+    timestamps: true  // ✅ Automatically adds createdAt and updatedAt
 });
+
 
 module.exports = mongoose.model("FoodRequest", FoodRequestSchema);

@@ -24,8 +24,6 @@ router.get("/", ensureAuthenticated, async (req, res) => {
     });
 });
 
-
-// Handle food request submission
 // Handle food request submission
 router.post("/submit-food-request", ensureAuthenticated, async (req, res) => {
     try {
@@ -39,40 +37,47 @@ router.post("/submit-food-request", ensureAuthenticated, async (req, res) => {
 
         if (!message || !address) {
             req.flash("error", "Message and address are required.");
-            return res.redirect("back");
+            return res.redirect("/request");
         }
 
         const wordCount = message.trim().split(/\s+/).length;
         if (wordCount < 5) {
             req.flash("error", "Message must be at least 5 words.");
-            return res.redirect("back");
+            return res.redirect("/request");
         }
 
-        // ❗ Check if the user already has a previous request
-        const previousRequest = await FoodRequest.findOne({ user: userId });
+        // ✅ Check how many requests today
+        const startOfDay = moment().startOf('day').toDate();
+        const endOfDay = moment().endOf('day').toDate();
 
-        if (previousRequest) {
-            await FoodRequest.deleteOne({ _id: previousRequest._id });
-            req.flash("warning", "Your previous food request was removed to submit a new one.");
+        const todayCount = await FoodRequest.countDocuments({
+            user: userId,
+            createdAt: { $gte: startOfDay, $lte: endOfDay }
+        });
+
+        if (todayCount >= 3) {
+            req.flash("error", "You can only submit 3 food requests per day.");
+            return res.redirect("/request");
         }
 
+        // ✅ Proceed with saving new request
         const newRequest = new FoodRequest({
             user: userId,
             message,
             address,
-            latitude: latitude ? parseFloat(latitude) : undefined,
-            longitude: longitude ? parseFloat(longitude) : undefined,
+            latitude: parseFloat(latitude),
+            longitude: parseFloat(longitude),
         });
 
         await newRequest.save();
 
         req.flash("success", "Food request submitted successfully!");
-        res.redirect("/request/requestedForFood");
+        return res.redirect("/request/requestedForFood");
 
     } catch (error) {
         console.error("Error submitting food request:", error);
         req.flash("error", "An error occurred. Please try again.");
-        res.redirect("back");
+        return res.redirect("back");
     }
 });
 
@@ -80,34 +85,13 @@ router.post("/submit-food-request", ensureAuthenticated, async (req, res) => {
 
 router.get("/requestedForFood", async (req, res) => {
     try {
-        const userLat = parseFloat(req.query.lat);
-        const userLng = parseFloat(req.query.lng);
-
         const requests = await FoodRequest.find().populate('user');
-
-        const enrichedRequests = requests.map(req => {
-            const timeAgo = moment(req.createdAt).fromNow();
-            let distanceKm = null;
-
-            if (userLat && userLng && req.latitude && req.longitude) {
-                const distanceMeters = haversine(
-                    { lat: userLat, lng: userLng },
-                    { lat: req.latitude, lng: req.longitude }
-                );
-                distanceKm = (distanceMeters / 1000).toFixed(1); // e.g., "2.3"
-            }
-
-            return {
-                ...req.toObject(),
-                timeAgo,
-                distanceKm
-            };
-        });
-
         res.render("requestedForFood", {
+            requests,
             success: req.flash('success'),
             error: req.flash('error'),
-            requests: enrichedRequests
+             session: req.session  // ✅ add this if not already passed
+
         });
     } catch (error) {
         console.error(error);
@@ -116,17 +100,13 @@ router.get("/requestedForFood", async (req, res) => {
     }
 });
 
-
-
 router.post("/i-want-to-donate", ensureAuthenticated, async (req, res) => {
     const { requestId, message, address, latitude, longitude } = req.body;
-    console.log("Donation Form Submission:", req.body);
-
     const donorId = req.session.userId;
     const fallbackRedirect = req.get("Referer") || "/request";
 
     try {
-        // Validate basic fields
+        // Validate input
         if (!requestId || !message || !address) {
             req.flash("error", "All fields are required.");
             return res.redirect(fallbackRedirect);
@@ -142,7 +122,7 @@ router.post("/i-want-to-donate", ensureAuthenticated, async (req, res) => {
             return res.redirect(fallbackRedirect);
         }
 
-        // Run DB queries in parallel
+        // Parallel DB queries
         const [donor, foodRequest] = await Promise.all([
             User.findById(donorId),
             FoodRequest.findById(requestId).populate("user")
@@ -153,21 +133,46 @@ router.post("/i-want-to-donate", ensureAuthenticated, async (req, res) => {
             return res.redirect(fallbackRedirect);
         }
 
+        // 🛑 Cannot donate to your own request
         if (foodRequest.user._id.toString() === donorId.toString()) {
             req.flash("error", "You cannot donate to your own request.");
             return res.redirect(fallbackRedirect);
         }
 
+        // 🛑 Already donated to this request
         if (foodRequest.wantToDonate.includes(donorId)) {
             req.flash("error", "You have already offered to donate for this request.");
             return res.redirect(fallbackRedirect);
         }
 
-        // Add donor to the request
+        // 🛑 Request already has 5 donors
+        if (foodRequest.wantToDonate.length >= 5) {
+            req.flash("error", "This request has already reached the maximum donation limit.");
+            return res.redirect(fallbackRedirect);
+        }
+
+        // 🛑 Daily donation limit check (3 per day)
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const endOfDay = new Date();
+        endOfDay.setHours(23, 59, 59, 999);
+
+        const todaysDonations = await SuccessRequestDonation.countDocuments({
+            donor: donorId,
+            createdAt: { $gte: startOfDay, $lte: endOfDay }
+        });
+
+        if (todaysDonations >= 3) {
+            req.flash("error", "You’ve reached your daily donation limit (3 per day).");
+            return res.redirect(fallbackRedirect);
+        }
+
+        // ✅ Add donor to the request
         foodRequest.wantToDonate.push(donorId);
         await foodRequest.save();
 
-        // Save success donation record
+        // ✅ Save donation record
         const successDonation = new SuccessRequestDonation({
             donor,
             recipient: foodRequest.user._id,
@@ -180,11 +185,10 @@ router.post("/i-want-to-donate", ensureAuthenticated, async (req, res) => {
 
         await successDonation.save();
 
-        // Respond immediately
         req.flash("success", "Donation submitted! Recipient notified.");
         res.redirect(fallbackRedirect);
 
-        // Send email asynchronously (non-blocking)
+        // ✅ Send email (non-blocking)
         setImmediate(async () => {
             try {
                 await transporter.sendMail({
@@ -220,35 +224,27 @@ router.post("/i-want-to-donate", ensureAuthenticated, async (req, res) => {
 
 
 
-router.delete("/:id", ensureAuthenticated, async (req, res) => {
+// DELETE /request/:id
+router.delete('/delete/:id', async (req, res) => {
     try {
         const requestId = req.params.id;
-        const userId = req.session.userId;
 
         // Find the request
-        const foodRequest = await FoodRequest.findById(requestId);
-        if (!foodRequest) {
-            req.flash("error", "Request not found.");
-            return res.redirect("back");
-        }
-
-        // Ensure the logged-in user is the one who created the request
-        if (foodRequest.user.toString() !== userId.toString()) {
-            req.flash("error", "You are not authorized to delete this request.");
-            return res.redirect("back");
+        const request = await FoodRequest.findById(requestId);
+        if (!request) {
+            return res.status(404).json({ error: 'Request not found' });
         }
 
         // Delete the request
         await FoodRequest.findByIdAndDelete(requestId);
 
-        req.flash("success", "Food request deleted successfully!");
-        res.redirect("back"); // Redirect to the previous page
-    } catch (error) {
-        console.error("Error deleting request:", error);
-        req.flash("error", "Something went wrong. Please try again.");
-        res.redirect("back");
+        res.status(200).json({ message: 'Request deleted successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
     }
 });
+
 
 
 

@@ -36,7 +36,7 @@
                 <div class="row g-4 align-items-center">
                     <!-- Left: Donation Form -->
                     <div class="col-md-6">
-                        <div class="wow fadeInUp" data-wow-delay="0.2s">
+                        <div >
                             <h3 class="mb-4 text-primary">🍛 Share a Meal. Spread Kindness.</h3>
                             <p class="text-muted mb-4">Fill in the details below to donate leftover or extra food. Your
                                 small effort can make a big difference in someone's life.</p>
@@ -65,7 +65,7 @@
                                         <div class="form-floating">
                                             <input type="text" class="form-control" id="subject" placeholder="Subject"
                                                 name="subject">
-                                            <label for="subject">Title for the Food (e.g. "10 Veg Meals")</label>
+                                            <label for="subject"  style="white-space: normal; overflow-wrap: break-word;"> (e.g. "10 Veg Meals")</label>
                                             <small class="error" id="subjectError">Title is required</small>
                                         </div>
                                     </div>
@@ -74,11 +74,13 @@
                                         <div class="form-floating">
                                             <textarea class="form-control" placeholder="Leave a message here"
                                                 id="message" name="message" style="height: 150px"></textarea>
-                                            <label for="message">Description (e.g. contents, condition, special
-                                                notes)</label>
+                                            <label for="message" style="white-space: normal; overflow-wrap: break-word;">
+                                                Description (e.g. contents, condition, special notes)
+                                            </label>
                                             <small class="error" id="messageError">Description is required</small>
                                         </div>
                                     </div>
+                                    
 
                                     <div class="col-12">
                                         <div class="form-floating">
@@ -102,13 +104,9 @@
 
                             
                               
-                                    <input type="text" name="latitude" id="latitude">
-                                    <input type="text" name="longitude" id="longitude">
-
-                                        
-                                        
-
-                                    <input type="text" name="donor" value="<%= user._id %>">
+                                    <input type="hidden" name="latitude" id="latitude">
+                                    <input type="hidden" name="longitude" id="longitude">
+                                    <input type="hidden" name="donor" value="<%= user._id %>">
 
                                     <div class="col-12">
                                         <button class="btn btn-primary w-100 py-3" type="submit">Donate Now</button>

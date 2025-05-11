@@ -6,7 +6,9 @@ const { v4: uuidv4 } = require('uuid');
 
 const Donation = require('../models/donation');
 const ourTeam = require('../models/ourTeams');
-const upload = require('../config/storage');
+const Contact = require('../models/conatctus');
+const transporter = require('../config/mailer'); // adjust path accordingly
+
 
 // ------------------
 // eSewa Configuration
@@ -90,9 +92,13 @@ router.get('/payment/failure', (req, res) => {
 // ------------------
 // Public Pages
 // ------------------
-router.get('/about', (req, res) => {
+router.get('/about', async (req, res) => {
+  const team = await ourTeam.find();
+
+
   res.render('about', {
     title: 'About',
+    team,
     success: req.flash('success'),
     error: req.flash('error')
   });
@@ -106,6 +112,61 @@ router.get('/contact', (req, res) => {
   });
 });
 
+
+const TWO_HOURS = 2 * 60 * 60 * 1000; // ms
+
+router.post('/contactUs', async (req, res) => {
+  try {
+    const { name, email, subject, message } = req.body;
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
+    if (!name || !email || !subject || !message) {
+      req.flash('error', 'All fields are required.');
+      return res.redirect('/contact');
+    }
+
+    const now = new Date();
+    const cutoff = new Date(now - TWO_HOURS);
+
+    const recentMessage = await Contact.findOne({
+      $or: [{ email }, { ip }],
+      createdAt: { $gte: cutoff }
+    }).sort({ createdAt: -1 });
+
+    if (recentMessage) {
+      req.flash('error', 'You can only send a message once every 2 hours.');
+      return res.redirect('/contact');
+    }
+
+    const newContact = new Contact({ name, email, subject, message, ip });
+    await newContact.save();
+
+    // Send email to your inbox
+    const mailOptions = {
+      from: `"Contact Form" <${process.env.EMAIL}>`,
+      to: 'destination@gmail.com', // Change to your Gmail
+      subject: `New Contact Message from ${name}`,
+      html: `
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Subject:</strong> ${subject}</p>
+        <p><strong>Message:</strong><br>${message}</p>
+        <p><strong>IP:</strong> ${ip}</p>
+        <p><small>Received on ${new Date().toLocaleString()}</small></p>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    req.flash('success', 'Your message has been sent successfully!');
+    res.redirect('/contact');
+  } catch (error) {
+    console.error('Contact form submission error:', error);
+    res.status(500).json({ error: 'An error occurred while submitting the form.' });
+  }
+});
+
+
 router.get('/service', (req, res) => {
   res.render('service', {
     title: 'Services',
@@ -114,20 +175,6 @@ router.get('/service', (req, res) => {
   });
 });
 
-router.get('/team', async (req, res) => {
-  try {
-    const team = await ourTeam.find();
-    res.render('team', {
-      title: 'Our Team',
-      team,
-      success: req.flash('success'),
-      error: req.flash('error')
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Server Error');
-  }
-});
 
 // ------------------
 // Member Signup Page

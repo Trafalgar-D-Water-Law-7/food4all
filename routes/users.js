@@ -13,11 +13,9 @@ const transporter = require('../config/mailer');
 const crypto = require('crypto');
 const generateToken = require('../config/generateToken');
 
-const {getLocationFromIP}  = require('../config/ipLocation');
+const { getLocationFromIP } = require('../config/ipLocation');
 
 const requestIp = require('request-ip');
-
-
 const deleteExpiredDonations = require('../config/cronJobs'); // Adjust path if needed
 deleteExpiredDonations(); // Start the scheduled task
 
@@ -26,66 +24,13 @@ const { ensureUserLoggedIn, preventUserIfLoggedIn, preventMemberIfLoggedIn } = r
 
 
 
-// user creation
-// router.post('/signup', preventMemberIfLoggedIn, upload.single('photo'), async (req, res) => {
-//     console.log(req.body)
-//     try {
-
-//         const { name, email, password, street, contact } = req.body;
-
-
-//         // Check if photo is provided
-//         if (!req.file) {
-//             req.flash('error', '❌ Photo is required.');
-//             return res.redirect('/users/signup');
-//         }
-
-//         const photo = req.savedFilePath;
-
-//         // Check if email or contact already exists
-//         const existingUser = await User.findOne({ $or: [{ email }, { contact }] });
-//         if (existingUser) {
-//             req.flash('error', '❌ Email or Contact number already in use.');
-//             return res.redirect('/users/signup');
-//         }
-
-//         // Hash Password
-//         const hashedPassword = await bcrypt.hash(password, 10);
-
-//         // Create New User with donationCount initialized to 0
-//         const newUser = new User({
-//             name,
-//             email,
-//             password: hashedPassword,
-//             street,
-//             contact,
-//             photo,
-//         });
-
-//         // Save User
-//         await newUser.save();
-//         req.flash('success', '✅ User registered successfully!');
-//         res.redirect('/users/login');
-
-//     } catch (error) {
-//         console.error(error);
-//         req.flash('error', '❌ Something went wrong. Please try again.');
-//         res.redirect('/users/signup'); // Redirect back to signup page
-//     }
-// });
-
 
 router.post('/signup', preventMemberIfLoggedIn, upload.single('photo'), async (req, res) => {
     try {
         const { name, email, password, street, contact, latitude, longitude } = req.body;
 
-        // Check if photo is provided
-        if (!req.file) {
-            req.flash('error', '❌ Photo is required.');
-            return res.redirect('/users/signup');
-        }
-
-        const photo = req.savedFilePath;
+        // Optional photo
+        const photo = req.savedFilePath || null;
 
         // Check if email or contact already exists
         const existingUser = await User.findOne({ $or: [{ email }, { contact }] });
@@ -100,11 +45,20 @@ router.post('/signup', preventMemberIfLoggedIn, upload.single('photo'), async (r
         // Generate OTP
         const otp = crypto.randomInt(100000, 999999).toString(); // 6-digit OTP
 
-        // Save OTP temporarily in session
+        // Save OTP and user data in session
         req.session.otp = otp;
-        req.session.userData = { name, email, password: hashedPassword, street, contact, photo, latitude, longitude };
+        req.session.userData = {
+            name,
+            email,
+            password: hashedPassword,
+            street,
+            contact,
+            photo, // This will be null if not uploaded
+            latitude,
+            longitude
+        };
 
-        // Send OTP to the user's email
+        // Email setup
         const mailOptions = {
             from: `"Plate Share" <${process.env.EMAIL}>`,
             to: email,
@@ -123,7 +77,6 @@ router.post('/signup', preventMemberIfLoggedIn, upload.single('photo'), async (r
             `,
             text: `Your OTP for Plate Share is: ${otp}. It is valid for 10 minutes.`,
         };
-        
 
         // Send OTP email
         transporter.sendMail(mailOptions, (error, info) => {
@@ -134,15 +87,16 @@ router.post('/signup', preventMemberIfLoggedIn, upload.single('photo'), async (r
             }
             console.log('Email sent: ' + info.response);
             req.flash('success', '✅ OTP sent to your email!');
-            res.redirect('/users/verify-otp'); // Redirect to OTP verification page
+            res.redirect('/users/verify-otp');
         });
 
     } catch (error) {
         console.error(error);
         req.flash('error', '❌ Something went wrong. Please try again.');
-        res.redirect('/users/signup'); // Redirect back to signup page
+        res.redirect('/users/signup');
     }
 });
+
 
 
 
@@ -280,100 +234,161 @@ const sendTokenEmail = async (email, name, token) => {
 
 router.post('/donate', upload.array('photos', 5), async (req, res) => {
     try {
-      const { name, email, subject, message, expiryTime, latitude, longitude } = req.body;
-      
-  
-      if (!email || !subject || !expiryTime) {
-        req.flash('error', '❌ Missing required fields.');
-        return res.redirect('/users/donate');
-      }
-  
-      const user = await User.findOne({ email }).lean();
-      if (!user) {
-        req.flash('error', '❌ User not found.');
-        return res.redirect('/donate');
-      }
-  
-      const photoPaths = req.savedFilePaths || [];
-      if (!Array.isArray(photoPaths) || photoPaths.length === 0) {
-        req.flash('error', '❌ At least one photo is required.');
-        return res.redirect('/donate');
-      }
-  
-      // Use the latitude and longitude from the form directly
-      let lat = parseFloat(latitude);
-      let lon = parseFloat(longitude);
-  
-      if (isNaN(lat) || isNaN(lon)) {
-        req.flash('error', '❌ Invalid location data.');
-        return res.redirect('/users/donate');
-      }
-  
-      // Set expiry date
-      const expiryDate = moment().add(parseInt(expiryTime, 10), 'hours').toDate();
-  
-      const donationData = {
-        name,
-        email,
-        subject,
-        message,
-        expiryTime: expiryDate,
-        claimedToken: generateToken(),
-        user: user._id,
-        donatedBy: user._id,
-        latitude: lat,
-        longitude: lon,
-        photos: photoPaths
-      };
-      console.log("Donation Data:", donationData);
-  
-      // Save to DB
-      const donation = await Donation.create(donationData);
-  
-      // Update user donation stats
-      await User.updateOne(
-        { _id: user._id },
-        {
-          $inc: { donationCount: 1 },
-          $push: { donations: donation._id }
-        }
-      );
-  
-      sendTokenEmail(email, name, donation.claimedToken)
-        .catch(err => console.error("❌ Failed to send email:", err));
-  
-      req.flash('success', '✅ Food donated successfully!');
-      res.redirect('/');
-    } catch (error) {
-      console.error("Donation Error:", error);
-      req.flash('error', '❌ Something went wrong. Please try again.');
-      res.redirect('/');
-    }
-  });
-  
+        const { name, email, subject, message, expiryTime, latitude, longitude } = req.body;
 
+
+        if (!email || !subject || !expiryTime) {
+            req.flash('error', '❌ Missing required fields.');
+            return res.redirect('/users/donate');
+        }
+
+        const user = await User.findOne({ email }).lean();
+        if (!user) {
+            req.flash('error', '❌ User not found.');
+            return res.redirect('/donate');
+        }
+
+        const photoPaths = req.savedFilePaths || [];
+        if (!Array.isArray(photoPaths) || photoPaths.length === 0) {
+            req.flash('error', '❌ At least one photo is required.');
+            return res.redirect('/donate');
+        }
+
+        // Use the latitude and longitude from the form directly
+        let lat = parseFloat(latitude);
+        let lon = parseFloat(longitude);
+
+        if (isNaN(lat) || isNaN(lon)) {
+            req.flash('error', '❌ Invalid location data.');
+            return res.redirect('/users/donate');
+        }
+
+        // Set expiry date
+        const expiryDate = moment().add(parseInt(expiryTime, 10), 'hours').toDate();
+
+        const donationData = {
+            name,
+            email,
+            subject,
+            message,
+            expiryTime: expiryDate,
+            claimedToken: generateToken(),
+            user: user._id,
+            donatedBy: user._id,
+            latitude: lat,
+            longitude: lon,
+            photos: photoPaths
+        };
+        console.log("Donation Data:", donationData);
+
+        // Save to DB
+        const donation = await Donation.create(donationData);
+
+        // Update user donation stats
+        await User.updateOne(
+            { _id: user._id },
+            {
+                $inc: { donationCount: 1 },
+                $push: { donations: donation._id }
+            }
+        );
+
+        sendTokenEmail(email, name, donation.claimedToken)
+            .catch(err => console.error("❌ Failed to send email:", err));
+
+        req.flash('success', '✅ Food donated successfully!');
+        res.redirect('/');
+    } catch (error) {
+        console.error("Donation Error:", error);
+        req.flash('error', '❌ Something went wrong. Please try again.');
+        res.redirect('/');
+    }
+});
+
+
+
+//   / DELETE /donation/:id
+router.delete('/donation/:id', async (req, res) => {
+    try {
+        const donationId = req.params.id;
+
+        // Find the donation
+        const donation = await Donation.findById(donationId);
+
+        if (!donation) {
+            return res.status(404).json({ error: 'Donation not found' });
+        }
+
+        const userId = donation.user; // Assuming the 'user' field stores the reference to the User
+
+        // Decrease donation count for the user
+        await User.findByIdAndUpdate(userId, {
+            $inc: { donationCount: -1 },
+            $pull: { donations: donationId } // Optional: remove donation ID from user's donations array
+        });
+
+        // Delete the donation
+        await Donation.findByIdAndDelete(donationId);
+
+        res.status(200).json({ message: 'Donation deleted successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
 
 
 
 router.get("/user", preventMemberIfLoggedIn, async (req, res) => {
     try {
         const userId = req.session.userId;
+
+        const claimedFood = await Donation.find({ claimedBy: userId }).populate('claimedBy');
+
+
+
+        if (!userId) {
+            req.flash('error', 'User not logged in');
+            return res.redirect('/login');
+        }
+
         const user = await User.findById(userId);
-        const requests = await FoodRequest.find({ user: user })
-        // Find all donations made by this user
-        const donatedFoods = await Donation.find({ user: userId }).populate("claimedBy name");
+        if (!user) {
+            req.flash('error', 'User not found');
+            return res.redirect('/');
+        }
+
+        const requests = await FoodRequest.find({ user: userId }).sort({ createdAt: -1 });
+
+        // Format request timestamps
+        const formattedRequests = requests.map(req => ({
+            ...req._doc,
+            timeAgo: moment(req.createdAt).fromNow()
+        }));
+
+        const donatedFoods = await Donation.find({ user: userId })
+            .populate("claimedBy")
+            .sort({ createdAt: -1 });
+
+        // Format donation timestamps
+        const formattedDonations = donatedFoods.map(donation => ({
+            ...donation._doc,
+            timeAgo: moment(donation.createdAt).fromNow()
+        }));
 
         res.render("user", {
-            donatedFoods, username: user.name, user,
-            requests,
-            userId: req.session.userId,
-
+            claimedFood,
+            donatedFoods: formattedDonations,
+            username: user.name,
+            user,
+            requests: formattedRequests,
+            userId,
             error: req.flash('error'),
             success: req.flash('success')
-
         });
+
     } catch (error) {
-        console.error("Error fetching user donations:", error);
+        console.error("Error fetching user profile:", error);
         res.status(500).send("Server error while fetching profile.");
     }
 });
@@ -468,11 +483,8 @@ router.post('/login', preventMemberIfLoggedIn, async (req, res) => {
 
 
 
-
-
 router.get('/donate', preventMemberIfLoggedIn, ensureUserLoggedIn, async (req, res) => {
     try {
-        // Get user session
         const userId = req.session.userId;
         const user = await User.findById(userId);
 
@@ -481,20 +493,30 @@ router.get('/donate', preventMemberIfLoggedIn, ensureUserLoggedIn, async (req, r
             return res.redirect('/users/login');
         }
 
-        // Get client IP using request-ip
-        const clientIp = requestIp.getClientIp(req) || '';
-        console.log("🌐 Detected IP:", clientIp);
+        // Check today's date range
+        const startOfDay = moment().startOf('day').toDate();
+        const endOfDay = moment().endOf('day').toDate();
 
-        // Lookup location
+        const todayDonations = await Donation.find({
+            donatedBy: userId,
+            createdAt: { $gte: startOfDay, $lte: endOfDay }
+        });
+
+
+        if (todayDonations.length >= 3) {
+            req.flash('error', 'You have reached the limit of 3 donations for today.');
+            return res.redirect('/'); // Or wherever you want to redirect
+        }
+
+        // IP and location (optional)
+        const clientIp = requestIp.getClientIp(req) || '';
         let location = await getLocationFromIP(clientIp);
         if (!location || !location.city) {
             location = { city: 'Unknown', country: 'Unknown' };
         }
 
-        // Get total donation count
         const totalDonations = await Donation.estimatedDocumentCount();
 
-        // Render the donate view
         res.render('donate', {
             user,
             location,
@@ -604,6 +626,140 @@ router.get("/profile/:userId", preventMemberIfLoggedIn, async (req, res) => {
         console.error(error);
         res.status(500).json({ message: "Error fetching claimed foods." });
     }
+});
+
+
+
+// DELETE /request/:id
+router.delete('/request/:id', async (req, res) => {
+    const { id } = req.params;
+
+    // Check if ID is a valid MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).send('Invalid ID');
+    }
+
+    try {
+        await FoodRequest.findByIdAndDelete(id);
+        res.status(200).send('Request deleted');
+    } catch (error) {
+        console.error('Error deleting request:', error);
+        res.status(500).send('Error deleting request');
+    }
+});
+
+// Step 1: Render forget password page
+router.get('/cpu-forgot-password', (req, res) => {
+  res.render('forgetPassword/cpu-forget-password', {
+    error: req.flash('error'),
+    success: req.flash('success')
+  });
+});
+
+// Step 1: Handle email + send OTP
+router.post('/cpu-forgot-password', async (req, res) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    req.flash('error', 'User not found');
+    return res.redirect('/users/cpu-forgot-password');
+  }
+
+  const otp = Math.floor(100000 + Math.random() * 900000);
+  req.session.otp = otp;
+  req.session.email = email;
+  req.session.otpExpiry = Date.now() + 10 * 60 * 1000; // 10 minutes
+  req.session.otpVerified = false; // Mark as not verified yet
+
+  try {
+    await transporter.sendMail({
+      from: process.env.EMAIL,
+      to: email,
+      subject: 'Your OTP for Password Reset',
+      text: `Your OTP is: ${otp}. It will expire in 10 minutes.`,
+    });
+
+    req.flash('success', 'OTP sent to your email');
+    res.redirect('/users/cpu-verify-otp');
+  } catch (err) {
+    console.error('Email send error:', err);
+    req.flash('error', 'Failed to send OTP');
+    res.redirect('/users/cpu-forgot-password');
+  }
+});
+
+// Step 2: Render OTP verification page
+router.get('/cpu-verify-otp', (req, res) => {
+  res.render('forgetPassword/cpu-verify-otp', {
+    error: req.flash('error'),
+    success: req.flash('success')
+  });
+});
+
+// Step 2: Verify OTP
+router.post('/cpu-verify-otp', (req, res) => {
+  const { otp } = req.body;
+
+  if (
+    req.session.otp &&
+    otp == req.session.otp &&
+    Date.now() < req.session.otpExpiry
+  ) {
+    req.session.otpVerified = true; // ✅ Set OTP verified flag
+    req.flash('success', 'OTP verified. Please reset your password.');
+    res.redirect('/users/cpu-change-password');
+  } else {
+    req.flash('error', 'Invalid or expired OTP');
+    res.redirect('/users/cpu-verify-otp');
+  }
+});
+
+// Step 3: Render password reset page (Only if OTP is verified)
+router.get('/cpu-change-password', (req, res) => {
+  if (!req.session.otpVerified) {
+    req.flash('error', 'Please verify OTP first');
+    return res.redirect('/users/cpu-forgot-password');
+  }
+
+  res.render('forgetPassword/cpu-change-password', {
+    error: req.flash('error'),
+    success: req.flash('success')
+  });
+});
+
+// Step 3: Handle new password (Only if OTP is verified)
+router.post('/cpu-change-password', async (req, res) => {
+  if (!req.session.otpVerified) {
+    req.flash('error', 'Unauthorized access');
+    return res.redirect('/users/cpu-forgot-password');
+  }
+
+  const { password, confirmPassword } = req.body;
+
+  if (password !== confirmPassword) {
+    req.flash('error', 'Passwords do not match');
+    return res.redirect('/users/cpu-change-password');
+  }
+
+  const user = await User.findOne({ email: req.session.email });
+
+  if (!user) {
+    req.flash('error', 'User not found');
+    return res.redirect('/users/cpu-change-password');
+  }
+
+  user.password = await bcrypt.hash(password, 10);
+  await user.save();
+
+  // ✅ Clear session after successful password change
+  req.session.otp = null;
+  req.session.email = null;
+  req.session.otpExpiry = null;
+  req.session.otpVerified = null;
+
+  req.flash('success', 'Password changed successfully');
+  res.redirect('/users/login');
 });
 
 

@@ -3,23 +3,17 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Restoran - Bootstrap Restaurant Template</title>
+    <title>Contact Us - Restoran</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="" name="keywords">
-    <meta content="" name="description">
     <%- include('config/export') %>
-
 </head>
 
 <body>
     <div class="container-xxl bg-white p-0">
 
-
-
         <!-- Navbar & Hero Start -->
         <div class="container-xxl position-relative p-0">
             <%- include('config/nav') %>
-
                 <div class="container-xxl py-5 bg-dark hero-header mb-5">
                     <div class="container text-center my-5 pt-5 pb-4">
                         <h1 class="display-3 text-white mb-3 animated slideInDown">Contact Us</h1>
@@ -35,7 +29,6 @@
         </div>
         <!-- Navbar & Hero End -->
 
-
         <!-- Contact Start -->
         <div class="container-xxl py-5">
             <div class="container">
@@ -48,52 +41,60 @@
                         <div class="row gy-4">
                             <div class="col-md-4">
                                 <h5 class="section-title ff-secondary fw-normal text-start text-primary">Booking</h5>
-                                <p><i class="fa fa-envelope-open text-primary me-2"></i>book@example.com</p>
+                                <p><i class="fa fa-envelope-open text-primary me-2"></i>food4allnp@.com</p>
                             </div>
                             <div class="col-md-4">
                                 <h5 class="section-title ff-secondary fw-normal text-start text-primary">General</h5>
-                                <p><i class="fa fa-envelope-open text-primary me-2"></i>info@example.com</p>
+                                <p><i class="fa fa-envelope-open text-primary me-2"></i>food4allnp@.com</p>
                             </div>
                             <div class="col-md-4">
                                 <h5 class="section-title ff-secondary fw-normal text-start text-primary">Technical</h5>
-                                <p><i class="fa fa-envelope-open text-primary me-2"></i>tech@example.com</p>
+                                <p><i class="fa fa-envelope-open text-primary me-2"></i>food4allnp@.com</p>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6 wow fadeIn" data-wow-delay="0.1s">
+                    <div class="col-md-6 wow">
                         <iframe class="position-relative rounded w-100 h-100"
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3001156.4288297426!2d-78.01371936852176!3d42.72876761954724!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4ccc4bf0f123a5a9%3A0xddcfc6c1de189567!2sNew%20York%2C%20USA!5e0!3m2!1sen!2sbd!4v1603794290143!5m2!1sen!2sbd"
-                            frameborder="0" style="min-height: 350px; border:0;" allowfullscreen="" aria-hidden="false"
-                            tabindex="0"></iframe>
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d28256.74581688589!2d85.02508865381036!3d27.428085248343932!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb6d0a1e6c278b%3A0x3e26a6f319c9248d!2sHetauda%2C%20Nepal!5e0!3m2!1sen!2snp!4v1683000000000!5m2!1sen!2snp"
+                            frameborder="0" style="min-height: 350px; border:0;" allowfullscreen="" loading="lazy"
+                            aria-hidden="false" tabindex="0"></iframe>
                     </div>
                     <div class="col-md-6">
-                        <div class="wow fadeInUp" data-wow-delay="0.2s">
-                            <form>
+                        <div class="wow ">
+                            <form id="contactForm" novalidate action="/contactUs" method="POST">
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <div class="form-floating">
-                                            <input type="text" class="form-control" id="name" placeholder="Your Name">
+                                            <input type="text" class="form-control" name="name" id="name"
+                                                placeholder="Your Name" required>
                                             <label for="name">Your Name</label>
+                                            <div class="invalid-feedback">Please enter your name.</div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-floating">
-                                            <input type="email" class="form-control" id="email"
-                                                placeholder="Your Email">
+                                            <input type="email" name="email" class="form-control" id="email"
+                                                placeholder="Your Email" required>
                                             <label for="email">Your Email</label>
+                                            <div class="invalid-feedback">Please enter a valid email.</div>
                                         </div>
                                     </div>
                                     <div class="col-12">
                                         <div class="form-floating">
-                                            <input type="text" class="form-control" id="subject" placeholder="Subject">
+                                            <input type="text" name="subject" class="form-control" id="subject"
+                                                placeholder="Subject" required>
                                             <label for="subject">Subject</label>
+                                            <div class="invalid-feedback">Please enter a subject.</div>
                                         </div>
                                     </div>
+
                                     <div class="col-12">
                                         <div class="form-floating">
-                                            <textarea class="form-control" placeholder="Leave a message here"
-                                                id="message" style="height: 150px"></textarea>
+                                            <textarea name="message" class="form-control"
+                                                placeholder="Leave a message here" id="message" style="height: 150px"
+                                                required></textarea>
                                             <label for="message">Message</label>
+                                            <div class="invalid-feedback">Please enter your message.</div>
                                         </div>
                                     </div>
                                     <div class="col-12">
@@ -101,6 +102,19 @@
                                     </div>
                                 </div>
                             </form>
+                            <script>
+                                // Bootstrap validation
+                                (() => {
+                                    const form = document.getElementById('contactForm');
+                                    form.addEventListener('submit', function (event) {
+                                        if (!form.checkValidity()) {
+                                            event.preventDefault();
+                                            event.stopPropagation();
+                                        }
+                                        form.classList.add('was-validated');
+                                    }, false);
+                                })();
+                            </script>
                         </div>
                     </div>
                 </div>
@@ -108,9 +122,9 @@
         </div>
         <!-- Contact End -->
 
-
         <%- include('config/footer')%>
 
+    </div>
 </body>
 
 </html>

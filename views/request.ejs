@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Request Food - Plate Share</title>
+  <title>Request Food</title>
   <%- include('config/export') %>
 
   <style>
@@ -120,27 +120,64 @@
 
   <script>
     window.addEventListener("DOMContentLoaded", () => {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    document.getElementById("latitude").value = position.coords.latitude;
-                    document.getElementById("longitude").value = position.coords.longitude;
-                },
-                (error) => {
-                    console.warn("Location access denied or failed:", error.message);
-                    // Optional: show a visual alert to the user
-                    const alertBox = document.querySelector(".location-alert");
-                    if (alertBox) {
-                        alertBox.textContent = "We couldn't access your location. Please allow GPS.";
-                        alertBox.classList.add("bg-warning", "text-dark");
-                    }
-                }
-            );
-        } else {
-            alert("Geolocation is not supported by your browser.");
+      const latInput = document.getElementById("latitude");
+      const lonInput = document.getElementById("longitude");
+      const alertBox = document.querySelector(".location-alert");
+      const toast = document.getElementById("toast");
+  
+      function showToast(msg) {
+        toast.textContent = msg;
+        toast.style.display = "block";
+        setTimeout(() => {
+          toast.style.display = "none";
+        }, 3000);
+      }
+  
+      function setLocation(lat, lon, source = "GPS") {
+        latInput.value = lat;
+        lonInput.value = lon;
+        if (alertBox) {
+          alertBox.textContent = `📍 Location detected via ${source}.`;
+          alertBox.classList.remove("bg-warning", "text-dark");
         }
+        showToast(`📍 Location set (${source})`);
+      }
+  
+      function fallbackToIP() {
+        fetch("https://ipapi.co/json/")
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.latitude && data.longitude) {
+              setLocation(data.latitude, data.longitude, "IP");
+            } else {
+              throw new Error("IP location unavailable");
+            }
+          })
+          .catch(() => {
+            if (alertBox) {
+              alertBox.textContent = "⚠️ We couldn't detect your location. Please enter your address manually.";
+              alertBox.classList.add("bg-warning", "text-dark");
+            }
+          });
+      }
+  
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setLocation(position.coords.latitude, position.coords.longitude, "GPS");
+          },
+          (error) => {
+            console.warn("GPS failed:", error.message);
+            fallbackToIP();
+          },
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+      } else {
+        fallbackToIP();
+      }
     });
-</script>
+  </script>
+  
 
   <script>
     const toast = document.getElementById("toast");

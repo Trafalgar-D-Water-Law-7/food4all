@@ -25,7 +25,12 @@ const ourTeamMemberSchema = new mongoose.Schema({
     photo: {
         type: String, // This will store the file path or URL
         required: true
-    }
+    },
+     // other fields
+  dailyPicks: [{
+    date: { type: Date, default: Date.now },
+    count: { type: Number, default: 0 }
+  }]
 }, { timestamps: true });
 
 const ourTeams = mongoose.model("ourTeams", ourTeamMemberSchema);

@@ -43,23 +43,27 @@ app.set('view engine', 'ejs');
 // --------------------
 app.use(morgan('dev'));
 app.use(express.json());
+app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(methodOverride('_method'));
 
 
+// Session setup (Ensure this is configured before your routes)
+app.use(session({
+    secret: 'your-secret-key',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { maxAge: 600000 } // 10 minutes
+}));
+
+
+
 const requestIp = require('request-ip');
 app.use(requestIp.mw());
 
-// --------------------
-// Session & Flash
-// --------------------
-app.use(session({
-  secret: 'your-secret-key', // 🔒 Replace with env var in production
-  resave: false,
-  saveUninitialized: false
-}));
+
 app.use(flash());
 
 // --------------------

@@ -13,8 +13,7 @@ const testamonial = require("../models/testimonial")
 router.post("/", async (req, res) => {
     // Get the userId from the session
     const userId = req.session.userId; // Replace with the actual session property storing the user ID
-    console.log(userId);
-
+  
     if (!userId) {
         // If user is not logged in, flash an error message and redirect to login page
         req.flash("error", "You must be logged in to submit feedback.");
@@ -32,12 +31,14 @@ router.post("/", async (req, res) => {
     const wordCount = countWords(message);
     if (wordCount < 5) {
         req.flash("error", "Your feedback must be at least 5 words.");
-        return res.redirect("back"); // Redirect back to the same page
+        return res.redirect(req.originalUrl);
+        // Redirect back to the same page
     }
 
     if (wordCount > 20) {
         req.flash("error", "Your feedback must be no more than 20 words.");
-        return res.redirect("back"); // Redirect back to the same page
+        return res.redirect(req.originalUrl);
+        // Redirect back to the same page
     }
 
     try {
@@ -57,17 +58,18 @@ router.post("/", async (req, res) => {
             await user.save(); // Save the updated user document
         } else {
             req.flash("error", "User not found.");
-            return res.redirect("back");
+            return res.redirect(req.originalUrl);
+
         }
 
         // Send a success message
         req.flash("success", "Feedback submitted successfully!");
-        res.redirect("back"); // Redirect back to the same page
+        res.redirect(req.originalUrl);// Redirect back to the same page
     } catch (error) {
         console.error(error);
         // If an error occurs, show an error message
         req.flash("error", "Failed to submit feedback. Please try again later.");
-        res.redirect("back"); // Redirect back to the same page
+        res.redirect(req.originalUrl);// Redirect back to the same page
     }
 });
 

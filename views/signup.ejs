@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Restoran - Bootstrap Restaurant Template</title>
+    <title>User Sign Up </title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="" name="keywords">
     <meta content="" name="description">
@@ -24,7 +24,7 @@
                         <nav aria-label="breadcrumb">
                             <ol class="breadcrumb justify-content-center text-uppercase">
                                 <li class="breadcrumb-item"><a href="#">Home</a></li>
-                                <li class="breadcrumb-item"><a href="#">Pages</a></li>
+                                <li class="breadcrumb-item"><a href="#">Options</a></li>
                                 <li class="breadcrumb-item text-white active" aria-current="page">Sign Up</li>
                             </ol>
                         </nav>
@@ -103,15 +103,20 @@
                                         <small class="text-danger" id="streetError"></small>
                                     </div>
 
-
                                     <!-- Photo Upload -->
                                     <div class="col-12">
                                         <div class="form-floating">
                                             <input type="file" name="photo" class="form-control" id="photoInput"
-                                                accept="image/*" required>
-                                            <label for="photoInput">Upload Photo</label>
+                                                accept="image/*">
+                                            <label for="photoInput">Upload Photo (Optional)</label>
                                         </div>
                                         <small class="text-danger" id="photoError"></small>
+                                    </div>
+
+                                    <!-- Inline Preview below photo -->
+                                    <div class="col-12 text-center">
+                                        <img id="imagePreview" src="" alt="Image Preview"
+                                            style="display: none; max-width: 200px; margin-top: 10px;" />
                                     </div>
 
                                     <!-- Submit Button -->
@@ -126,16 +131,19 @@
                         </div>
                     </div>
 
-                    <!-- Right Side Image Preview -->
+                    <!-- Right Side Info Section -->
                     <div class="col-md-6 wow fadeIn" data-wow-delay="0.1s">
-                        <div class="images text-center">
-                            <p>Captured Image Will Appear Here</p>
-                            <div id="previewContainer" class="d-flex justify-content-center">
-                                <img id="imagePreview" src="" alt="Image Preview"
-                                    style="display: none; max-width: 100%; height: auto;">
-                            </div>
+                        <div class="p-4 border rounded bg-light">
+                            <h4 class="mb-3">Why Join Us?</h4>
+                            <ul>
+                                <li>Help reduce food waste in your area</li>
+                                <li>Connect with local donors and receivers</li>
+                                <li>Make an impact in your community</li>
+                                <li>Track and manage your donations</li>
+                            </ul>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -168,26 +176,7 @@
             const previewContainer = document.getElementById("previewContainer");
             const imagePreview = document.getElementById("imagePreview");
 
-            // Event listener for file input
-            photoInput.addEventListener("change", function (event) {
-                // Clear previous preview
-                previewContainer.innerHTML = '';
-
-                // Ensure only one image is selected
-                const file = event.target.files[0];
-                if (file && file.type.startsWith("image/")) {
-                    // Create an image element to display the preview
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        imagePreview.src = e.target.result;
-                        imagePreview.style.display = 'block';  // Show the image
-                        previewContainer.appendChild(imagePreview); // Append image to preview container
-                    };
-                    reader.readAsDataURL(file);
-                } else {
-                    alert("Please upload a valid image.");
-                }
-            });
+           
         </script>
 
         <script>
@@ -198,6 +187,23 @@
                     document.getElementById("longitude").value = position.coords.longitude;
                 });
             }
+
+
+            // Event listener for file input
+            photoInput.addEventListener("change", function (event) {
+                const file = event.target.files[0];
+                if (file && file.type.startsWith("image/")) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        imagePreview.src = e.target.result;
+                        imagePreview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    imagePreview.style.display = 'none';
+                }
+            });
+
         </script>
 
 
@@ -213,7 +219,8 @@
                 const password = document.getElementById("password");
                 const confirmPassword = document.getElementById("confirmPassword");
                 const contact = document.getElementById("contact");
-                const photo = document.getElementById("photoInput");
+
+
                 const street = document.getElementById("street");
                 const country = document.getElementById("country");
                 const city = document.getElementById("city");
@@ -224,7 +231,8 @@
                 const passwordError = document.getElementById("passwordError");
                 const confirmPasswordError = document.getElementById("confirmPasswordError");
                 const contactError = document.getElementById("contactError");
-                const photoError = document.getElementById("photoError");
+
+
                 const streetError = document.getElementById("streetError");
 
 
@@ -279,13 +287,6 @@
                     }
                 }
 
-                function validatePhoto() {
-                    if (!photo.files.length) {
-                        photoError.textContent = "Please upload a photo.";
-                    } else {
-                        photoError.textContent = "";
-                    }
-                }
 
                 function validateStreet() {
                     if (street.value.trim().length < 5) {
@@ -326,7 +327,7 @@
                 password.addEventListener("input", validatePassword);
                 confirmPassword.addEventListener("input", validateConfirmPassword);
                 contact.addEventListener("input", validateContact);
-                photo.addEventListener("change", validatePhoto);
+
                 street.addEventListener("input", validateStreet);
 
 
@@ -339,10 +340,10 @@
                     validatePassword();
                     validateConfirmPassword();
                     validateContact();
-                    validatePhoto();
+
 
                     // Prevent form submission if there are validation errors
-                    if (nameError.textContent || emailError.textContent || passwordError.textContent || confirmPasswordError.textContent || contactError.textContent || photoError.textContent) {
+                    if (nameError.textContent || emailError.textContent || passwordError.textContent || confirmPasswordError.textContent || contactError.textContent) {
                         event.preventDefault();
                     }
                 });
@@ -350,7 +351,7 @@
         </script>
 
 
-        
+
 
 
         <%- include('config/footer')%>
