@@ -1,34 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8">
-    <title>Plate Share - Food Details</title>
+    <title>Food4all - Food Details</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <style>
-        #map {
-            height: 500px;
-            width: 100%;
-            margin-top: 10px;
-            border: 1px solid #ccc;
-        }
-    </style>
     <%- include('config/export') %>
 </head>
 
 <body>
-    <h1><%= food.donationCount %></h1>
+    <h1>
+        <%= food.donationCount %>
+    </h1>
 
     <div class="container-xxl bg-white p-0">
         <!-- Navbar & Hero -->
         <div class="container-xxl position-relative p-0">
             <%- include('config/nav') %>
-            <div class="container-xxl py-5 bg-dark hero-header mb-5">
-                <div class="container text-center my-5 pt-5 pb-4">
-                    <h1 class="display-3 text-white mb-3">Food Details</h1>
+                <div class="container-xxl py-5 bg-dark hero-header mb-5">
+                    <div class="container text-center my-5 pt-5 pb-4">
+                        <h1 class="display-3 text-white mb-3">Food Details</h1>
+                    </div>
                 </div>
-            </div>
         </div>
 
         <!-- Food Details Section -->
@@ -39,27 +31,32 @@
                     <!-- Images -->
                     <div class="col-lg-6">
                         <div class="row g-3">
-                            <% (food.photos || []).forEach((photo, i) => { %>
+                            <% (food.photos || []).forEach((photo, i)=> { %>
                                 <div class="col-6 text-<%= i % 2 === 0 ? 'start' : 'end' %>">
                                     <img class="img-fluid rounded w-<%= i % 2 === 0 ? '100' : '75' %> wow zoomIn"
-                                         data-wow-delay="0.<%= i + 1 %>s"
-                                         src="/<%= photo %>"
-                                         style="<%= i === 1 ? 'margin-top: 25%;' : '' %>">
+                                        data-wow-delay="0.<%= i + 1 %>s" src="/<%= photo %>"
+                                        style="<%= i === 1 ? 'margin-top: 25%;' : '' %>">
                                 </div>
-                            <% }) %>
+                                <% }) %>
                         </div>
                     </div>
 
                     <!-- Details -->
                     <div class="col-lg-6">
                         <h2 class="section-title ff-secondary text-start text-primary fw-normal">Food for you</h2>
-                        <h1 class="mb-4">Donated by <i class="fa fa-utensils text-primary me-2"></i><%= food.name %></h1>
-                        <p class="mb-4"><%= food.message %></p>
+                        <h1 class="mb-4">Donated by <i class="fa fa-utensils text-primary me-2"></i>
+                            <%= food.name %>
+                        </h1>
+                        <p class="mb-4">
+                            <%= food.message %>
+                        </p>
 
                         <div class="row g-4 mb-4">
                             <div class="col-sm-6">
                                 <div class="d-flex align-items-center border-start border-5 border-primary px-3">
-                                    <h1 class="flex-shrink-0 display-5 text-primary mb-0"><%= food.user[0].donationCount %></h1>
+                                    <h1 class="flex-shrink-0 display-5 text-primary mb-0">
+                                        <%= food.user[0].donationCount %>
+                                    </h1>
                                     <div class="ps-4">
                                         <p class="mb-0">Times</p>
                                         <h6 class="text-uppercase mb-0">Donated</h6>
@@ -104,29 +101,17 @@
                             });
                         </script>
 
-                        <% if (food.status !== "claimed") { %>
+                        <% if (food.status !=="claimed" && session.userId !==(food.user[0]?._id?.toString?.())) { %>
                             <form action="/users/claim/<%= food._id %>" method="POST"
-                                  onsubmit="return confirm('Are you sure you want to claim this food?');">
+                                onsubmit="return confirm('Are you sure you want to claim this food?');">
                                 <button class="btn btn-primary py-3 px-5 mt-2" type="submit">Claim Food</button>
                             </form>
-                        <% } %>
+                            <% } %>
+
                     </div>
                 </div>
 
-                <!-- Food Location -->
-                <br><br>
-                <div class="container">
-                    <h4>Food Location</h4>
-                    <% if (food.latitude && food.longitude) { %>
-                        <iframe id="map"
-                                src="https://maps.google.com/maps?q=<%= food.latitude %>,<%= food.longitude %>&z=14&output=embed"
-                                allowfullscreen
-                                loading="lazy">
-                        </iframe>
-                    <% } else { %>
-                        <p style="color:red;">Location not available.</p>
-                    <% } %>
-                </div>
+
             </div>
         </div>
 

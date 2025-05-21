@@ -85,14 +85,22 @@ router.post("/submit-food-request", ensureAuthenticated, async (req, res) => {
 
 router.get("/requestedForFood", async (req, res) => {
     try {
-        const requests = await FoodRequest.find().populate('user');
+        let filter = {};
+
+        if (req.session.userId) {
+            // Exclude the logged-in user's requests
+            filter = { user: { $ne: req.session.userId } };
+        }
+
+        const requests = await FoodRequest.find(filter).populate('user');
+
         res.render("requestedForFood", {
             requests,
             success: req.flash('success'),
             error: req.flash('error'),
-             session: req.session  // ✅ add this if not already passed
-
+            session: req.session
         });
+
     } catch (error) {
         console.error(error);
         req.flash('error', 'Something went wrong, please try again.');

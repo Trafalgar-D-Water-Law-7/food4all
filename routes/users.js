@@ -22,12 +22,13 @@ deleteExpiredDonations(); // Start the scheduled task
 const { ensureUserLoggedIn, preventUserIfLoggedIn, preventMemberIfLoggedIn } = require('../middleware/auth');
 
 
-
+ 
 
 
 router.post('/signup', preventMemberIfLoggedIn, upload.single('photo'), async (req, res) => {
     try {
         const { name, email, password, street, contact, latitude, longitude } = req.body;
+        console.log(req.body);
 
         // Optional photo
         const photo = req.savedFilePath || null;
@@ -52,7 +53,7 @@ router.post('/signup', preventMemberIfLoggedIn, upload.single('photo'), async (r
             email,
             password: hashedPassword,
             street,
-            contact,
+        contact,
             photo, // This will be null if not uploaded
             latitude,
             longitude
@@ -231,79 +232,89 @@ const sendTokenEmail = async (email, name, token) => {
 };
 
 // Handle form submission
-
 router.post('/donate', upload.array('photos', 5), async (req, res) => {
-    try {
-        const { name, email, subject, message, expiryTime, latitude, longitude } = req.body;
+  try {
+    const { name, email, subject, message, expiryTime, latitude, longitude } = req.body;
 
-
-        if (!email || !subject || !expiryTime) {
-            req.flash('error', '❌ Missing required fields.');
-            return res.redirect('/users/donate');
-        }
-
-        const user = await User.findOne({ email }).lean();
-        if (!user) {
-            req.flash('error', '❌ User not found.');
-            return res.redirect('/donate');
-        }
-
-        const photoPaths = req.savedFilePaths || [];
-        if (!Array.isArray(photoPaths) || photoPaths.length === 0) {
-            req.flash('error', '❌ At least one photo is required.');
-            return res.redirect('/donate');
-        }
-
-        // Use the latitude and longitude from the form directly
-        let lat = parseFloat(latitude);
-        let lon = parseFloat(longitude);
-
-        if (isNaN(lat) || isNaN(lon)) {
-            req.flash('error', '❌ Invalid location data.');
-            return res.redirect('/users/donate');
-        }
-
-        // Set expiry date
-        const expiryDate = moment().add(parseInt(expiryTime, 10), 'hours').toDate();
-
-        const donationData = {
-            name,
-            email,
-            subject,
-            message,
-            expiryTime: expiryDate,
-            claimedToken: generateToken(),
-            user: user._id,
-            donatedBy: user._id,
-            latitude: lat,
-            longitude: lon,
-            photos: photoPaths
-        };
-        console.log("Donation Data:", donationData);
-
-        // Save to DB
-        const donation = await Donation.create(donationData);
-
-        // Update user donation stats
-        await User.updateOne(
-            { _id: user._id },
-            {
-                $inc: { donationCount: 1 },
-                $push: { donations: donation._id }
-            }
-        );
-
-        sendTokenEmail(email, name, donation.claimedToken)
-            .catch(err => console.error("❌ Failed to send email:", err));
-
-        req.flash('success', '✅ Food donated successfully!');
-        res.redirect('/');
-    } catch (error) {
-        console.error("Donation Error:", error);
-        req.flash('error', '❌ Something went wrong. Please try again.');
-        res.redirect('/');
+    // Basic validation
+    if (!email || !subject || !expiryTime) {
+      req.flash('error', '❌ Missing required fields.');
+      return res.redirect('/users/donate');
     }
+
+    const user = await User.findOne({ email }).lean();
+    if (!user) {
+      req.flash('error', '❌ User not found.');
+      return res.redirect('/donate');
+    }
+
+    const photoPaths = req.savedFilePaths || [];
+    if (!Array.isArray(photoPaths) || photoPaths.length === 0) {
+      req.flash('error', '❌ At least one photo is required.');
+      return res.redirect('/users/donate');
+    }
+
+    const lat = parseFloat(latitude);
+    const lon = parseFloat(longitude);
+
+    if (isNaN(lat) || isNaN(lon)) {
+      req.flash('error', '❌ Invalid location data.');
+      return res.redirect('/users/donate');
+    }
+
+    // Prevent duplicate donation (same user, subject, and location within short time)
+    const recentDonation = await Donation.findOne({
+      user: user._id,
+      subject,
+      latitude: lat,
+      longitude: lon,
+      createdAt: { $gte: new Date(Date.now() - 5 * 60 * 1000) } // within last 5 mins
+    });
+
+    if (recentDonation) {
+      req.flash('error', '⚠️ Duplicate donation detected.');
+      return res.redirect('/users/donate');
+    }
+
+    const expiryDate = moment().add(parseInt(expiryTime, 10), 'hours').toDate();
+
+    const donationData = {
+      name,
+      email,
+      subject,
+      message,
+      expiryTime: expiryDate,
+      claimedToken: generateToken(),
+      user: user._id,
+      donatedBy: user._id,
+      latitude: lat,
+      longitude: lon,
+      photos: photoPaths
+    };
+
+    const donation = await Donation.create(donationData);
+
+    await User.updateOne(
+      { _id: user._id },
+      {
+        $inc: { donationCount: 1 },
+        $push: { donations: donation._id }
+      }
+    );
+
+    sendTokenEmail(email, name, donation.claimedToken).catch(err =>
+      console.error("❌ Failed to send email:", err)
+    );
+
+    req.flash('success', '✅ Food donated successfully!');
+    res.redirect('/');
+  } catch (error) {
+    console.error("Donation Error:", error);
+    req.flash('error', '❌ Something went wrong. Please try again.');
+    res.redirect('/');
+  }
 });
+
 
 
 

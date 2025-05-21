@@ -25,11 +25,13 @@ router.get("/:foodId", ensureAuthenticated, async function (req, res, next) {
       return res.redirect('/');
     }
 
-    res.render("foodDetails", {
-      food,
-      error: req.flash('error'),
-      success: req.flash('success')
-    });
+  res.render("foodDetails", {
+  food,
+  error: req.flash('error'),
+  success: req.flash('success'),
+  session: req.session // ✅ Add this line
+});
+
 
   } catch (err) {
     next(err); // Pass error to the global error handler

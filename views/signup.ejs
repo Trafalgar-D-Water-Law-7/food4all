@@ -3,42 +3,110 @@
 
 <head>
     <meta charset="utf-8">
-    <title>User Sign Up </title>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="" name="keywords">
-    <meta content="" name="description">
+    <title>Join Our Community | FoodShare</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="keywords" content="food sharing, community, sustainability, sign up">
+    <meta name="description" content="Join FoodShare to connect with your community and reduce food waste">
     <%- include('config/export') %>
+    <style>
+        .form-section {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        .benefits-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 8px;
+            padding: 30px;
+            height: 100%;
+            border-left: 4px solid #fd7e14;
+        }
+        
+        .benefits-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        
+        .benefits-list li {
+            padding: 8px 0;
+            position: relative;
+            padding-left: 30px;
+        }
+        
+        .benefits-list li:before {
+            content: "✓";
+            color: #28a745;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+        
+        .image-preview-container {
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .form-floating>label {
+            padding: 1rem 0.75rem;
+        }
+        
+        .progress-indicator {
+            display: none;
+            margin-top: 15px;
+        }
+        
+        .password-strength {
+            height: 5px;
+            margin-top: 5px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .tooltip-icon {
+            cursor: pointer;
+            color: #6c757d;
+            margin-left: 5px;
+        }
+    </style>
 </head>
 
 <body>
-
     <div class="container-xxl bg-white p-0">
-
         <!-- Navbar & Hero Start -->
         <div class="container-xxl position-relative p-0">
             <%- include('config/nav') %>
 
-                <div class="container-xxl py-5 bg-dark hero-header mb-5">
-                    <div class="container text-center my-5 pt-5 pb-4">
-                        <h1 class="display-3 text-white mb-3 animated slideInDown">Sign Up </h1>
-                        <nav aria-label="breadcrumb">
-                            <ol class="breadcrumb justify-content-center text-uppercase">
-                                <li class="breadcrumb-item"><a href="#">Home</a></li>
-                                <li class="breadcrumb-item"><a href="#">Options</a></li>
-                                <li class="breadcrumb-item text-white active" aria-current="page">Sign Up</li>
-                            </ol>
-                        </nav>
-                    </div>
+            <div class="container-xxl py-5 bg-dark hero-header mb-5">
+                <div class="container text-center my-5 pt-5 pb-4">
+                    <h1 class="display-3 text-white mb-3 animated slideInDown">Join Our Community</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb justify-content-center text-uppercase">
+                            <li class="breadcrumb-item"><a href="/">Home</a></li>
+                            <li class="breadcrumb-item"><a href="#">options</a></li>
+
+                            <li class="breadcrumb-item text-white active" aria-current="page">Sign Up</li>
+                        </ol>
+                    </nav>
                 </div>
+            </div>
         </div>
         <!-- Navbar & Hero End -->
 
         <div class="container-xxl py-5">
             <div class="container">
-                <div class="row g-4">
-                    <div class="col-md-6">
-                        <div class="wow fadeInUp" data-wow-delay="0.2s">
-                            <form id="signupForm" action="/users/signup" method="post" enctype="multipart/form-data">
+                <div class="row g-5 align-items-center">
+                    <div class="col-lg-6">
+                        <div class="wow fadeInUp form-section" data-wow-delay="0.2s">
+                            <h2 class="mb-4">Create Your Account</h2>
+                            <p class="mb-4 text-muted">Join thousands helping to reduce food waste in their communities</p>
+                            
+                           <form action="/users/signup" method="POST" enctype="multipart/form-data">
                                 <input type="hidden" name="latitude" id="latitude">
                                 <input type="hidden" name="longitude" id="longitude">
 
@@ -48,9 +116,9 @@
                                         <div class="form-floating">
                                             <input type="text" class="form-control" id="name" name="name"
                                                 placeholder="Your Name" required>
-                                            <label for="name">Your Name</label>
+                                            <label for="name">Full Name</label>
                                         </div>
-                                        <small class="text-danger" id="nameError"></small>
+                                        <div class="invalid-feedback" id="nameError">Please provide your full name.</div>
                                     </div>
 
                                     <!-- Email Field -->
@@ -58,19 +126,24 @@
                                         <div class="form-floating">
                                             <input type="email" class="form-control" id="email" name="email"
                                                 placeholder="Your Email" required>
-                                            <label for="email">Your Email</label>
+                                            <label for="email">Email Address</label>
                                         </div>
-                                        <small class="text-danger" id="emailError"></small>
+                                        <div class="invalid-feedback" id="emailError">Please provide a valid email.</div>
                                     </div>
 
                                     <!-- Password Field -->
                                     <div class="col-md-6">
-                                        <div class="form-floating">
+                                        <div class="form-floating position-relative">
                                             <input type="password" name="password" class="form-control" id="password"
                                                 placeholder="Your Password" required>
                                             <label for="password">Password</label>
+                                            <i class="fas fa-question-circle tooltip-icon" 
+                                               data-bs-toggle="tooltip" 
+                                               data-bs-placement="top" 
+                                               title="Must be at least 8 characters with uppercase, number, and special character"></i>
                                         </div>
-                                        <small class="text-danger" id="passwordError"></small>
+                                        <div class="password-strength" id="passwordStrength"></div>
+                                        <div class="invalid-feedback" id="passwordError"></div>
                                     </div>
 
                                     <!-- Confirm Password Field -->
@@ -80,7 +153,7 @@
                                                 id="confirmPassword" placeholder="Confirm Password" required>
                                             <label for="confirmPassword">Confirm Password</label>
                                         </div>
-                                        <small class="text-danger" id="confirmPasswordError"></small>
+                                        <div class="invalid-feedback" id="confirmPasswordError">Passwords must match.</div>
                                     </div>
 
                                     <!-- Contact Field -->
@@ -88,19 +161,19 @@
                                         <div class="form-floating">
                                             <input type="tel" name="contact" class="form-control" id="contact"
                                                 placeholder="Contact Number" required>
-                                            <label for="contact">Contact Number</label>
-
+                                            <label for="contact">Phone Number</label>
                                         </div>
-                                        <small class="text-danger" id="contactError"></small>
+                                        <div class="invalid-feedback" id="contactError">Please provide a valid phone number.</div>
                                     </div>
+                                    
                                     <!-- Street -->
                                     <div class="col-md-6">
                                         <div class="form-floating">
                                             <input type="text" class="form-control" id="street" name="street"
                                                 placeholder="Street" required>
-                                            <label for="street">Street</label>
+                                            <label for="street">Street Address</label>
                                         </div>
-                                        <small class="text-danger" id="streetError"></small>
+                                        <div class="invalid-feedback" id="streetError">Please provide your street address.</div>
                                     </div>
 
                                     <!-- Photo Upload -->
@@ -108,254 +181,303 @@
                                         <div class="form-floating">
                                             <input type="file" name="photo" class="form-control" id="photoInput"
                                                 accept="image/*">
-                                            <label for="photoInput">Upload Photo (Optional)</label>
+                                            <label for="photoInput">Profile Photo (Optional)</label>
                                         </div>
-                                        <small class="text-danger" id="photoError"></small>
+                                        <div class="invalid-feedback" id="photoError"></div>
+                                        
+                                        <div class="image-preview-container" id="previewContainer">
+                                            <img id="imagePreview" src="" alt="Preview" class="img-fluid rounded" style="max-height: 200px;"/>
+                                            <button type="button" class="btn btn-sm btn-outline-danger mt-2" id="removeImageBtn">
+                                                <i class="fas fa-times me-1"></i>Remove
+                                            </button>
+                                        </div>
                                     </div>
 
-                                    <!-- Inline Preview below photo -->
-                                    <div class="col-12 text-center">
-                                        <img id="imagePreview" src="" alt="Image Preview"
-                                            style="display: none; max-width: 200px; margin-top: 10px;" />
+                                    <!-- Terms and Conditions -->
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="termsCheck" required>
+                                            <label class="form-check-label" for="termsCheck">
+                                                I agree to the <a href="/terms" target="_blank">Terms of Service</a> and <a href="/privacy" target="_blank">Privacy Policy</a>
+                                            </label>
+                                            <div class="invalid-feedback">You must agree before submitting.</div>
+                                        </div>
                                     </div>
 
                                     <!-- Submit Button -->
                                     <div class="col-12">
-                                        <button class="btn btn-primary w-100 py-3" type="submit">Sign Up</button>
+                                        <button class="btn btn-primary w-100 py-3" type="submit" id="submitBtn">
+                                            <span id="submitText">Create Account</span>
+                                            <div class="spinner-border spinner-border-sm ms-2 d-none" id="submitSpinner" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Login Link -->
+                                    <div class="col-12 text-center">
+                                        <p class="mb-0">Already have an account? <a href="/users/login">Sign in</a></p>
                                     </div>
                                 </div>
                             </form>
-
-
-
                         </div>
                     </div>
 
                     <!-- Right Side Info Section -->
-                    <div class="col-md-6 wow fadeIn" data-wow-delay="0.1s">
-                        <div class="p-4 border rounded bg-light">
-                            <h4 class="mb-3">Why Join Us?</h4>
-                            <ul>
-                                <li>Help reduce food waste in your area</li>
-                                <li>Connect with local donors and receivers</li>
-                                <li>Make an impact in your community</li>
-                                <li>Track and manage your donations</li>
+                    <div class="col-lg-6 wow fadeIn" data-wow-delay="0.1s">
+                        <div class="benefits-card">
+                            <h3 class="mb-4">Benefits of Joining</h3>
+                            <ul class="benefits-list">
+                                <li><strong>Reduce Food Waste</strong> - Help divert edible food from landfills</li>
+                                <li><strong>Community Connection</strong> - Meet like-minded people in your area</li>
+                                <li><strong>Real Impact</strong> - See exactly how much food you've helped save</li>
+                                <li><strong>Easy Management</strong> - Simple tools to track your contributions</li>
+                                <li><strong>Recognition</strong> - Earn badges for your sustainability efforts</li>
+                                <li><strong>Exclusive Access</strong> - Get early invites to community events</li>
                             </ul>
+                            
+                            <hr class="my-4">
+                            
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-shield-alt fa-2x text-primary"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h5 class="mb-1">Your Privacy Matters</h5>
+                                    <p class="small text-muted mb-0">We never share your personal information without your consent.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
 
-
-        <!-- Modal Structure -->
+        <!-- Success Modal -->
         <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
+            <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="successModalLabel">Success</h5>
+                    <div class="modal-header border-0">
+                        <h5 class="modal-title text-success" id="successModalLabel">
+                            <i class="fas fa-check-circle me-2"></i>Account Created!
+                        </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body">
-                        User successfully created!
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <div class="modal-body text-center py-4">
+                        <i class="fas fa-check-circle fa-5x text-success mb-4"></i>
+                        <h4>Welcome to FoodShare!</h4>
+                        <p class="mb-4">Your account has been successfully created. We've sent a verification email to your address.</p>
+                        <div class="d-grid gap-2">
+                            <a href="/dashboard" class="btn btn-success">Go to Dashboard</a>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Trigger button for the modal -->
-        <!-- You don't need this button since we're triggering it programmatically -->
+        <%- include('config/footer') %>
 
         <script>
-            // Get file input and preview container
-            const photoInput = document.getElementById("photoInput");
-            const previewContainer = document.getElementById("previewContainer");
-            const imagePreview = document.getElementById("imagePreview");
-
-           
-        </script>
-
-        <script>
-            // Get the user's location and set it in the hidden input fields
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function (position) {
-                    document.getElementById("latitude").value = position.coords.latitude;
-                    document.getElementById("longitude").value = position.coords.longitude;
+            // Initialize tooltips
+            document.addEventListener('DOMContentLoaded', function() {
+                // Enable Bootstrap tooltips
+                const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                tooltipTriggerList.map(function (tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl);
                 });
-            }
-
-
-            // Event listener for file input
-            photoInput.addEventListener("change", function (event) {
-                const file = event.target.files[0];
-                if (file && file.type.startsWith("image/")) {
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        imagePreview.src = e.target.result;
-                        imagePreview.style.display = 'block';
-                    };
-                    reader.readAsDataURL(file);
-                } else {
-                    imagePreview.style.display = 'none';
+                
+                // Get current location
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            document.getElementById("latitude").value = position.coords.latitude;
+                            document.getElementById("longitude").value = position.coords.longitude;
+                        },
+                        function(error) {
+                            console.warn("Geolocation error:", error);
+                        },
+                        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                    );
                 }
-            });
-
-        </script>
-
-
-
-
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
+                
+                // Image preview functionality
+                const photoInput = document.getElementById("photoInput");
+                const previewContainer = document.getElementById("previewContainer");
+                const imagePreview = document.getElementById("imagePreview");
+                const removeImageBtn = document.getElementById("removeImageBtn");
+                
+                photoInput.addEventListener("change", function(event) {
+                    const file = event.target.files[0];
+                    if (file && file.type.startsWith("image/")) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            imagePreview.src = e.target.result;
+                            previewContainer.style.display = 'block';
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+                
+                removeImageBtn.addEventListener("click", function() {
+                    photoInput.value = '';
+                    previewContainer.style.display = 'none';
+                });
+                
+                // Password strength indicator
+                const passwordInput = document.getElementById("password");
+                const passwordStrength = document.getElementById("passwordStrength");
+                
+                passwordInput.addEventListener("input", function() {
+                    const strength = calculatePasswordStrength(this.value);
+                    updateStrengthIndicator(strength);
+                });
+                
+                function calculatePasswordStrength(password) {
+                    let strength = 0;
+                    
+                    // Length check
+                    if (password.length >= 8) strength += 1;
+                    if (password.length >= 12) strength += 1;
+                    
+                    // Character type checks
+                    if (/[A-Z]/.test(password)) strength += 1;
+                    if (/[a-z]/.test(password)) strength += 1;
+                    if (/[0-9]/.test(password)) strength += 1;
+                    if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+                    
+                    return Math.min(strength, 5);
+                }
+                
+                function updateStrengthIndicator(strength) {
+                    const colors = ['#dc3545', '#fd7e14', '#ffc107', '#28a745', '#20c997'];
+                    const width = strength * 20;
+                    
+                    passwordStrength.style.width = width + '%';
+                    passwordStrength.style.backgroundColor = colors[strength - 1];
+                }
+                
+                // Form validation
                 const form = document.getElementById("signupForm");
-
-                // Input fields
-                const name = document.getElementById("name");
-                const email = document.getElementById("email");
-                const password = document.getElementById("password");
-                const confirmPassword = document.getElementById("confirmPassword");
-                const contact = document.getElementById("contact");
-
-
-                const street = document.getElementById("street");
-                const country = document.getElementById("country");
-                const city = document.getElementById("city");
-
-                // Error message elements
-                const nameError = document.getElementById("nameError");
-                const emailError = document.getElementById("emailError");
-                const passwordError = document.getElementById("passwordError");
-                const confirmPasswordError = document.getElementById("confirmPasswordError");
-                const contactError = document.getElementById("contactError");
-
-
-                const streetError = document.getElementById("streetError");
-
-
-
-
-                // Validate if input contains only letters
-                function isValidString(value) {
-                    return /^[A-Za-z\s]+$/.test(value);
-                }
-
+                const submitBtn = document.getElementById("submitBtn");
+                const submitText = document.getElementById("submitText");
+                const submitSpinner = document.getElementById("submitSpinner");
+                
+                // Real-time validation for each field
+                document.getElementById("name").addEventListener("input", validateName);
+                document.getElementById("email").addEventListener("input", validateEmail);
+                document.getElementById("password").addEventListener("input", validatePassword);
+                document.getElementById("confirmPassword").addEventListener("input", validateConfirmPassword);
+                document.getElementById("contact").addEventListener("input", validateContact);
+                document.getElementById("street").addEventListener("input", validateStreet);
+                
                 function validateName() {
-                    if (!isValidString(name.value.trim())) {
-                        nameError.textContent = "Name must contain only letters.";
+                    const name = document.getElementById("name");
+                    const error = document.getElementById("nameError");
+                    
+                    if (name.value.trim().length < 2) {
+                        name.classList.add('is-invalid');
+                        error.textContent = "Name must be at least 2 characters";
+                        return false;
+                    } else if (!/^[A-Za-z\s\-']+$/.test(name.value)) {
+                        name.classList.add('is-invalid');
+                        error.textContent = "Name contains invalid characters";
+                        return false;
                     } else {
-                        nameError.textContent = "";
+                        name.classList.remove('is-invalid');
+                        return true;
                     }
                 }
-
+                
                 function validateEmail() {
+                    const email = document.getElementById("email");
+                    const error = document.getElementById("emailError");
                     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    
                     if (!emailRegex.test(email.value)) {
-                        emailError.textContent = "Enter a valid email address.";
+                        email.classList.add('is-invalid');
+                        error.textContent = "Please enter a valid email address";
+                        return false;
                     } else {
-                        emailError.textContent = "";
+                        email.classList.remove('is-invalid');
+                        return true;
                     }
                 }
-
+                
                 function validatePassword() {
+                    const password = document.getElementById("password");
+                    const error = document.getElementById("passwordError");
                     const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,}$/;
+                    
                     if (!passwordRegex.test(password.value)) {
-                        passwordError.textContent = "Password must be at least 8 characters long, contain at least one uppercase letter, one number, and one special character.";
+                        password.classList.add('is-invalid');
+                        error.textContent = "Must be 8+ chars with uppercase, number, and special character";
+                        return false;
                     } else {
-                        passwordError.textContent = "";
+                        password.classList.remove('is-invalid');
+                        return true;
                     }
                 }
-
-
+                
                 function validateConfirmPassword() {
+                    const confirmPassword = document.getElementById("confirmPassword");
+                    const password = document.getElementById("password");
+                    const error = document.getElementById("confirmPasswordError");
+                    
                     if (confirmPassword.value !== password.value) {
-                        confirmPasswordError.textContent = "Passwords do not match.";
+                        confirmPassword.classList.add('is-invalid');
+                        error.textContent = "Passwords do not match";
+                        return false;
                     } else {
-                        confirmPasswordError.textContent = "";
+                        confirmPassword.classList.remove('is-invalid');
+                        return true;
                     }
                 }
-
+                
                 function validateContact() {
-                    const contactRegex = /^[0-9]{10}$/;
+                    const contact = document.getElementById("contact");
+                    const error = document.getElementById("contactError");
+                    const contactRegex = /^[0-9]{10,15}$/;
+                    
                     if (!contactRegex.test(contact.value)) {
-                        contactError.textContent = "Enter a valid 10-digit contact number.";
+                        contact.classList.add('is-invalid');
+                        error.textContent = "Please enter a valid phone number (10-15 digits)";
+                        return false;
                     } else {
-                        contactError.textContent = "";
+                        contact.classList.remove('is-invalid');
+                        return true;
                     }
                 }
-
-
+                
                 function validateStreet() {
+                    const street = document.getElementById("street");
+                    const error = document.getElementById("streetError");
+                    
                     if (street.value.trim().length < 5) {
-                        streetError.textContent = "Street name must be at least 5 characters.";
+                        street.classList.add('is-invalid');
+                        error.textContent = "Street address must be at least 5 characters";
+                        return false;
                     } else {
-                        streetError.textContent = "";
+                        street.classList.remove('is-invalid');
+                        return true;
                     }
                 }
-
-                async function handleSignup(event) {
-                    event.preventDefault(); // Prevent the default form submission
-
-                    // Collect form data
-                    const formData = new FormData(event.target);
-
-                    try {
-                        const response = await fetch('/users/signup', {
-                            method: 'POST',
-                            body: formData,
-                        });
-
-                        if (response.ok) {
-                            // Show a success popup
-                            alert('User successfully created!');
-                        } else {
-                            // Handle errors (e.g., email already in use)
-                            const data = await response.json();
-                            alert(data.message || 'Something went wrong.');
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        alert('An error occurred during signup.');
+                
+                function validateTerms() {
+                    const termsCheck = document.getElementById("termsCheck");
+                    
+                    if (!termsCheck.checked) {
+                        termsCheck.classList.add('is-invalid');
+                        return false;
+                    } else {
+                        termsCheck.classList.remove('is-invalid');
+                        return true;
                     }
                 }
-                // Event listeners for real-time validation
-                name.addEventListener("input", validateName);
-                email.addEventListener("input", validateEmail);
-                password.addEventListener("input", validatePassword);
-                confirmPassword.addEventListener("input", validateConfirmPassword);
-                contact.addEventListener("input", validateContact);
-
-                street.addEventListener("input", validateStreet);
-
-
-
-
-                form.addEventListener("submit", function (event) {
-                    validateName();
-                    validateEmail();
-                    validateCountry();
-                    validatePassword();
-                    validateConfirmPassword();
-                    validateContact();
-
-
-                    // Prevent form submission if there are validation errors
-                    if (nameError.textContent || emailError.textContent || passwordError.textContent || confirmPasswordError.textContent || contactError.textContent) {
-                        event.preventDefault();
-                    }
-                });
+                
             });
         </script>
-
-
-
-
-
-        <%- include('config/footer')%>
-
+    </div>
 </body>
 
 </html>
