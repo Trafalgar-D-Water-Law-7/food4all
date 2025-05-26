@@ -49,9 +49,6 @@
 </head>
 
 <body>
-
-
-
   <div class="container-xxl bg-white p-0">
     <div class="container-xxl position-relative p-0">
       <%- include('config/nav') %>
@@ -64,9 +61,8 @@
                   All the food is provided by generous individuals from across the country. Big thanks to those who
                   share and donate.
                 </p>
-                <button class="btn btn-success" onclick="document.getElementById('donate-popup').style.display='block'">
-                  💸 Donate via eSewa
-                </button>
+                <button class="btn btn-success"
+                  onclick="document.getElementById('donate-popup').style.display='block'">💸 Donate via eSewa</button>
               </div>
               <div class="col-lg-6 text-center text-lg-end overflow-hidden">
                 <img class="img-fluid" src="img/hero.png" alt="Hero Image">
@@ -77,136 +73,31 @@
     </div>
   </div>
 
-
   <% if (!memberId) { %>
-    <!-- Available Food Donations -->
-    <div class="container py-4">
+    <div class="container py-4" id="donation-container">
       <h4 class="mb-3 fw-semibold">📦 Available Food Donations Near You</h4>
-      <div id="location-info" class="mb-3">Loading location...</div>
-      <div id="card-list" class="row g-4">
-        <!-- Donation Cards will be appended here by JavaScript -->
-
-
-
-
-
-      </div>
+      <div id="location-info" class="mb-3">Detecting location...</div>
+      <div id="card-list" class="row g-4"></div>
     </div>
     <% } %>
 
-
-
-
-
-
+      <!-- Donation Logic Script -->
       <script>
         const donations = <%- JSON.stringify(donations || []) %>;
 
-
-        const locationInfo = document.getElementById('location-info');
-        const cardList = document.getElementById('card-list');
-
-
-
-        // Try to get user's location using geolocation API (GPS)
-        navigator.geolocation.getCurrentPosition(
-          pos => {
-            const lat = pos.coords.latitude;
-            const lon = pos.coords.longitude;
-            locationInfo.textContent = `📍 Your location: ${lat.toFixed(4)}, ${lon.toFixed(4)} (via GPS)`;
-
-            processNearbyFood(lat, lon);
-          },
-          async (err) => {
-            // Log geolocation error for debugging
-            console.error("Geolocation error:", err);
-
-            // Fallback to IP-based location if geolocation fails
-            try {
-              const res = await fetch("https://ipapi.co/json/");
-              const data = await res.json();
-              const lat = data.latitude;
-              const lon = data.longitude;
-              locationInfo.textContent = `📍 Your location: ${lat.toFixed(4)}, ${lon.toFixed(4)} (via IP)`;
-
-              processNearbyFood(lat, lon);
-            } catch (ipErr) {
-              console.error("IP Location fetch error:", ipErr);
-              locationInfo.textContent = "⚠️ Failed to detect location.";
-            }
-          },
-          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-        );
-
-        // Function to process and display nearby food donations
-        function processNearbyFood(userLat, userLon) {
-          // Log the location data and donation status
-
-
-          // Check if donations exist and log the filtered data
-          if (!donations || donations.length === 0) {
-            locationInfo.textContent = "No donations available nearby.";
-            return;
-          }
-
-          const sorted = donations
-            .filter(d => d.status === 'claim' && d.latitude && d.longitude) // Ensure status and coordinates are present
-            .map(d => ({
-              ...d,
-              distance: getDistance(userLat, userLon, d.latitude, d.longitude)
-            }))
-            .sort((a, b) => a.distance - b.distance);
-
-
-          // If no sorted donations, display message
-          if (sorted.length === 0) {
-            locationInfo.textContent = "No nearby donations available.";
-            return;
-          }
-
-          // Create and append donation cards
-          sorted.forEach(d => {
-            const { _id, subject, message, photos, latitude, longitude, expiryTime, distance } = d;
-            const imageUrl = photos?.[0] || 'https://via.placeholder.com/300x180?text=No+Image';
-            const timeLeft = getTimeLeft(expiryTime);
-            const foodDetailsUrl = `/food/${_id}`;
-            const directionsUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLon}&destination=${latitude},${longitude}`;
-
-
-            const col = document.createElement('div');
-            col.className = 'col-lg-4 col-md-6 col-12';
-            col.innerHTML = `
-  <div class="card h-100">
-    <img src="${imageUrl}" class="card-img-top" alt="${subject}">
-    <div class="card-body">
-      <h5 class="card-title">${subject}</h5>
-      <p class="card-text small text-muted">${message || 'No description provided'}</p>
-      <p class="text-muted small">📍 Lat: ${latitude.toFixed(4)}, Lon: ${longitude.toFixed(4)}</p>
-      <p class="text-muted small">⏳ ${timeLeft} | 📌 ${distance} km away</p>
-      <div class="d-flex gap-2">
-        <a href="${foodDetailsUrl}" class="btn btn-sm btn-primary w-50">Details</a>
-        <a href="${directionsUrl}" target="_blank" class="btn btn-sm btn-outline-success w-50">Directions</a>
-      </div>
-    </div>
-  </div>`;
-
-            cardList.appendChild(col);
-          });
-        }
-
-        // Function to calculate the distance between two points (in km)
+        // Function to calculate distance in KM between two lat/lon
         function getDistance(lat1, lon1, lat2, lon2) {
-          const R = 6371; // Radius of Earth in kilometers
+          const R = 6371;
           const dLat = (lat2 - lat1) * Math.PI / 180;
           const dLon = (lon2 - lon1) * Math.PI / 180;
           const a = Math.sin(dLat / 2) ** 2 +
             Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
             Math.sin(dLon / 2) ** 2;
           const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-          return (R * c).toFixed(2); // Distance in km
+          return (R * c).toFixed(2);
         }
 
-        // Function to get the time left for a donation based on expiry time
+        // Time left logic
         function getTimeLeft(expiryTime) {
           const now = new Date();
           const expiry = new Date(expiryTime);
@@ -215,6 +106,56 @@
           const mins = Math.floor((diffMs / 1000 / 60) % 60);
           const hrs = Math.floor(diffMs / 1000 / 60 / 60);
           return `${hrs}h ${mins}m`;
+        }
+
+        // Function to render donations nearby
+        function processNearbyFood(userLat, userLon) {
+          const locationInfo = document.getElementById('location-info');
+          const cardList = document.getElementById('card-list');
+
+          if (!donations || donations.length === 0) {
+            locationInfo.textContent = "No donations available nearby.";
+            return;
+          }
+
+          const sorted = donations
+            .filter(d => d.status === 'claim' && d.latitude && d.longitude)
+            .map(d => ({
+              ...d,
+              distance: getDistance(userLat, userLon, d.latitude, d.longitude)
+            }))
+            .sort((a, b) => a.distance - b.distance);
+
+          if (sorted.length === 0) {
+            locationInfo.textContent = "No nearby donations available.";
+            return;
+          }
+
+          sorted.forEach(d => {
+            const { _id, subject, message, photos, latitude, longitude, expiryTime, distance } = d;
+            const imageUrl = photos?.[0] || 'https://via.placeholder.com/300x180?text=No+Image';
+            const timeLeft = getTimeLeft(expiryTime);
+            const foodDetailsUrl = `/food/${_id}`;
+            const directionsUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLon}&destination=${latitude},${longitude}`;
+
+            const col = document.createElement('div');
+            col.className = 'col-lg-4 col-md-6 col-12';
+            col.innerHTML = `
+          <div class="card h-100">
+            <img src="${imageUrl}" class="card-img-top" alt="${subject}">
+            <div class="card-body">
+              <h5 class="card-title">${subject}</h5>
+              <p class="card-text small text-muted">${message || 'No description provided'}</p>
+              <p class="text-muted small">📍 Lat: ${latitude.toFixed(4)}, Lon: ${longitude.toFixed(4)}</p>
+              <p class="text-muted small">⏳ ${timeLeft} | 📌 ${distance} km away</p>
+              <div class="d-flex gap-2">
+                <a href="${foodDetailsUrl}" class="btn btn-sm btn-primary w-50">Details</a>
+                <a href="${directionsUrl}" target="_blank" class="btn btn-sm btn-outline-success w-50">Directions</a>
+              </div>
+            </div>
+          </div>`;
+            cardList.appendChild(col);
+          });
         }
       </script>
 
@@ -229,20 +170,52 @@
           <textarea name="message" style="width: 100%; padding: 6px; margin-bottom: 10px;"></textarea><br />
           <button type="submit"
             style="padding: 6px 12px; background-color: green; color: white; border: none; border-radius: 4px;">Proceed
-            to
-            Pay</button>
+            to Pay</button>
           <button type="button" onclick="document.getElementById('donate-popup').style.display='none'"
             style="margin-left: 10px;">Cancel</button>
         </form>
       </div>
 
-
+      <!-- Testimonials -->
+      <div class="container-xxl py-5 wow fadeInUp" data-wow-delay="0.1s">
+        <div class="container">
+          <div class="text-center">
+            <h5 class="section-title ff-secondary text-center text-primary fw-normal">Testimonial</h5>
+            <h1 class="mb-5">What people Say!!!</h1>
+          </div>
+          <div class="owl-carousel testimonial-carousel">
+            <% if (feedbacks.length> 0) { %>
+              <% feedbacks.forEach(feedback=> { %>
+                <div class="testimonial-item bg-transparent border rounded p-4">
+                  <i class="fa fa-quote-left fa-2x text-primary mb-3"></i>
+                  <p>
+                    <%= feedback.message %>
+                  </p>
+               
+                  <div class="d-flex align-items-center">
+                    <img class="img-fluid flex-shrink-0 rounded-circle" src="/<%= feedback.user.photo %>"
+                      style="width: 50px; height: 50px;">
+                    <div class="ps-3">
+                      <h5 class="mb-1">
+                        <%= feedback.user.name %>
+                      </h5>
+                    </div>
+                  </div>
+                </div>
+                <% }) %>
+                  <% } else { %>
+                    <div class="text-center">
+                      <p class="text-muted">No feedback available yet.</p>
+                    </div>
+                    <% } %>
+          </div>
+        </div>
+      </div>
 
       <%- include('config/footer') %>
         <div>
           <%= success %>
         </div>
-
 </body>
 
 </html>

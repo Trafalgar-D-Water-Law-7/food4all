@@ -237,3 +237,33 @@
     });
 
 </script>
+
+
+
+
+
+<script>
+    // Block access if location not enabled
+        window.onload = function () {
+          if (!navigator.geolocation) {
+            document.body.innerHTML = "<h2 style='text-align:center;margin-top:100px;'>❌ Geolocation not supported. Please use a modern browser.</h2>";
+            return;
+          }
+
+          navigator.geolocation.getCurrentPosition(
+            function (position) {
+              const lat = position.coords.latitude;
+              const lon = position.coords.longitude;
+              document.getElementById('location-info').textContent = `📍 Your location: ${lat.toFixed(4)}, ${lon.toFixed(4)} (via GPS)`;
+              processNearbyFood(lat, lon);
+            },
+            function () {
+              document.body.innerHTML = "<h2 style='text-align:center;margin-top:100px;'>❌ You must allow location access to use this site.</h2>";
+            },
+            {
+              enableHighAccuracy: true,
+              timeout: 10000,
+            }
+          );
+        };
+</script>

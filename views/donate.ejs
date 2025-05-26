@@ -359,8 +359,8 @@
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     position => {
-                        document.getElementById('latitude').value = position.coords.latitude.toFixed(6);
-                        document.getElementById('longitude').value = position.coords.longitude.toFixed(6);
+                        document.getElementById('latitude').value = position.coords.latitude
+                        document.getElementById('longitude').value = position.coords.longitude
                     },
                     error => {
                         console.warn('Geolocation not available:', error.message);

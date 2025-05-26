@@ -1,222 +1,608 @@
 
 
-        <div class="container mt-5">
-            <!-- Claimed Foods Section -->
-            <div class="container mt-5">
-                <h2 class="text-center mb-4">My Claimed Food</h2>
-
-                <% if (claimedFood.length===0) { %>
-                    <p class="text-center">You haven't claimed any food yet.</p>
-                    <% } else { %>
-                        <div class="row">
-                            <% claimedFood.forEach(food=> { %>
-                                <div class="col-md-4 mb-4">
-                                    <div class="card">
-                                        <div class="card-header bg-success text-white">
-                                            <h5 class="card-title">From: <%= food.name %>
-                                            </h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <p><strong>Claim Token:</strong>
-                                                <span class="badge bg-danger fs-6">
-                                                    <%= food.claimedToken %>
-                                                </span>
-                                            </p>
-                                            <p><strong>Status:</strong>
-                                                <%= food.status %>
-                                            </p>
-                                            <a href="/food/<%= food._id %>" class="btn btn-outline-primary">View
-                                                Details</a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <% }) %>
-                        </div>
-                        <% } %>
-            </div>
 
 
-            <!-- Search Bar -->
-            <div class="input-group mb-4">
-                <input type="text" id="searchInput" class="form-control" placeholder="Search food by name or token..."
-                    oninput="searchFood()">
-                <button class="btn btn-primary" type="button">Search</button>
-            </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>PlateShare - Requested For Food</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <%- include('config/export') %>
+    <style>
+        .modal-backdrop.show { background-color: rgba(0, 0, 0, 0.5); }
+        .location-alert {
+            background-color: #e0f7fa;
+            color: #006064;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .donors-list {
+            margin-top: 10px;
+            background: #f1f1f1;
+            padding: 8px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="container-xxl bg-white p-0">
+    <%- include('config/nav') %>
 
-            <h2 class="text-center mb-4">My Donated Food</h2>
-            <!-- List of Donated Foods -->
-            <div class="row">
-                <% donatedFoods.forEach(food => { %>
-                    <div class="col-md-4 mb-4 food-card" data-id="<%= food._id %>" data-name="<%= food.name.toLowerCase() %>" data-token="<%= food.claimedToken.toLowerCase() %>">
-                        <div class="card">
-                            <div class="card-header bg-primary text-white">
-                                <h5 class="card-title">Donated By: <%= food.name %></h5>
-                            </div>
-                            <div class="card-body">
-                                <p><strong>Claim Token:</strong>
-                                    <span class="badge bg-danger fs-6"><%= food.claimedToken %></span>
+    <div class="container-xxl py-5 bg-dark hero-header mb-5">
+        <div class="container text-center my-5 pt-5 pb-4">
+            <h1 class="display-3 text-white mb-3 animated slideInDown">Fill The Request</h1>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2 class="text-center mb-4">Available Food Requests</h2>
+        <div class="row g-4">
+            <% requests.forEach(request => { %>
+                <div class="col-sm-6 col-md-4 col-lg-3 mb-3">
+                    <div class="card h-100 shadow-sm request-card"
+                         data-lat="<%= request.latitude %>" data-lng="<%= request.longitude %>"
+                         style="font-size: 0.85rem;">
+                        <img src="/<%= request?.user?.photo || 'default.jpg' %>" class="card-img-top"
+                             alt="<%= request.subject || 'Food Request' %>"
+                             style="height: 120px; object-fit: cover;">
+
+                        <div class="card-body p-2 d-flex flex-column justify-content-between">
+                            <div>
+                                <h6 class="card-title text-primary mb-1">
+                                    <%= request.subject || request?.user?.name || 'Anonymous' %>
+                                </h6>
+                                <p class="card-text small text-muted mb-1">
+                                    <%= request.message?.length > 80
+                                        ? request.message.substring(0, 80) + '...'
+                                        : request.message || 'No description provided' %>
                                 </p>
-            
-                                <% if (food.claimedBy) { %>
-                                    <p><strong>Claimed By:</strong> <%= food.claimedBy.name %></p>
+                                <p class="text-muted small mb-1">
+                                    ⏳ <span class="timeago" data-time="<%= request.createdAt.toISOString() %>"></span> |
+                                    <span class="distance-display">📍 Calculating...</span>
+                                </p>
+                            </div>
+
+                            <div class="d-flex flex-column gap-1 mt-2">
+                                <button class="btn btn-sm btn-primary w-100"
+                                        onclick="showRequestDetails('<%= request._id %>')">Details</button>
+
+                                <a href="https://www.google.com/maps/dir/?api=1&destination=<%= request.latitude %>,<%= request.longitude %>"
+                                   target="_blank" class="btn btn-sm btn-outline-success w-100">Directions</a>
+
+                                <% if (!session.userId) { %>
+                                    <a href="/users/login" class="btn btn-sm btn-secondary w-100">Login to Donate</a>
+                                <% } else if (request?.user?._id?.toString?.() === session.userId?.toString?.()) { %>
+                                    <!-- User's own request, no donate button -->
+                                <% } else if (request.wantToDonate?.includes(session.userId)) { %>
+                                    <button class="btn btn-sm btn-outline-success w-100" disabled>✅ You’ve already donated</button>
+                                <% } else if (request.wantToDonate?.length >= 5) { %>
+                                    <button class="btn btn-sm btn-danger w-100" disabled>🚫 Max donation limit reached</button>
                                 <% } else { %>
-                                    <p><strong>Claimed By:</strong> Not yet claimed</p>
+                                    <button class="btn btn-sm btn-warning w-100" onclick="showDonationForm('<%= request._id %>')">
+                                        I Want to Donate
+                                    </button>
                                 <% } %>
-            
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <button class="btn btn-success confirm-pickup" data-id="<%= food._id %>">Confirm Pickup</button>
-                                    <button class="btn btn-danger delete-donation" data-id="<%= food._id %>">Delete</button>
-                                </div>
                             </div>
                         </div>
                     </div>
-                <% }); %>
-            </div>
-            
-            <script>
-                document.addEventListener("DOMContentLoaded", () => {
-                    const deleteButtons = document.querySelectorAll(".delete-donation");
-            
-                    deleteButtons.forEach(btn => {
-                        btn.addEventListener("click", async () => {
-                            const foodId = btn.dataset.id;
-            
-                            if (confirm("Are you sure you want to delete this donation?")) {
-                                try {
-                                    const res = await fetch(`/users/donation/${foodId}`, {
-                                        method: "DELETE",
-                                        headers: {
-                                            "Content-Type": "application/json"
-                                        }
-                                    });
-            
-                                    if (res.ok) {
-                                        // Remove the card from the page
-                                        const card = btn.closest(".food-card");
-                                        if (card) card.remove();
-            
-                                        // Update the user's donation count
-                                        const donationCountElement = document.querySelector("#donation-count");
-                                        if (donationCountElement) {
-                                            let currentCount = parseInt(donationCountElement.innerText);
-                                            donationCountElement.innerText = currentCount - 1;
-                                        }
-                                    } else {
-                                        alert("Failed to delete donation.");
-                                    }
-                                } catch (err) {
-                                    console.error(err);
-                                    alert("Error deleting donation.");
-                                }
-                            }
-                        });
-                    });
-                });
-            </script>
-            
-        </div>
+                </div>
 
-        <div class="container">
-            <h2 class="text-center">Food Requests</h2>
-            <div class="row">
-                <% requests.forEach(request => { %>
-                    <div class="col-md-4" id="request-<%= request._id %>">
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                <p class="card-text">Message: <%= request.message %></p>
-                                <p class="text-muted"><%= request.timeAgo %></p>
-        
-                                <!-- Delete Button -->
-                                <button class="btn btn-danger delete-request" data-id="<%= request._id %>">
-                                    Delete Request
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                <% }) %>
-            </div>
+          
+            <% }) %>
         </div>
-        
-        <script>
-            document.addEventListener("DOMContentLoaded", () => {
-                const deleteButtons = document.querySelectorAll(".delete-request");
-        
-                deleteButtons.forEach(btn => {
-                    btn.addEventListener("click", async () => {
-                        const requestId = btn.dataset.id;
-        
-                        if (confirm("Are you sure you want to delete this request?")) {
-                            try {
-                                const res = await fetch(`/request/delete/${requestId}`, {
-                                    method: "DELETE",
-                                    headers: {
-                                        "Content-Type": "application/json"
-                                    }
-                                });
-        
-                                if (res.ok) {
-                                    // Remove the request card from the page
-                                    const card = btn.closest(".col-md-4");
-                                    if (card) card.remove();
-                                } else {
-                                    alert("Failed to delete request.");
-                                }
-                            } catch (err) {
-                                console.error(err);
-                                alert("Error deleting request.");
-                            }
+    </div>
+</div>
+
+<%- include('config/footer') %>
+
+ <script>
+            // Show full request details in a modal
+            function showRequestDetails(id) {
+                const modal = new bootstrap.Modal(document.getElementById('requestDetailModal-' + id));
+                modal.show();
+            }
+
+            // Show donation form and autofill geolocation
+            function showDonationForm(id) {
+                const modal = new bootstrap.Modal(document.getElementById('donationModal-' + id));
+                modal.show();
+
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        pos => {
+                            document.getElementById('latitude-' + id).value = pos.coords.latitude;
+                            document.getElementById('longitude-' + id).value = pos.coords.longitude;
+                        },
+                        err => {
+                            alert("Could not retrieve location. Please allow location access.");
                         }
-                    });
+                    );
+                }
+            }
+
+            // Validate donation form input
+            function validateDonationForm(id) {
+                const form = document.querySelector(`#donationModal-${id} form`);
+                const message = form.querySelector('textarea[name="message"]').value.trim();
+                const address = form.querySelector('input[name="address"]').value.trim();
+
+                if (message.split(/\s+/).length < 5) {
+                    alert("Please enter at least 5 words in the message.");
+                    return false;
+                }
+
+                if (address.split(/\s+/).length < 2) {
+                    alert("Please enter a more detailed address.");
+                    return false;
+                }
+
+                return true;
+            }
+
+            // Function to format the time as "X minutes ago", "X hours ago", etc.
+            function timeAgo(dateTime) {
+                const now = new Date();
+                const diffInSeconds = Math.floor((now - new Date(dateTime)) / 1000);
+                const diffInMinutes = Math.floor(diffInSeconds / 60);
+                const diffInHours = Math.floor(diffInMinutes / 60);
+                const diffInDays = Math.floor(diffInHours / 24);
+
+                if (diffInSeconds < 60) {
+                    return `${diffInSeconds} second${diffInSeconds > 1 ? 's' : ''} ago`;
+                } else if (diffInMinutes < 60) {
+                    return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
+                } else if (diffInHours < 24) {
+                    return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+                } else if (diffInDays < 30) {
+                    return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+                } else {
+                    return `${Math.floor(diffInDays / 30)} month${Math.floor(diffInDays / 30) > 1 ? 's' : ''} ago`;
+                }
+            }
+
+            // Function to update all timeago elements on the page
+            function updateTimeAgo() {
+                document.querySelectorAll('.timeago').forEach(element => {
+                    const time = element.getAttribute('data-time');
+                    const formattedTime = timeAgo(time);
+                    element.textContent = formattedTime;
                 });
-            });
-        </script>
-        
+            }
 
-  
+            // Helper: Calculate distance using Haversine formula
+            function calculateDistance(lat1, lon1, lat2, lon2) {
+                const R = 6371; // Earth radius in km
+                const dLat = (lat2 - lat1) * Math.PI / 180;
+                const dLon = (lon2 - lon1) * Math.PI / 180;
+                const a =
+                    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                return (R * c).toFixed(1); // distance in km
+            }
 
+            // Function to update all distances on the page based on the user's location
+            function updateDistances(userLat, userLon) {
+                document.querySelectorAll('.request-card').forEach(card => {
+                    const destLat = parseFloat(card.dataset.lat);
+                    const destLon = parseFloat(card.dataset.lng);
 
-
-
-
-
-
-
-
-        <script>
-            function searchFood() {
-                let input = document.getElementById("searchInput").value.toLowerCase();
-                let cards = document.querySelectorAll(".food-card");
-
-                cards.forEach(card => {
-                    let name = card.getAttribute("data-name");
-                    let token = card.getAttribute("data-token");
-
-                    // Show card if name or token matches the search input
-                    if (name.includes(input) || token.includes(input)) {
-                        card.style.display = "block";
-                    } else {
-                        card.style.display = "none";
+                    const distance = calculateDistance(userLat, userLon, destLat, destLon);
+                    const displayEl = card.querySelector('.distance-display');
+                    if (displayEl) {
+                        displayEl.textContent = `📍 ${distance} km away`;
                     }
                 });
             }
 
-            document.querySelectorAll(".confirm-pickup").forEach(button => {
-                button.addEventListener("click", async () => {
-                    const foodId = button.getAttribute("data-id");
-                    const response = await fetch("/users/confirmPickup", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ foodId })
+            // Fallback using IP location if geolocation is not available
+            function fallbackToIP() {
+                fetch('https://ipapi.co/json/')
+                    .then(res => res.json())
+                    .then(data => {
+                        const lat = parseFloat(data.latitude);
+                        const lon = parseFloat(data.longitude);
+                        updateDistances(lat, lon);
+                    })
+                    .catch(err => {
+                        document.querySelectorAll('.distance-display').forEach(el => {
+                            el.textContent = '📍 Location not available';
+                        });
                     });
+            }
 
-                    const result = await response.json();
-                    if (result.success) {
-                        alert("Pickup confirmed!");
-                        button.closest('.card').remove();
-                    } else {
-                        alert(result.message);
+            // Get user's location and update distances
+            function fetchUserLocation() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        pos => {
+                            const lat = pos.coords.latitude;
+                            const lon = pos.coords.longitude;
+                            updateDistances(lat, lon);
+                        },
+                        err => {
+                            console.warn("Geolocation error:", err.message);
+                            fallbackToIP(); // Fallback to IP if geolocation fails
+                        },
+                        {
+                            enableHighAccuracy: true,
+                            timeout: 10000,
+                            maximumAge: 0
+                        }
+                    );
+                } else {
+                    fallbackToIP(); // Fallback if geolocation is not available
+                }
+            }
+
+            // Run these functions when the page is loaded
+            document.addEventListener('DOMContentLoaded', () => {
+                updateTimeAgo(); // Update time ago labels
+                fetchUserLocation(); // Fetch user location for distance calculation
+            });
+        </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>PlateShare - Requested For Food</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <%- include('config/export') %>
+        <style>
+            .modal-backdrop.show {
+                background-color: rgba(0, 0, 0, 0.5);
+            }
+            .location-alert {
+                background-color: #e0f7fa;
+                color: #006064;
+                padding: 10px;
+                border-radius: 5px;
+                margin-top: 10px;
+            }
+            .donors-list {
+                margin-top: 10px;
+                background: #f1f1f1;
+                padding: 8px;
+                border-radius: 5px;
+            }
+        </style>
+
+
+
+</head>
+<body>
+    <div class="container-xxl bg-white p-0">
+        <%- include('config/nav') %>
+            <div class="container-xxl py-5 bg-dark hero-header mb-5">
+                <div class="container text-center my-5 pt-5 pb-4">
+                    <h1 class="display-3 text-white mb-3 animated slideInDown">Fill The Request</h1>
+                </div>
+            </div>
+            <div class="container">
+                <h2 class="text-center mb-4">Available Food Requests</h2>
+                <div class="row g-4">
+                    <% requests.forEach(request=> { %>
+                        <div class="col-sm-6 col-md-4 col-lg-3 mb-3">
+                            <div class="card h-100 shadow-sm request-card" style="font-size: 0.85rem;"
+                                data-lat="<%= request.latitude %>" data-lng="<%= request.longitude %>">
+                                <img src="/<%= request.user.photo %>" class="card-img-top"
+                                    alt="<%= request.subject || 'Food Request' %>"
+                                    style="height: 120px; object-fit: cover;">
+
+                                <div class="card-body p-2 d-flex flex-column justify-content-between">
+                                    <div>
+                                        <h6 class="card-title text-primary mb-1">
+                                            <%= request.subject || request.user.name %>
+                                        </h6>
+                                        <p class="card-text small text-muted mb-1">
+                                            <%= request.message?.length> 80 ? request.message.substring(0, 80) + '...' :
+                                                request.message || 'No description provided' %>
+                                        </p>
+                                        <p class="text-muted small mb-1">
+                                            ⏳ <span class="timeago"
+                                                data-time="<%= request.createdAt.toISOString() %>"></span> |
+                                            <span class="distance-display">📍 Calculating...</span>
+                                        </p>
+                                    </div>
+
+                                    <div class="d-flex flex-column gap-1 mt-2">
+                                        <button class="btn btn-sm btn-primary w-100"
+                                            onclick="showRequestDetails('<%= request._id %>')">Details</button>
+                                        <a href="https://www.google.com/maps/dir/?api=1&destination=<%= request.latitude %>,<%= request.longitude %>"
+                                            target="_blank" class="btn btn-sm btn-outline-success w-100">Directions</a>
+
+                                        <% if (!session.userId) { %>
+                                            <a href="/users/login" class="btn btn-sm btn-secondary w-100">Login to
+                                                Donate</a>
+                                            <% } else if (request.user._id.toString()===session.userId.toString()) { %>
+                                                <!-- No button shown if it's the user's own request -->
+                                                <% } else if (request.wantToDonate.includes(session.userId)) { %>
+                                                    <button class="btn btn-sm btn-outline-success w-100" disabled>✅
+                                                        You’ve already donated</button>
+                                                    <% } else if (request.wantToDonate.length>= 5) { %>
+                                                        <button class="btn btn-sm btn-danger w-100" disabled>🚫 Max
+                                                            donation limit reached</button>
+                                                        <% } else { %>
+                                                            <button class="btn btn-sm btn-warning w-100"
+                                                                onclick="showDonationForm('<%= request._id %>')">
+                                                                I Want to Donate
+                                                            </button>
+                                                            <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Donation Modal -->
+                        <div class="modal fade" id="donationModal-<%= request._id %>" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content shadow-sm">
+                                    <form action="/request/i-want-to-donate" method="POST"
+                                        onsubmit="return validateDonationForm('<%= request._id %>')">
+                                        <input type="hidden" name="requestId" value="<%= request._id %>">
+                                        <input type="hidden" id="latitude-<%= request._id %>" name="latitude">
+                                        <input type="hidden" id="longitude-<%= request._id %>" name="longitude">
+
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">🍱 Offer Food Donation</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="mb-3">
+                                                <label class="form-label">📍 Your Address</label>
+                                                <input type="text" name="address" class="form-control" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">📝 Message</label>
+                                                <textarea name="message" class="form-control" rows="3"
+                                                    required></textarea>
+                                            </div>
+                                            <div class="location-alert text-center small">📌 Your location will be
+                                                captured automatically.</div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="submit" class="btn btn-success w-100">Send Donation
+                                                Offer</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Request Detail Modal -->
+                        <div class="modal fade" id="requestDetailModal-<%= request._id %>" tabindex="-1"
+                            aria-labelledby="requestDetailModalLabel-<%= request._id %>" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content border-0 shadow">
+                                    <div class="modal-header bg-light">
+                                        <h5 class="modal-title fw-semibold text-primary"
+                                            id="requestDetailModalLabel-<%= request._id %>">🥗 Food Request Details</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <strong class="text-dark">From:</strong>
+                                            <span class="ms-1 text-muted">
+                                                <%= request.user.name %>
+                                            </span>
+                                        </div>
+                                        <div class="mb-3">
+                                            <strong class="text-dark">Message:</strong>
+                                            <p class="text-muted mb-0">
+                                                <%= request.message %>
+                                            </p>
+                                        </div>
+                                        <div class="mb-3">
+                                            <strong class="text-dark">Address:</strong>
+                                            <p class="text-muted mb-0">
+                                                <%= request.address %>
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <strong class="text-dark">Requested:</strong>
+                                            <span class="text-muted timeago"
+                                                data-time="<%= request.createdAt.toISOString() %>">
+                                                <!-- Will be replaced by JS -->
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer bg-light">
+                                        <button type="button" class="btn btn-secondary"
+                                            data-bs-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <% }) %>
+                </div>
+
+            </div>
+
+
+    </div>
+
+
+
+
+
+
+
+    <%- include('config/footer') %>
+        <script>
+            // Show full request details in a modal
+            function showRequestDetails(id) {
+                const modal = new bootstrap.Modal(document.getElementById('requestDetailModal-' + id));
+                modal.show();
+            }
+
+            // Show donation form and autofill geolocation
+            function showDonationForm(id) {
+                const modal = new bootstrap.Modal(document.getElementById('donationModal-' + id));
+                modal.show();
+
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        pos => {
+                            document.getElementById('latitude-' + id).value = pos.coords.latitude;
+                            document.getElementById('longitude-' + id).value = pos.coords.longitude;
+                        },
+                        err => {
+                            alert("Could not retrieve location. Please allow location access.");
+                        }
+                    );
+                }
+            }
+
+            // Validate donation form input
+            function validateDonationForm(id) {
+                const form = document.querySelector(`#donationModal-${id} form`);
+                const message = form.querySelector('textarea[name="message"]').value.trim();
+                const address = form.querySelector('input[name="address"]').value.trim();
+
+                if (message.split(/\s+/).length < 5) {
+                    alert("Please enter at least 5 words in the message.");
+                    return false;
+                }
+
+                if (address.split(/\s+/).length < 2) {
+                    alert("Please enter a more detailed address.");
+                    return false;
+                }
+
+                return true;
+            }
+
+            // Function to format the time as "X minutes ago", "X hours ago", etc.
+            function timeAgo(dateTime) {
+                const now = new Date();
+                const diffInSeconds = Math.floor((now - new Date(dateTime)) / 1000);
+                const diffInMinutes = Math.floor(diffInSeconds / 60);
+                const diffInHours = Math.floor(diffInMinutes / 60);
+                const diffInDays = Math.floor(diffInHours / 24);
+
+                if (diffInSeconds < 60) {
+                    return `${diffInSeconds} second${diffInSeconds > 1 ? 's' : ''} ago`;
+                } else if (diffInMinutes < 60) {
+                    return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
+                } else if (diffInHours < 24) {
+                    return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+                } else if (diffInDays < 30) {
+                    return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+                } else {
+                    return `${Math.floor(diffInDays / 30)} month${Math.floor(diffInDays / 30) > 1 ? 's' : ''} ago`;
+                }
+            }
+
+            // Function to update all timeago elements on the page
+            function updateTimeAgo() {
+                document.querySelectorAll('.timeago').forEach(element => {
+                    const time = element.getAttribute('data-time');
+                    const formattedTime = timeAgo(time);
+                    element.textContent = formattedTime;
+                });
+            }
+
+            // Helper: Calculate distance using Haversine formula
+            function calculateDistance(lat1, lon1, lat2, lon2) {
+                const R = 6371; // Earth radius in km
+                const dLat = (lat2 - lat1) * Math.PI / 180;
+                const dLon = (lon2 - lon1) * Math.PI / 180;
+                const a =
+                    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                return (R * c).toFixed(1); // distance in km
+            }
+
+            // Function to update all distances on the page based on the user's location
+            function updateDistances(userLat, userLon) {
+                document.querySelectorAll('.request-card').forEach(card => {
+                    const destLat = parseFloat(card.dataset.lat);
+                    const destLon = parseFloat(card.dataset.lng);
+
+                    const distance = calculateDistance(userLat, userLon, destLat, destLon);
+                    const displayEl = card.querySelector('.distance-display');
+                    if (displayEl) {
+                        displayEl.textContent = `📍 ${distance} km away`;
                     }
                 });
+            }
+
+            // Fallback using IP location if geolocation is not available
+            function fallbackToIP() {
+                fetch('https://ipapi.co/json/')
+                    .then(res => res.json())
+                    .then(data => {
+                        const lat = parseFloat(data.latitude);
+                        const lon = parseFloat(data.longitude);
+                        updateDistances(lat, lon);
+                    })
+                    .catch(err => {
+                        document.querySelectorAll('.distance-display').forEach(el => {
+                            el.textContent = '📍 Location not available';
+                        });
+                    });
+            }
+
+            // Get user's location and update distances
+            function fetchUserLocation() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        pos => {
+                            const lat = pos.coords.latitude;
+                            const lon = pos.coords.longitude;
+                            updateDistances(lat, lon);
+                        },
+                        err => {
+                            console.warn("Geolocation error:", err.message);
+                            fallbackToIP(); // Fallback to IP if geolocation fails
+                        },
+                        {
+                            enableHighAccuracy: true,
+                            timeout: 10000,
+                            maximumAge: 0
+                        }
+                    );
+                } else {
+                    fallbackToIP(); // Fallback if geolocation is not available
+                }
+            }
+
+            // Run these functions when the page is loaded
+            document.addEventListener('DOMContentLoaded', () => {
+                updateTimeAgo(); // Update time ago labels
+                fetchUserLocation(); // Fetch user location for distance calculation
             });
         </script>
 
+
+
+
+</body>
+
+</html>

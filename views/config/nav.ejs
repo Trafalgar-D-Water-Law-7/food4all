@@ -6,69 +6,81 @@
     <% } %>
 
       <% if (memberId) { %>
-    <a href="/ourTeams/readyToPick" class="navbar-brand p-0">
-      <h1 class="text-primary m-0"><i class="fa fa-utensils me-3"></i>food4rall</h1>
-    </a>
-    <% } %>
+        <a href="/ourTeams/readyToPick" class="navbar-brand p-0">
+          <h1 class="text-primary m-0"><i class="fa fa-utensils me-3"></i>food4rall</h1>
+        </a>
+        <% } %>
 
-    
-    
 
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
-        <span class="fa fa-bars"></span>
-      </button>
 
-      <div class="collapse navbar-collapse" id="navbarCollapse">
-        <div class="navbar-nav ms-auto py-0 pe-4">
-          <% if (!memberId) { %>
-            <a href="/" class="nav-item nav-link">Home</a>
 
-            <a href="/about" class="nav-item nav-link">About</a>
-            <a href="/request/requestedForFood" class="nav-item nav-link">Requested For Food</a>
-            <% } %>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+            <span class="fa fa-bars"></span>
+          </button>
 
-              <% if (memberId) { %>
-                <a href="/ourTeams/readyToPick" class="nav-item nav-link">Ready To Pick</a>
-                <% } %>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <div class="navbar-nav ms-auto py-0 pe-4">
+              <% if (!memberId) { %>
+                <a href="/" class="nav-item nav-link">Home</a>
 
-                  <% if (!memberId) { %>
-                    <div class="nav-item dropdown">
-                      <a href="#" class="nav-link dropdown-toggle active" data-bs-toggle="dropdown">Options</a>
-                      <div class="dropdown-menu m-0">
-                        <% if (!userId && !memberId) { %>
-                          <!-- Not logged in: show both login/signup options -->
-                          <a href="/users/signup" class="dropdown-item">User Sign Up</a>
-                          <a href="/users/login" class="dropdown-item">User Login</a>
-                          <a href="/memberSignup" class="dropdown-item">Member Sign Up</a>
-                          <a href="/ourTeams/login" class="dropdown-item">Member Login</a>
-                          <% } else if (userId) { %>
-                            <!-- Logged in as user -->
-                            <a href="/users/user" class="dropdown-item">User Profile</a>
-                            <a href="/request" class="dropdown-item">Request Food</a>
-                            <% } %>
-                              <a href="/testimonial" class="dropdown-item">Testimonial</a>
-                              <a href="/service" class="dropdown-item">Services</a>
-                      </div>
-                    </div>
-                    <a href="/contact" class="nav-item nav-link">Contact</a>
-                    <% } %>
-        </div>
-
-        <div class="d-flex gap-2">
-          <% if (!memberId) { %>
-            <a href="/users/donate" class="btn btn-primary py-2 px-4">Donate Food</a>
-            <% } %>
-
-              <% if (userId) { %>
-                <a href="/users/logout" class="btn btn-danger py-2 px-4">Log Out</a>
+                <a href="/about" class="nav-item nav-link">About</a>
+                <a href="/request/requestedForFood" class="nav-item nav-link">Requested For Food</a>
                 <% } %>
 
                   <% if (memberId) { %>
-                    <a href="/ourTeams/memberProfile" class="btn btn-outline-light py-2 px-4">👤 Profile</a>
-                    <a href="/ourTeams/logout" class="btn btn-danger py-2 px-4">Log Out</a>
+                    <a href="/ourTeams/readyToPick" class="nav-item nav-link">Ready To Pick</a>
                     <% } %>
-        </div>
-      </div>
+
+                      <% if (!memberId) { %>
+                        <div class="nav-item dropdown">
+                          <a href="#" class="nav-link dropdown-toggle active" data-bs-toggle="dropdown">Options</a>
+                          <div class="dropdown-menu m-0">
+                            <% if (!userId && !memberId) { %>
+                              <!-- Not logged in: show both login/signup options -->
+                              <a href="/users/signup" class="dropdown-item">User Sign Up</a>
+                              <a href="/users/login" class="dropdown-item">User Login</a>
+                              <a href="/memberSignup" class="dropdown-item">Member Sign Up</a>
+                              <a href="/ourTeams/login" class="dropdown-item">Member Login</a>
+                              <% } else if (userId) { %>
+
+                                <a href="/request" class="dropdown-item">Request Food</a>
+                                <a href="/users/claimedFood" class="dropdown-item">My Claimed Food</a>
+                                <a href="/users/myFoodDonation" class="dropdown-item">My Food Donation</a>
+                                <a href="/users/myFoodRequests" class="dropdown-item">My Food Request</a>
+
+
+                                <% } %>
+                                  <a href="/testimonial" class="dropdown-item">Testimonial</a>
+                                  <a href="/service" class="dropdown-item">Services</a>
+                                  <% if (userId) { %>
+                                    <a href="/users/logout" class="dropdown-item">Log Out</a>
+                                    <% } %>
+
+                          </div>
+                        </div>
+                        <a href="/contact" class="nav-item nav-link">Contact</a>
+                        <% } %>
+            </div>
+
+            <div class="d-flex gap-2">
+              <% if (!memberId) { %>
+                <a href="/users/donate" class="btn btn-primary py-2 px-4">Donate Food</a>
+                <% } %>
+
+                  <% if (userId) { %>
+                    <a href="/users/user" class="text-align-center btn btn-outline-light py-2 px-4">
+                      <i class="ri-settings-4-line"></i>
+                    </a>
+                    <% } %>
+
+
+
+                      <% if (memberId) { %>
+                        <a href="/ourTeams/memberProfile" class="btn btn-outline-light py-2 px-4">👤 Profile</a>
+                        <a href="/ourTeams/logout" class="btn btn-danger py-2 px-4">Log Out</a>
+                        <% } %>
+            </div>
+          </div>
 </nav>
 
 <!-- Flash Messages -->

@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Donations | FoodShare</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <%- include('config/export') %>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #2E7D32;
+            --accent-color: #8BC34A;
+            --dark-color: #263238;
+            --light-color: #f5f7fa;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        .page-header {
+                    background: linear-gradient(135deg, #2c3e50, #4ca1af);
+
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+             padding: 100px 0 50px 0 !important;
+        }
+
+        .page-title {
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 1.25rem;
+            border-bottom: none;
+        }
+
+        .card-title {
+            font-weight: 600;
+            margin-bottom: 0;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .badge-token {
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+            padding: 0.35em 0.65em;
+            background-color: var(--dark-color);
+        }
+
+        .empty-state {
+            padding: 4rem 0;
+            text-align: center;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            color: #e0e0e0;
+        }
+
+        .empty-state-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark-color);
+        }
+
+        .empty-state-text {
+            color: #6c757d;
+            margin-bottom: 1.5rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .search-box {
+            position: relative;
+            max-width: 400px;
+            margin-left: auto;
+        }
+
+        .search-box .form-control {
+            padding-left: 2.5rem;
+            border-radius: 50px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .search-box .btn {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            border: none;
+            background: transparent;
+            z-index: 10;
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.35em 0.65em;
+            border-radius: 50px;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background-color: #FFF3CD;
+            color: #856404;
+        }
+
+        .status-claimed {
+            background-color: #D1ECF1;
+            color: #0C5460;
+        }
+
+        .status-completed {
+            background-color: #D4EDDA;
+            color: #155724;
+        }
+
+        .action-buttons .btn {
+            margin-left: 0.5rem;
+            min-width: 120px;
+        }
+
+        .food-image {
+            height: 180px;
+            object-fit: cover;
+            width: 100%;
+        }
+
+        .token-container {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .search-box {
+                max-width: 100%;
+                margin-top: 1rem;
+            }
+            
+            .action-buttons .btn {
+                margin-left: 0;
+                margin-top: 0.5rem;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <%- include('config/nav') %>
+    <div class="page-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="page-title">My Donations</h1>
+                    <p class="mb-0">View and manage your food donations</p>
+                </div>
+                <div class="col-md-6">
+                    <div class="search-box">
+                        <button class="btn" type="button">
+                            <i class="bi bi-search"></i>
+                        </button>
+                        <input type="text" id="searchDonated" class="form-control" placeholder="Search donations...">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container mb-5">
+        <% if (donatedFoods.length === 0) { %>
+            <div class="empty-state animate__animated animate__fadeIn">
+                <i class="bi bi-gift empty-state-icon"></i>
+                <h3 class="empty-state-title">No Donations Yet</h3>
+                <p class="empty-state-text">You haven't donated any food items yet. Start sharing with your community by making your first donation.</p>
+                <a href="/users/donate" class="btn btn-primary btn-lg">
+                    <i class="bi bi-plus-circle me-2"></i> Make a Donation
+                </a>
+            </div>
+        <% } else { %>
+            <div class="row">
+                <div class="col-12 mb-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="fw-semibold">Your Donated Items</h4>
+                        <span class="badge bg-secondary"> 
+                            <%= donatedFoods.length %> <%= donatedFoods.length === 1 ? 'item' : 'items' %>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                <% donatedFoods.forEach(food => { %>
+                    <div class="col food-card" data-name="<%= food.name.toLowerCase() %>" data-token="<%= food.claimedToken ? food.claimedToken.toLowerCase() : '' %>">
+                        <div class="card h-100 animate__animated animate__fadeIn">
+                            <% if (food.photos && food.photos.length > 0) { %>
+                                <img src="/<%= food.photos[0] %>" class="food-image" alt="<%= food.name %>">
+                            <% } else { %>
+                                <div class="food-image bg-light d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                                </div>
+                            <% } %>
+                            
+                            <div class="card-header">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="card-title mb-0"><%= food.name %></h5>
+                                    <span class="status-badge <%= food.status === 'pending' ? 'status-pending' : food.status === 'claimed' ? 'status-claimed' : 'status-completed' %>">
+                                        <%= food.status %>
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="card-body">
+                                <p class="card-text text-muted mb-3">
+                                    <small>Donated on <%= new Date(food.createdAt).toLocaleDateString() %></small>
+                                </p>
+                                
+                                <% if (food.claimedToken) { %>
+                                    <div class="token-container">
+                                        <p class="mb-1 small text-uppercase fw-semibold">Claim Token</p>
+                                        <p class="mb-0">
+                                            <span class="badge bg-dark badge-token">
+                                                <i class="bi bi-shield-lock me-1"></i> <%= food.claimedToken %>
+                                            </span>
+                                        </p>
+                                    </div>
+                                    
+                                    <p class="card-text mb-1">
+                                        <span class="fw-semibold">Claimed by:</span>
+                                        <%= food.claimedBy ? food.claimedBy.name : 'Pending confirmation' %>
+                                    </p>
+                                    
+                                    <% if (food.claimedBy && food.claimedBy.contact) { %>
+                                        <p class="card-text mb-1">
+                                            <span class="fw-semibold">Contact:</span>
+                                            <%= food.claimedBy.contact %>
+                                        </p>
+                                    <% } %>
+                                <% } else { %>
+                                    <p class="card-text text-muted">
+                                        <i class="bi bi-hourglass-split me-1"></i> Waiting to be claimed
+                                    </p>
+                                <% } %>
+                            </div>
+                            
+                            <div class="card-footer bg-white border-top-0">
+                                <div class="d-flex flex-wrap action-buttons">
+                                    <a href="/food/<%= food._id %>" class="btn btn-outline-primary">
+                                        <i class="bi bi-eye me-1"></i> Details
+                                    </a>
+                                    <% if (food.claimedBy && food.status !== 'completed') { %>
+                                        <button class="btn btn-success confirm-pickup" data-id="<%= food._id %>">
+                                            <i class="bi bi-check-circle me-1"></i> Confirm
+                                        </button>
+                                    <% } %>
+                                    <button class="btn btn-outline-danger delete-donation" data-id="<%= food._id %>">
+                                        <i class="bi bi-trash me-1"></i> Remove
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        <% } %>
+    </div>
+
+    <%- include('config/footer') %>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Enhanced search functionality
+        document.getElementById("searchDonated").addEventListener("input", function() {
+            const searchTerm = this.value.trim().toLowerCase();
+            const cards = document.querySelectorAll(".food-card");
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                const name = card.getAttribute("data-name") || "";
+                const token = card.getAttribute("data-token") || "";
+
+                if (name.includes(searchTerm) || token.includes(searchTerm)) {
+                    card.style.display = "block";
+                    visibleCount++;
+                } else {
+                    card.style.display = "none";
+                }
+            });
+
+            // Show no results message if needed
+            const noResults = document.getElementById("noResults");
+            if (visibleCount === 0 && searchTerm.length > 0) {
+                if (!noResults) {
+                    const row = document.querySelector(".row.row-cols-1");
+                    const noResultsDiv = document.createElement("div");
+                    noResultsDiv.id = "noResults";
+                    noResultsDiv.className = "col-12 text-center py-5";
+                    noResultsDiv.innerHTML = `
+                        <i class="bi bi-search" style="font-size: 3rem; color: #dee2e6;"></i>
+                        <h4 class="h5 mt-3">No matching donations found</h4>
+                        <p class="text-muted">Try different search terms</p>
+                    `;
+                    row.appendChild(noResultsDiv);
+                }
+            } else if (noResults) {
+                noResults.remove();
+            }
+        });
+
+        // Enhanced delete donation with SweetAlert
+        document.querySelectorAll(".delete-donation").forEach(btn => {
+            btn.addEventListener("click", async () => {
+                const foodId = btn.dataset.id;
+                
+                Swal.fire({
+                    title: 'Delete Donation?',
+                    text: "Are you sure you want to delete this donation? This action cannot be undone.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, delete it',
+                    cancelButtonText: 'Cancel',
+                    reverseButtons: true
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        try {
+                            const res = await fetch(`/users/donation/${foodId}`, { 
+                                method: "DELETE",
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                }
+                            });
+                            
+                            if (res.ok) {
+                                // Animate removal
+                                const card = btn.closest(".food-card");
+                                card.classList.add("animate__animated", "animate__fadeOut");
+                                
+                                setTimeout(() => {
+                                    card.remove();
+                                    
+                                    // Show success message
+                                    Swal.fire(
+                                        'Deleted!',
+                                        'Your donation has been removed.',
+                                        'success'
+                                    );
+                                    
+                                    // Reload if no cards left
+                                    if (document.querySelectorAll(".food-card").length === 0) {
+                                        setTimeout(() => location.reload(), 1500);
+                                    }
+                                }, 300);
+                            } else {
+                                throw new Error("Failed to delete donation");
+                            }
+                        } catch (err) {
+                            console.error(err);
+                            Swal.fire(
+                                'Error',
+                                'Failed to delete donation. Please try again.',
+                                'error'
+                            );
+                        }
+                    }
+                });
+            });
+        });
+
+        // Enhanced confirm pickup with SweetAlert
+        document.querySelectorAll(".confirm-pickup").forEach(btn => {
+            btn.addEventListener("click", async () => {
+                const foodId = btn.dataset.id;
+                
+                Swal.fire({
+                    title: 'Confirm Pickup?',
+                    text: "Please confirm that the recipient has picked up the food donation.",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#28a745',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, confirm pickup',
+                    cancelButtonText: 'Cancel',
+                    reverseButtons: true
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        try {
+                            const res = await fetch("/users/confirmPickup", {
+                                method: "POST",
+                                headers: { 
+                                    "Content-Type": "application/json" 
+                                },
+                                body: JSON.stringify({ foodId })
+                            });
+                            
+                            const result = await res.json();
+                            
+                            if (result.success) {
+                                // Animate removal
+                                const card = btn.closest(".food-card");
+                                card.classList.add("animate__animated", "animate__fadeOut");
+                                
+                                setTimeout(() => {
+                                    card.remove();
+                                    
+                                    // Show success message
+                                    Swal.fire(
+                                        'Confirmed!',
+                                        'Pickup has been successfully confirmed.',
+                                        'success'
+                                    );
+                                    
+                                    // Reload if no cards left
+                                    if (document.querySelectorAll(".food-card").length === 0) {
+                                        setTimeout(() => location.reload(), 1500);
+                                    }
+                                }, 300);
+                            } else {
+                                throw new Error(result.message || "Confirmation failed");
+                            }
+                        } catch (err) {
+                            console.error(err);
+                            Swal.fire(
+                                'Error',
+                                'Failed to confirm pickup. Please try again.',
+                                'error'
+                            );
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

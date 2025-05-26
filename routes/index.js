@@ -8,6 +8,7 @@ const Donation = require('../models/donation');
 const ourTeam = require('../models/ourTeams');
 const Contact = require('../models/conatctus');
 const transporter = require('../config/mailer'); // adjust path accordingly
+const testimonial = require('../models/testimonial');
 
 
 // ------------------
@@ -35,12 +36,14 @@ function generateSignature(total_amount, transaction_uuid, product_code, secret_
 router.get('/', async (req, res) => {
   try {
     const now = new Date();
+    const testimonials = await testimonial.find().populate('user');
     const donations = await Donation.find({
       status: 'claim',
       expiryTime: { $gte: now }
     });
 
     res.render('index', {
+      feedbacks: testimonials,
       donations,
       userId: req.session.userId,
       success: req.flash('success'),

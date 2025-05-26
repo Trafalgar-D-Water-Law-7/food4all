@@ -29,6 +29,7 @@ router.post("/submit-food-request", ensureAuthenticated, async (req, res) => {
     try {
         const { message, address, latitude, longitude } = req.body;
         const userId = req.session.userId;
+        console.log(userId)
 
         if (!userId) {
             req.flash("error", "Please log in to submit a food request.");

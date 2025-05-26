@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Claimed Food | FoodShare</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <%- include('config/export') %>
+        <style>
+            :root {
+                --primary-color: #4CAF50;
+                --secondary-color: #2E7D32;
+                --accent-color: #8BC34A;
+                --dark-color: #263238;
+                --light-color: #f5f7fa;
+            }
+
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background-color: #f8f9fa;
+                color: #333;
+            }
+
+            .page-header {
+                background: linear-gradient(135deg, #2c3e50, #4ca1af);
+                color: white;
+                padding: 3rem 0;
+                margin-bottom: 2rem;
+                border-radius: 0 0 20px 20px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+                padding: 100px 0 50px 0 ;
+            }
+
+            .page-title {
+                font-weight: 600;
+                letter-spacing: -0.5px;
+            }
+
+            .card {
+                border: none;
+                border-radius: 12px;
+                box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+                transition: all 0.3s ease;
+                overflow: hidden;
+                margin-bottom: 1.5rem;
+            }
+
+            .card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+            }
+
+            .card-header {
+                background-color: var(--primary-color);
+                color: white;
+                padding: 1rem 1.25rem;
+                border-bottom: none;
+            }
+
+            .card-title {
+                font-weight: 600;
+                margin-bottom: 0;
+            }
+
+            .badge-token {
+                font-size: 0.8rem;
+                letter-spacing: 0.5px;
+                padding: 0.35em 0.65em;
+                background-color: var(--dark-color);
+            }
+
+            .status-badge {
+                font-size: 0.75rem;
+                font-weight: 600;
+                padding: 0.35em 0.65em;
+                border-radius: 50px;
+                text-transform: uppercase;
+            }
+
+            .status-pending {
+                background-color: #FFF3CD;
+                color: #856404;
+            }
+
+            .status-claimed {
+                background-color: #D1ECF1;
+                color: #0C5460;
+            }
+
+            .status-completed {
+                background-color: #D4EDDA;
+                color: #155724;
+            }
+
+            .empty-state {
+                padding: 4rem 0;
+                text-align: center;
+                background-color: white;
+                border-radius: 12px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            }
+
+            .empty-state-icon {
+                font-size: 4rem;
+                margin-bottom: 1.5rem;
+                color: #e0e0e6;
+            }
+
+            .empty-state-title {
+                font-weight: 600;
+                margin-bottom: 0.5rem;
+                color: var(--dark-color);
+            }
+
+            .empty-state-text {
+                color: #6c757d;
+                margin-bottom: 1.5rem;
+                max-width: 500px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .search-box {
+                position: relative;
+                max-width: 400px;
+                margin-left: auto;
+            }
+
+            .search-box .form-control {
+                padding-left: 2.5rem;
+                border-radius: 50px;
+                border: 1px solid #e0e0e0;
+            }
+
+            .search-box .btn {
+                position: absolute;
+                left: 0;
+                top: 0;
+                height: 100%;
+                border: none;
+                background: transparent;
+                z-index: 10;
+            }
+
+            .token-container {
+                background-color: #f8f9fa;
+                border-radius: 8px;
+                padding: 0.75rem;
+                margin-bottom: 1rem;
+            }
+
+            @media (max-width: 768px) {
+                .search-box {
+                    max-width: 100%;
+                    margin-top: 1rem;
+                }
+            }
+        </style>
+</head>
+
+<body>
+    <%- include('config/nav') %>
+
+        <div class="page-header">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="page-title">My Claimed Food</h1>
+                        <p class="mb-0">View and manage your claimed food donations</p>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="search-box">
+                            <button class="btn" type="button">
+                                <i class="bi bi-search"></i>
+                            </button>
+                            <input type="text" id="searchClaimed" class="form-control"
+                                placeholder="Search claimed food...">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container mb-5">
+            <% if (claimedFood.length===0) { %>
+                <div class="empty-state animate__animated animate__fadeIn">
+                    <i class="bi bi-basket empty-state-icon"></i>
+                    <h3 class="empty-state-title">No Claimed Food Yet</h3>
+                    <p class="empty-state-text">You haven't claimed any food donations yet. Browse available donations
+                        to find food near you.</p>
+                    <a href="/food" class="btn btn-primary btn-lg">
+                        <i class="bi bi-search me-2"></i> Browse Donations
+                    </a>
+                </div>
+                <% } else { %>
+                    <div class="row">
+                        <div class="col-12 mb-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h4 class="fw-semibold">Your Claimed Items</h4>
+                                <span class="badge bg-secondary">
+                                    <%= claimedFood.length %>
+                                        <%= claimedFood.length===1 ? 'item' : 'items' %>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                        <% claimedFood.forEach(food=> { %>
+                            <div class="col food-card" data-name="<%= food.name.toLowerCase() %>"
+                                data-token="<%= food.claimedToken %>">
+                                <div class="card h-100 animate__animated animate__fadeIn">
+
+                                                <div class="card-header">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <h5 class="card-title mb-0">
+                                                            <%= food.name %>
+                                                        </h5>
+                                                        <span
+                                                            class="status-badge <%= food.status === 'pending' ? 'status-pending' : food.status === 'claimed' ? 'status-claimed' : 'status-completed' %>">
+                                                            <%= food.status %>
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="card-body">
+                                                    <div class="token-container">
+                                                        <p class="mb-1 small text-uppercase fw-semibold">Claim Token</p>
+                                                        <p class="mb-0">
+                                                            <span class="badge bg-dark badge-token">
+                                                                <i class="bi bi-shield-lock me-1"></i>
+                                                                <%= food.claimedToken %>
+                                                            </span>
+                                                        </p>
+                                                    </div>
+
+                                                    <p class="card-text mb-1">
+                                                        <span class="fw-semibold">Donated by:</span>
+                                                        <%= food.donatedBy.name %>
+                                                    </p>
+
+                                                    <% if (food.donatedBy.contact) { %>
+                                                        <p class="card-text mb-1">
+                                                            <span class="fw-semibold">Contact:</span>
+                                                            <%= food.donatedBy.contact %>
+                                                        </p>
+                                                        <% } %>
+
+                                                            <p class="card-text mb-1">
+                                                                <a href="https://www.google.com/maps/dir/?api=1&destination=<%= food.latitude %>,<%= food.longitude %>"
+                                                                    target="_blank">
+                                                                    Get Food Location
+                                                                    <i class="bi bi-geo-alt-fill ms-1"></i>
+                                                                </a>
+                                                            </p>
+
+
+                                                            <p class="card-text mb-1">
+                                                                <span class="fw-semibold">Time Left:</span>
+                                                                <span class="text-danger"
+                                                                    id="time-left-<%= food._id %>"></span>
+                                                            </p>
+
+                                                            <script>
+                                                                function getTimeLeft(expiryTime) {
+                                                                    const now = new Date();
+                                                                    const expiry = new Date(expiryTime);
+                                                                    const diffMs = expiry - now;
+                                                                    if (diffMs <= 0) return "Expired";
+                                                                    const mins = Math.floor((diffMs / 1000 / 60) % 60);
+                                                                    const hrs = Math.floor(diffMs / 1000 / 60 / 60);
+                                                                    return `${hrs}h ${mins}m left`;
+                                                                }
+
+                                                                const expiryTime = "<%= food.expiryTime.toISOString() %>";
+                                                                document.getElementById("time-left-<%= food._id %>").textContent = getTimeLeft(expiryTime);
+                                                            </script>
+
+                                                </div>
+
+                                                <div class="card-footer bg-white border-top-0">
+                                                    <a href="/food/<%= food._id %>"
+                                                        class="btn btn-outline-primary w-100">
+                                                        <i class="bi bi-eye me-1"></i> View Details
+                                                    </a>
+                                                </div>
+                                </div>
+                            </div>
+                            <% }); %>
+                    </div>
+                    <% } %>
+        </div>
+
+        <%- include('config/footer') %>
+
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    // Enhanced search functionality
+                    document.getElementById("searchClaimed").addEventListener("input", function () {
+                        const searchTerm = this.value.trim().toLowerCase();
+                        const cards = document.querySelectorAll(".food-card");
+                        let visibleCount = 0;
+
+                        cards.forEach(card => {
+                            const name = card.getAttribute("data-name") || "";
+                            const token = card.getAttribute("data-token") || "";
+
+                            if (name.includes(searchTerm) || token.includes(searchTerm)) {
+                                card.style.display = "block";
+                                visibleCount++;
+                            } else {
+                                card.style.display = "none";
+                            }
+                        });
+
+                        // Show no results message if needed
+                        const noResults = document.getElementById("noResults");
+                        if (visibleCount === 0 && searchTerm.length > 0) {
+                            if (!noResults) {
+                                const row = document.querySelector(".row.row-cols-1");
+                                const noResultsDiv = document.createElement("div");
+                                noResultsDiv.id = "noResults";
+                                noResultsDiv.className = "col-12 text-center py-5";
+                                noResultsDiv.innerHTML = `
+                            <i class="bi bi-search" style="font-size: 3rem; color: #dee2e6;"></i>
+                            <h4 class="h5 mt-3">No matching claims found</h4>
+                            <p class="text-muted">Try different search terms</p>
+                        `;
+                                row.appendChild(noResultsDiv);
+                            }
+                        } else if (noResults) {
+                            noResults.remove();
+                        }
+                    });
+                });
+            </script>
+</body>
+
+</html>

@@ -4,12 +4,13 @@
 <head>
     <meta charset="utf-8">
     <title>PlateShare - Requested For Food</title>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <%- include('config/export') %>
         <style>
             .modal-backdrop.show {
                 background-color: rgba(0, 0, 0, 0.5);
             }
+
             .location-alert {
                 background-color: #e0f7fa;
                 color: #006064;
@@ -17,6 +18,7 @@
                 border-radius: 5px;
                 margin-top: 10px;
             }
+
             .donors-list {
                 margin-top: 10px;
                 background: #f1f1f1;
@@ -24,37 +26,38 @@
                 border-radius: 5px;
             }
         </style>
-
-
-
 </head>
+
 <body>
     <div class="container-xxl bg-white p-0">
         <%- include('config/nav') %>
+
             <div class="container-xxl py-5 bg-dark hero-header mb-5">
                 <div class="container text-center my-5 pt-5 pb-4">
                     <h1 class="display-3 text-white mb-3 animated slideInDown">Fill The Request</h1>
                 </div>
             </div>
+
             <div class="container">
                 <h2 class="text-center mb-4">Available Food Requests</h2>
                 <div class="row g-4">
                     <% requests.forEach(request=> { %>
                         <div class="col-sm-6 col-md-4 col-lg-3 mb-3">
-                            <div class="card h-100 shadow-sm request-card" style="font-size: 0.85rem;"
-                                data-lat="<%= request.latitude %>" data-lng="<%= request.longitude %>">
-                                <img src="/<%= request.user.photo %>" class="card-img-top"
+                            <div class="card h-100 shadow-sm request-card" data-lat="<%= request.latitude %>"
+                                data-lng="<%= request.longitude %>" style="font-size: 0.85rem;">
+                                <img src="/<%= request?.user?.photo || 'default.jpg' %>" class="card-img-top"
                                     alt="<%= request.subject || 'Food Request' %>"
                                     style="height: 120px; object-fit: cover;">
 
                                 <div class="card-body p-2 d-flex flex-column justify-content-between">
                                     <div>
                                         <h6 class="card-title text-primary mb-1">
-                                            <%= request.subject || request.user.name %>
+                                            <%= request.subject || request?.user?.name || 'Anonymous' %>
                                         </h6>
                                         <p class="card-text small text-muted mb-1">
-                                            <%= request.message?.length> 80 ? request.message.substring(0, 80) + '...' :
-                                                request.message || 'No description provided' %>
+                                            <%= request.message?.length> 80
+                                                ? request.message.substring(0, 80) + '...'
+                                                : request.message || 'No description provided' %>
                                         </p>
                                         <p class="text-muted small mb-1">
                                             ⏳ <span class="timeago"
@@ -66,18 +69,20 @@
                                     <div class="d-flex flex-column gap-1 mt-2">
                                         <button class="btn btn-sm btn-primary w-100"
                                             onclick="showRequestDetails('<%= request._id %>')">Details</button>
+
                                         <a href="https://www.google.com/maps/dir/?api=1&destination=<%= request.latitude %>,<%= request.longitude %>"
                                             target="_blank" class="btn btn-sm btn-outline-success w-100">Directions</a>
 
                                         <% if (!session.userId) { %>
                                             <a href="/users/login" class="btn btn-sm btn-secondary w-100">Login to
                                                 Donate</a>
-                                            <% } else if (request.user._id.toString()===session.userId.toString()) { %>
-                                                <!-- No button shown if it's the user's own request -->
-                                                <% } else if (request.wantToDonate.includes(session.userId)) { %>
+                                            <% } else if
+                                                (request?.user?._id?.toString?.()===session.userId?.toString?.()) { %>
+                                                <!-- User's own request, no donate button -->
+                                                <% } else if (request.wantToDonate?.includes(session.userId)) { %>
                                                     <button class="btn btn-sm btn-outline-success w-100" disabled>✅
                                                         You’ve already donated</button>
-                                                    <% } else if (request.wantToDonate.length>= 5) { %>
+                                                    <% } else if (request.wantToDonate?.length>= 5) { %>
                                                         <button class="btn btn-sm btn-danger w-100" disabled>🚫 Max
                                                             donation limit reached</button>
                                                         <% } else { %>
@@ -90,6 +95,8 @@
                                 </div>
                             </div>
                         </div>
+
+
                         <!-- Donation Modal -->
                         <div class="modal fade" id="donationModal-<%= request._id %>" tabindex="-1" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered">
@@ -140,7 +147,7 @@
                                         <div class="mb-3">
                                             <strong class="text-dark">From:</strong>
                                             <span class="ms-1 text-muted">
-                                                <%= request.user.name %>
+                                                <%=  request?.user?.name  %>
                                             </span>
                                         </div>
                                         <div class="mb-3">
@@ -173,19 +180,11 @@
 
                         <% }) %>
                 </div>
-
             </div>
-
-
     </div>
 
-
-
-
-
-
-
     <%- include('config/footer') %>
+
         <script>
             // Show full request details in a modal
             function showRequestDetails(id) {
@@ -333,10 +332,6 @@
                 fetchUserLocation(); // Fetch user location for distance calculation
             });
         </script>
-
-
-
-
 </body>
 
 </html>

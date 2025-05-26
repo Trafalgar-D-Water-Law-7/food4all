@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const FoodRequestSchema = new mongoose.Schema({
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     message: { type: String, required: true },
     longitude: { type: Number },
     latitude: { type: Number },
