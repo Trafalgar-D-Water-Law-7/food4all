@@ -6,141 +6,139 @@
   <title>Food4all</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <%- include('config/export') %>
-    <style>
-      .card {
-        border: none;
-        border-radius: 10px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        transition: transform 0.2s ease;
-      }
+  <style>
+    .card {
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s ease;
+    }
 
-      .card:hover {
-        transform: translateY(-5px);
-      }
+    .card:hover {
+      transform: translateY(-5px);
+    }
 
+    .card img {
+      height: 180px;
+      object-fit: cover;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+    }
+
+    .card-body .btn {
+      font-size: 14px;
+      padding: 6px 12px;
+    }
+
+    .card-text {
+      font-size: 14px;
+    }
+
+    #location-info {
+      font-size: 15px;
+      margin-bottom: 10px;
+      color: #555;
+    }
+
+    @media (max-width: 768px) {
       .card img {
-        height: 180px;
-        object-fit: cover;
-        border-top-left-radius: 10px;
-        border-top-right-radius: 10px;
+        height: 150px;
       }
-
-      .card-body .btn {
-        font-size: 14px;
-        padding: 6px 12px;
-      }
-
-      .card-text {
-        font-size: 14px;
-      }
-
-      #location-info {
-        font-size: 15px;
-        margin-bottom: 10px;
-        color: #555;
-      }
-
-      @media (max-width: 768px) {
-        .card img {
-          height: 150px;
-        }
-      }
-    </style>
+    }
+  </style>
 </head>
 
 <body>
   <div class="container-xxl bg-white p-0">
     <div class="container-xxl position-relative p-0">
       <%- include('config/nav') %>
-        <div class="container-xxl py-5 bg-dark hero-header mb-5">
-          <div class="container my-5 py-5">
-            <div class="row align-items-center g-5">
-              <div class="col-lg-6 text-center text-lg-start">
-                <h1 class="display-3 text-white">Enjoy Our<br>Delicious Meal</h1>
-                <p class="text-white mb-4 pb-2">
-                  All the food is provided by generous individuals from across the country. Big thanks to those who
-                  share and donate.
-                </p>
-                <button class="btn btn-success"
-                  onclick="document.getElementById('donate-popup').style.display='block'">💸 Donate via eSewa</button>
-              </div>
-              <div class="col-lg-6 text-center text-lg-end overflow-hidden">
-                <img class="img-fluid" src="img/hero.png" alt="Hero Image">
-              </div>
+      <div class="container-xxl py-5 bg-dark hero-header mb-5">
+        <div class="container my-5 py-5">
+          <div class="row align-items-center g-5">
+            <div class="col-lg-6 text-center text-lg-start">
+              <h1 class="display-3 text-white">Enjoy Our<br>Delicious Meal</h1>
+              <p class="text-white mb-4 pb-2">
+                All the food is provided by generous individuals from across the country. Big thanks to those who
+                share and donate.
+              </p>
+              <button class="btn btn-success"
+                onclick="document.getElementById('donate-popup').style.display='block'">💸 Donate via eSewa</button>
+            </div>
+            <div class="col-lg-6 text-center text-lg-end overflow-hidden">
+              <img class="img-fluid" src="img/hero.png" alt="Hero Image">
             </div>
           </div>
         </div>
+      </div>
     </div>
   </div>
 
   <% if (!memberId) { %>
-    <div class="container py-4" id="donation-container">
-      <h4 class="mb-3 fw-semibold">📦 Available Food Donations Near You</h4>
-      <div id="location-info" class="mb-3">Detecting location...</div>
-      <div id="card-list" class="row g-4"></div>
-    </div>
-    <% } %>
+  <div class="container py-4" id="donation-container">
+    <h4 class="mb-3 fw-semibold">📦 Available Food Donations Near You</h4>
+    <div id="location-info" class="mb-3">Detecting location...</div>
+    <div id="card-list" class="row g-4"></div>
+  </div>
+  <% } %>
 
-      <!-- Donation Logic Script -->
-      <script>
-        const donations = <%- JSON.stringify(donations || []) %>;
+  <!-- Donation Logic Script -->
+  <script>
+    const donations = <%- JSON.stringify(donations || []) %>;
 
-        // Function to calculate distance in KM between two lat/lon
-        function getDistance(lat1, lon1, lat2, lon2) {
-          const R = 6371;
-          const dLat = (lat2 - lat1) * Math.PI / 180;
-          const dLon = (lon2 - lon1) * Math.PI / 180;
-          const a = Math.sin(dLat / 2) ** 2 +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-            Math.sin(dLon / 2) ** 2;
-          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-          return (R * c).toFixed(2);
-        }
+    function getDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat / 2) ** 2 +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) ** 2;
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return (R * c).toFixed(2);
+    }
 
-        // Time left logic
-        function getTimeLeft(expiryTime) {
-          const now = new Date();
-          const expiry = new Date(expiryTime);
-          const diffMs = expiry - now;
-          if (diffMs <= 0) return "Expired";
-          const mins = Math.floor((diffMs / 1000 / 60) % 60);
-          const hrs = Math.floor(diffMs / 1000 / 60 / 60);
-          return `${hrs}h ${mins}m`;
-        }
+    function getTimeLeft(expiryTime) {
+      const now = new Date();
+      const expiry = new Date(expiryTime);
+      const diffMs = expiry - now;
+      if (diffMs <= 0) return "Expired";
+      const mins = Math.floor((diffMs / 1000 / 60) % 60);
+      const hrs = Math.floor(diffMs / 1000 / 60 / 60);
+      return `${hrs}h ${mins}m`;
+    }
 
-        // Function to render donations nearby
-        function processNearbyFood(userLat, userLon) {
-          const locationInfo = document.getElementById('location-info');
-          const cardList = document.getElementById('card-list');
+    function processNearbyFood(userLat, userLon) {
+      const locationInfo = document.getElementById('location-info');
+      const cardList = document.getElementById('card-list');
 
-          if (!donations || donations.length === 0) {
-            locationInfo.textContent = "No donations available nearby.";
-            return;
-          }
+      if (!donations || donations.length === 0) {
+        locationInfo.textContent = "No donations available nearby.";
+        return;
+      }
 
-          const sorted = donations
-            .filter(d => d.status === 'claim' && d.latitude && d.longitude)
-            .map(d => ({
-              ...d,
-              distance: getDistance(userLat, userLon, d.latitude, d.longitude)
-            }))
-            .sort((a, b) => a.distance - b.distance);
+      const sorted = donations
+        .filter(d => d.status === 'claim' && d.latitude && d.longitude)
+        .map(d => ({
+          ...d,
+          distance: getDistance(userLat, userLon, d.latitude, d.longitude)
+        }))
+        .sort((a, b) => a.distance - b.distance);
 
-          if (sorted.length === 0) {
-            locationInfo.textContent = "No nearby donations available.";
-            return;
-          }
+      if (sorted.length === 0) {
+        locationInfo.textContent = "No nearby donations available.";
+        return;
+      }
 
-          sorted.forEach(d => {
-            const { _id, subject, message, photos, latitude, longitude, expiryTime, distance } = d;
-            const imageUrl = photos?.[0] || 'https://via.placeholder.com/300x180?text=No+Image';
-            const timeLeft = getTimeLeft(expiryTime);
-            const foodDetailsUrl = `/food/${_id}`;
-            const directionsUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLon}&destination=${latitude},${longitude}`;
+      locationInfo.textContent = "Showing donations near your location.";
+      sorted.forEach(d => {
+        const { _id, subject, message, photos, latitude, longitude, expiryTime, distance } = d;
+        const imageUrl = photos?.[0] || 'https://via.placeholder.com/300x180?text=No+Image';
+        const timeLeft = getTimeLeft(expiryTime);
+        const foodDetailsUrl = `/food/${_id}`;
+        const directionsUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLon}&destination=${latitude},${longitude}`;
 
-            const col = document.createElement('div');
-            col.className = 'col-lg-4 col-md-6 col-12';
-            col.innerHTML = `
+        const col = document.createElement('div');
+        col.className = 'col-lg-4 col-md-6 col-12';
+        col.innerHTML = `
           <div class="card h-100">
             <img src="${imageUrl}" class="card-img-top" alt="${subject}">
             <div class="card-body">
@@ -154,68 +152,85 @@
               </div>
             </div>
           </div>`;
-            cardList.appendChild(col);
-          });
-        }
-      </script>
+        cardList.appendChild(col);
+      });
+    }
 
-      <!-- eSewa Donate Popup -->
-      <div id="donate-popup"
-        style="z-index: 1009; display: none; position: fixed; top: 20%; left: 50%; transform: translate(-50%, -20%); background: #fff; border: 1px solid #ccc; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.2);">
-        <h3>Donate with eSewa</h3>
-        <form action="/donate" method="POST">
-          <label>Amount (NPR):</label><br />
-          <input type="number" name="amount" required style="padding: 6px; margin-bottom: 10px; width: 100%;"><br />
-          <label>Message (optional):</label><br />
-          <textarea name="message" style="width: 100%; padding: 6px; margin-bottom: 10px;"></textarea><br />
-          <button type="submit"
-            style="padding: 6px 12px; background-color: green; color: white; border: none; border-radius: 4px;">Proceed
-            to Pay</button>
-          <button type="button" onclick="document.getElementById('donate-popup').style.display='none'"
-            style="margin-left: 10px;">Cancel</button>
-        </form>
+    // 🔍 Geolocation logic
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          const userLat = position.coords.latitude;
+          const userLon = position.coords.longitude;
+          processNearbyFood(userLat, userLon);
+        },
+        error => {
+          document.getElementById('location-info').textContent = "Unable to access your location.";
+          console.error("Geolocation error:", error);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    } else {
+      document.getElementById('location-info').textContent = "Geolocation is not supported by your browser.";
+    }
+  </script>
+
+  <!-- eSewa Donate Popup -->
+  <div id="donate-popup"
+    style="z-index: 1009; display: none; position: fixed; top: 20%; left: 50%; transform: translate(-50%, -20%); background: #fff; border: 1px solid #ccc; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.2);">
+    <h3>Donate with eSewa</h3>
+    <form action="/donate" method="POST">
+      <label>Amount (NPR):</label><br />
+      <input type="number" name="amount" required style="padding: 6px; margin-bottom: 10px; width: 100%;"><br />
+      <label>Message (optional):</label><br />
+      <textarea name="message" style="width: 100%; padding: 6px; margin-bottom: 10px;"></textarea><br />
+      <button type="submit"
+        style="padding: 6px 12px; background-color: green; color: white; border: none; border-radius: 4px;">Proceed to
+        Pay</button>
+      <button type="button" onclick="document.getElementById('donate-popup').style.display='none'"
+        style="margin-left: 10px;">Cancel</button>
+    </form>
+  </div>
+
+  <!-- Testimonials -->
+  <div class="container-xxl py-5 wow fadeInUp" data-wow-delay="0.1s">
+    <div class="container">
+      <div class="text-center">
+        <h5 class="section-title ff-secondary text-center text-primary fw-normal">Testimonial</h5>
+        <h1 class="mb-5">What people Say!!!</h1>
       </div>
-
-      <!-- Testimonials -->
-      <div class="container-xxl py-5 wow fadeInUp" data-wow-delay="0.1s">
-        <div class="container">
-          <div class="text-center">
-            <h5 class="section-title ff-secondary text-center text-primary fw-normal">Testimonial</h5>
-            <h1 class="mb-5">What people Say!!!</h1>
-          </div>
-          <div class="owl-carousel testimonial-carousel">
-            <% if (feedbacks.length> 0) { %>
-              <% feedbacks.forEach(feedback=> { %>
-                <div class="testimonial-item bg-transparent border rounded p-4">
-                  <i class="fa fa-quote-left fa-2x text-primary mb-3"></i>
-                  <p>
-                    <%= feedback.message %>
-                  </p>
-               
-                  <div class="d-flex align-items-center">
-                    <img class="img-fluid flex-shrink-0 rounded-circle" src="/<%= feedback.user.photo %>"
-                      style="width: 50px; height: 50px;">
-                    <div class="ps-3">
-                      <h5 class="mb-1">
-                        <%= feedback.user.name %>
-                      </h5>
-                    </div>
-                  </div>
-                </div>
-                <% }) %>
-                  <% } else { %>
-                    <div class="text-center">
-                      <p class="text-muted">No feedback available yet.</p>
-                    </div>
-                    <% } %>
+      <div class="owl-carousel testimonial-carousel">
+        <% if (feedbacks.length> 0) { %>
+        <% feedbacks.forEach(feedback=> { %>
+        <div class="testimonial-item bg-transparent border rounded p-4">
+          <i class="fa fa-quote-left fa-2x text-primary mb-3"></i>
+          <p>
+            <%= feedback.message %>
+          </p>
+          <div class="d-flex align-items-center">
+            <img class="img-fluid flex-shrink-0 rounded-circle" src="/<%= feedback.user.photo %>"
+              style="width: 50px; height: 50px;">
+            <div class="ps-3">
+              <h5 class="mb-1">
+                <%= feedback.user.name %>
+              </h5>
+            </div>
           </div>
         </div>
-      </div>
-
-      <%- include('config/footer') %>
-        <div>
-          <%= success %>
+        <% }) %>
+        <% } else { %>
+        <div class="text-center">
+          <p class="text-muted">No feedback available yet.</p>
         </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <%- include('config/footer') %>
+  <div>
+    <%= success %>
+  </div>
 </body>
 
 </html>

@@ -28,7 +28,7 @@ const { CompositionListInstance } = require('twilio/lib/rest/video/v1/compositio
 
 router.post('/signup', preventMemberIfLoggedIn, upload.single('photo'), async (req, res) => {
     try {
-        const { name, email, password, street, contact, latitude, longitude } = req.body;
+        const { name, email, password, street, contact } = req.body;
         console.log(req.body);
 
         // Optional photo
@@ -114,7 +114,8 @@ router.post('/verify-otp', async (req, res) => {
     // Check if OTP matches the one stored in session
     if (otp === req.session.otp) {
         try {
-            const { name, email, password, street, contact, photo, latitude, longitude } = req.session.userData;
+            const { name, email, password, street, contact, photo,  } = req.session.userData;
+const normalizedEmail = email.toLowerCase();
 
             // Create a new user with the provided details
             const newUser = new User({
@@ -124,11 +125,6 @@ router.post('/verify-otp', async (req, res) => {
                 street,
                 contact,
                 photo,
-                location: {
-                    type: 'Point',
-                    coordinates: [parseFloat(longitude), parseFloat(latitude)],
-                    donationCount: 0
-                },
             });
 
             // Save the new user to the database
@@ -575,11 +571,12 @@ router.get('/login', preventMemberIfLoggedIn, preventUserIfLoggedIn, function (r
 });
 
 
-
 router.post('/login', preventMemberIfLoggedIn, async (req, res) => {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
 
     try {
+        email = email.toLowerCase();  // Convert email to lowercase for case-insensitive search
+
         const user = await User.findOne({ email });
         if (!user) {
             req.flash('error', '❌ User not found.');
@@ -606,6 +603,7 @@ router.post('/login', preventMemberIfLoggedIn, async (req, res) => {
         res.redirect('/users/login');
     }
 });
+
 
 
 

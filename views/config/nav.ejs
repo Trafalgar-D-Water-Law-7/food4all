@@ -30,30 +30,33 @@
                   <% if (memberId) { %>
                     <a href="/ourTeams/readyToPick" class="nav-item nav-link">Ready To Pick</a>
                     <% } %>
+<style>
+  .dropdown-item.text-white:hover {
+    background-color: #FEA116; /* Replace with any color you want */
+  }
+</style>
 
                       <% if (!memberId) { %>
                         <div class="nav-item dropdown">
                           <a href="#" class="nav-link dropdown-toggle active" data-bs-toggle="dropdown">Options</a>
-                          <div class="dropdown-menu m-0">
+                          <div class="dropdown-menu m-0 bg-dark text-white">
                             <% if (!userId && !memberId) { %>
                               <!-- Not logged in: show both login/signup options -->
-                              <a href="/users/signup" class="dropdown-item">User Sign Up</a>
-                              <a href="/users/login" class="dropdown-item">User Login</a>
-                              <a href="/memberSignup" class="dropdown-item">Member Sign Up</a>
-                              <a href="/ourTeams/login" class="dropdown-item">Member Login</a>
+                              <a href="/users/signup" class="dropdown-item text-white "><i class="ri-user-add-fill"></i>  User Sign Up</a>
+                              <a href="/users/login" class="dropdown-item text-white "><i class="ri-user-shared-fill"></i> User Login</a>
+                              <a href="/memberSignup" class="dropdown-item text-white "><i class="ri-group-3-fill"></i> Member Sign Up</a>
+                              <a href="/ourTeams/login" class="dropdown-item text-white "><i class="ri-group-fill"></i> Member Login</a>
                               <% } else if (userId) { %>
 
-                                <a href="/request" class="dropdown-item">Request Food</a>
-                                <a href="/users/claimedFood" class="dropdown-item">My Claimed Food</a>
-                                <a href="/users/myFoodDonation" class="dropdown-item">My Food Donation</a>
-                                <a href="/users/myFoodRequests" class="dropdown-item">My Food Request</a>
+                                <a href="/request" class="dropdown-item text-white "><i class="ri-hand-heart-fill"></i> Request Food</a>
+                                <a href="/users/claimedFood" class="dropdown-item text-white "> <i class="bi bi-basket me-1"></i> My Claimed Food</a>
+                                <a href="/users/myFoodDonation" class="dropdown-item text-white ">  <i class="bi bi-gift me-1"> </i>My Food Donation</a>
+                                <a href="/users/myFoodRequests" class="dropdown-item text-white "><i class="bi bi-chat-left-text me-1"> </i>My Food Request</a>
 
 
                                 <% } %>
-                                  <a href="/testimonial" class="dropdown-item">Testimonial</a>
-                                  <a href="/service" class="dropdown-item">Services</a>
                                   <% if (userId) { %>
-                                    <a href="/users/logout" class="dropdown-item">Log Out</a>
+                                    <a href="/users/logout" class="dropdown-item text-white "><i class="ri-logout-circle-r-fill"></i> Log Out</a>
                                     <% } %>
 
                           </div>
@@ -69,7 +72,7 @@
 
                   <% if (userId) { %>
                     <a href="/users/user" class="text-align-center btn btn-outline-light py-2 px-4">
-                      <i class="ri-settings-4-line"></i>
+                     <i class="ri-user-settings-fill"></i>
                     </a>
                     <% } %>
 

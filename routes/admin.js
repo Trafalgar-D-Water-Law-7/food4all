@@ -1,167 +1,164 @@
 const express = require("express");
+const bcrypt = require("bcrypt");
+const nodemailer = require("nodemailer");
+const Admin = require("../models/Admin");
+
 const router = express.Router();
-const bcrypt = require("bcryptjs");
-const Admin = require("../models/admin");
-const User = require("../models/user");
-const Donation = require("../models/donation");
-const Testimonial = require("../models/testimonial")
 
-// Middleware to check if admin is logged in
-function isAuthenticated(req, res, next) {
-    if (req.session.admin) return next();
-    req.flash("error", "Please log in first");
-    res.redirect("/admin/login");
-}
+// Store OTPs temporarily
+const otpMap = new Map();
 
+// Email transporter setup (use real credentials)
+const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+        user:process.env.EMAIL, // Your email address
+        pass: process.env.PASSWORD, // Use app-specific password
+    },
+});
 
-// Create Admin(Admin Creation Route)
-router.post("/create", async (req, res) => {
-    const { username, password } = req.body;
+// Show email form
+router.get("/create", (req, res) => {
+    res.render("create");
+});
 
-    // Check if the admin already exists
-    const existingAdmin = await Admin.findOne({ username });
-    if (existingAdmin) {
-        req.flash("error", "Admin username already exists");
+// Handle email + send OTP
+router.post("/send-otp", async (req, res) => {
+    const { email } = req.body;
+
+    const existing = await Admin.findOne({ email: email.toLowerCase() });
+    if (existing) {
+        req.flash("error", "Admin already exists with this email");
         return res.redirect("/admin/create");
     }
 
-    // Hash the password before saving
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    otpMap.set(email, otp);
 
-    // Create a new Admin instance
-    const admin = new Admin({
-        username,
+    await transporter.sendMail({
+        from: process.env.EMAIL,
+        to: email,
+        subject: "Admin OTP Verification",
+        text: `Your OTP is: ${otp}`,
+    });
+
+    req.session.pendingAdminEmail = email;
+    req.flash("success", "OTP sent to your email");
+    res.redirect("/admin/verify-otp");
+});
+
+// Show OTP form
+router.get("/verify-otp", (req, res) => {
+    if (!req.session.pendingAdminEmail) {
+        req.flash("error", "Start registration again");
+        return res.redirect("/admin/create");
+    }
+    res.render("verify");
+});
+
+// Handle OTP verification
+router.post("/verify-otp", (req, res) => {
+    const { otp, password } = req.body;
+    const email = req.session.pendingAdminEmail;
+
+    const expectedOtp = otpMap.get(email);
+    if (expectedOtp !== otp) {
+        req.flash("error", "Invalid OTP");
+        return res.redirect("/admin/verify-otp");
+    }
+
+    req.session.verifiedAdmin = { email, password };
+    otpMap.delete(email);
+    res.redirect("/admin/finalize");
+});
+
+// Show final form (optional)
+router.get("/finalize", (req, res) => {
+    if (!req.session.verifiedAdmin) {
+        req.flash("error", "OTP not verified");
+        return res.redirect("/admin/create");
+    }
+    res.render("finalize");
+});
+
+// Save admin
+router.post("/finalize", async (req, res) => {
+    const data = req.session.verifiedAdmin;
+    if (!data) {
+        req.flash("error", "Session expired");
+        return res.redirect("/admin/create");
+    }
+
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+    const newAdmin = new Admin({
+        email: data.email.toLowerCase(),
         password: hashedPassword,
     });
 
     try {
-        await admin.save();
+        await newAdmin.save();
+        req.session.verifiedAdmin = null;
+        req.session.pendingAdminEmail = null;
         req.flash("success", "Admin created successfully");
-        res.redirect("/admin/login"); // Redirect to login page after successful creation
+        res.redirect("/admin/login");
     } catch (err) {
         console.error(err);
-        req.flash("error", "Failed to create admin");
+        req.flash("error", "Error saving admin");
         res.redirect("/admin/create");
     }
 });
 
-// Login Page
+
+
+
+// Show login form
 router.get("/login", (req, res) => {
-    res.render("adminLogin", {
-        success: req.flash('success'),
-        error: req.flash('error')
-    });
+    res.render("adminLogin",
+        { error: req.flash("error"), success: req.flash("success") }
+    );
 });
 
-// Handle Login
+// Handle login
 router.post("/login", async (req, res) => {
-    const { username, password } = req.body;
-    const admin = await Admin.findOne({ username });
+    const { email, password } = req.body;
 
-    if (!admin || !(await bcrypt.compare(password, admin.password))) {
-        req.flash("error", "Invalid credentials");
+    const admin = await Admin.findOne({ email: email.toLowerCase() });
+    if (!admin) {
+        req.flash("error", "Invalid email or password");
         return res.redirect("/admin/login");
     }
 
-    req.session.admin = admin;
-    req.flash('success', '✅ Admin Login Successfull');
-    res.redirect("/admin");
-});
-
-// Admin Dashboard
-router.get("/", isAuthenticated, async (req, res) => {
-    try {
-        const users = await User.find().populate("donations"); // Corrected populate syntax
-        res.render("admin", {
-            admin: req.session.admin, users,
-            success: req.flash('success'),
-            error: req.flash('error')
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).send("Server Error");
-    }
-});
-
-// POST route to update admin details
-router.post("/update", isAuthenticated, async (req, res) => {
-    const { username, newPassword } = req.body;
-
-    // Check if the admin is logged in
-    const admin = await Admin.findOne({ _id: req.session.admin._id });
-
-    if (!admin) {
-        req.flash("error", "Admin not found");
-        return res.redirect("/admin"); // Redirect to admin page if admin is not found
+    const match = await bcrypt.compare(password, admin.password);
+    if (!match) {
+        req.flash("error", "Invalid email or password");
+        return res.redirect("/admin/login");
     }
 
-    try {
-        admin.username = username;
-        if (newPassword) {
-            admin.password = await bcrypt.hash(newPassword, 10); // Hash new password
-        }
+    // Save login session
+    req.session.admin = {
+        _id: admin._id,
+        email: admin.email,
+    };
 
-        await admin.save(); // Save the changes to the database
-        req.flash("success", "Profile updated successfully");
-        req.session.destroy(() => {
-            res.redirect("/admin/login");
-        });
-    } catch (error) {
-        console.error(error);
-        req.flash("error", "Failed to update profile");
-        res.redirect("/admin"); // Redirect back on error
-    }
+    req.flash("success", "Logged in successfully");
+    res.redirect("/");
 });
 
+// Admin dashboard (protected)
+router.get("/dashboard", (req, res) => {a
+    if (!req.session.admin) {
+        req.flash("error", "You must log in first");
+        return res.redirect("/admin/login");
+    }
 
+    res.render("admin/dashboard", { admin: req.session.admin });
+});
 
-// Logout Route
-router.get("/admin/logout", (req, res) => {
+// Logout
+router.get("/logout", (req, res) => {
     req.session.destroy(() => {
         res.redirect("/admin/login");
     });
 });
-
-
-
-
-// Delete user
-router.delete("/user/:id", async (req, res) => {
-    try {
-        const userId = req.params.id;
-
-        // Delete user
-        await User.findByIdAndDelete(userId);
-
-        // Delete all donations made by the user
-        await Donation.deleteMany({ user: userId });
-
-        // Delete all feedback submitted by the user
-        await Testimonial.deleteMany({ user: userId });
-
-        res.sendStatus(200);
-    } catch (error) {
-        console.error(error);
-        res.sendStatus(500);
-    }
-});
-
-
-// Delete food donation
-router.delete("/donation/:id", async (req, res) => {
-    try {
-        const donationId = req.params.id;
-        await Donation.findByIdAndDelete(donationId);
-        res.sendStatus(200);
-    } catch (error) {
-        console.error(error);
-        res.sendStatus(500);
-    }
-});
-
-
-
-
-
 
 module.exports = router;

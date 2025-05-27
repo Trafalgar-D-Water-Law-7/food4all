@@ -66,6 +66,8 @@
                 <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Company</h4>
                 <a class="btn btn-link" href="/about">About Us</a>
                 <a class="btn btn-link" href="/contact">Contact Us</a>
+                <a href="/testimonial" class="btn btn-link ">Testimonial</a>
+                <a href="/service" class="btn btn-link ">Services</a>
             </div>
             <div class="col-lg-3 col-md-6">
                 <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Contact</h4>
@@ -81,10 +83,8 @@
             </div>
             <div class="col-lg-3 col-md-6">
                 <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Opening</h4>
-                <h5 class="text-light fw-normal">Monday - Saturday</h5>
-                <p>09AM - 09PM</p>
-                <h5 class="text-light fw-normal">Sunday</h5>
-                <p>10AM - 08PM</p>
+                <h5 class="text-light fw-normal">24 Hours Available</h5>
+              
             </div>
             <!-- Background Dimmer (Initially hidden) -->
             <div id="backgroundDimmer" class="background-dimmer"></div>
@@ -138,7 +138,7 @@
                         <a href="/">Home</a>
                         <a href="/about">About</a>
                         <a href="/service">Service</a>
-                        <a href="/contact">Contact</a>      
+                        <a href="/contact">Contact</a>
                     </div>
                 </div>
             </div>
@@ -236,34 +236,4 @@
         backgroundDimmer.style.display = "none"; // Remove the dimmed background
     });
 
-</script>
-
-
-
-
-
-<script>
-    // Block access if location not enabled
-        window.onload = function () {
-          if (!navigator.geolocation) {
-            document.body.innerHTML = "<h2 style='text-align:center;margin-top:100px;'>❌ Geolocation not supported. Please use a modern browser.</h2>";
-            return;
-          }
-
-          navigator.geolocation.getCurrentPosition(
-            function (position) {
-              const lat = position.coords.latitude;
-              const lon = position.coords.longitude;
-              document.getElementById('location-info').textContent = `📍 Your location: ${lat.toFixed(4)}, ${lon.toFixed(4)} (via GPS)`;
-              processNearbyFood(lat, lon);
-            },
-            function () {
-              document.body.innerHTML = "<h2 style='text-align:center;margin-top:100px;'>❌ You must allow location access to use this site.</h2>";
-            },
-            {
-              enableHighAccuracy: true,
-              timeout: 10000,
-            }
-          );
-        };
 </script>

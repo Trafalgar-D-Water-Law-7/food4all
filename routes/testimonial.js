@@ -9,69 +9,65 @@ const testamonial = require("../models/testimonial")
 
 
 // Assuming userId is stored in the session after login
-
 router.post("/", async (req, res) => {
-    // Get the userId from the session
-    const userId = req.session.userId; // Replace with the actual session property storing the user ID
-  
+    const userId = req.session.userId;
+
     if (!userId) {
-        // If user is not logged in, flash an error message and redirect to login page
         req.flash("error", "You must be logged in to submit feedback.");
-        return res.redirect("/users/login"); // Redirect to login page (or wherever the login route is)
+        return res.redirect("/users/login");
     }
 
     const { message } = req.body;
 
-    // Function to count words in the feedback message
     function countWords(str) {
         return str.trim().split(/\s+/).length;
     }
 
-    // Validate word count (between 5 and 20 words)
     const wordCount = countWords(message);
     if (wordCount < 5) {
         req.flash("error", "Your feedback must be at least 5 words.");
         return res.redirect(req.originalUrl);
-        // Redirect back to the same page
     }
 
-    if (wordCount > 20) {
-        req.flash("error", "Your feedback must be no more than 20 words.");
+    if (wordCount > 50) {
+        req.flash("error", "Your feedback must be no more than 50 words.");
         return res.redirect(req.originalUrl);
-        // Redirect back to the same page
     }
 
     try {
-        // Create a new feedback document
-        const feedback = new testamonial({
-            user: userId, // Use the userId from the session
-            message: message
-        });
+        // Check if feedback already exists for this user
+        let feedback = await testamonial.findOne({ user: userId });
 
-        // Save the feedback
-        await feedback.save();
-
-        // Update the User schema and add the feedback ID to the user's feedback array
-        const user = await User.findById(userId);
-        if (user) {
-            user.feedback.push(feedback._id); // Push the feedback ID to the user's feedback array
-            await user.save(); // Save the updated user document
+        if (feedback) {
+            // Update existing feedback
+            feedback.message = message;
+            await feedback.save();
         } else {
-            req.flash("error", "User not found.");
-            return res.redirect(req.originalUrl);
-
+            // Create a new feedback
+            feedback = new testamonial({
+                user: userId,
+                message: message
+            });
+            await feedback.save();
         }
 
-        // Send a success message
+        // Optionally update the user's feedback reference (if needed)
+        const user = await User.findById(userId);
+        if (user) {
+            user.feedback = [feedback._id]; // Replace or set to this feedback
+            await user.save();
+        }
+
         req.flash("success", "Feedback submitted successfully!");
-        res.redirect(req.originalUrl);// Redirect back to the same page
+        res.redirect(req.originalUrl);
     } catch (error) {
         console.error(error);
-        // If an error occurs, show an error message
         req.flash("error", "Failed to submit feedback. Please try again later.");
-        res.redirect(req.originalUrl);// Redirect back to the same page
+        res.redirect(req.originalUrl);
     }
 });
+
+
 
 
 router.get('/', async function (req, res, next) {
