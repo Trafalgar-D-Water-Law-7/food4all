@@ -238,9 +238,9 @@ router.post('/verify-member-otp', async (req, res) => {
 
 
 
-
-router.post("/login",preventUserIfLoggedIn,  async (req, res) => {
-  const { email, password } = req.body;
+router.post("/login", preventUserIfLoggedIn, async (req, res) => {
+  let { email, password } = req.body;
+  email = email.trim().toLowerCase(); // Normalize email
 
   try {
     const teamMember = await ourTeams.findOne({ email });
@@ -261,9 +261,10 @@ router.post("/login",preventUserIfLoggedIn,  async (req, res) => {
   } catch (error) {
     console.error(error);
     req.flash("error", "Something went wrong. Please try again.");
-    res.redirect("/ourteams/login");
+    res.redirect("/ourTeams/login"); // corrected casing
   }
 });
+
 
 router.get('/logout', (req, res) => {
   req.session.destroy((err) => {
