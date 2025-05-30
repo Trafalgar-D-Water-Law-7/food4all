@@ -1,26 +1,25 @@
 const mongoose = require("mongoose");
 
-const SuccessRequestDonation = new mongoose.Schema({
+const SuccessRequestDonationSchema = new mongoose.Schema({
     donor: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User", // Reference to the donor (who is donating the food)
-        required: true
+        ref: "User"
+     
     },
     recipient: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User", // Reference to the recipient (who requested the food)
-        required: true
+        ref: "User"
+       
     },
     foodRequest: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "FoodRequest", // Reference to the food request
+        ref: "FoodRequest",
         required: true
     },
     pickedBy: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "ourTeams" // or your member model
-    }
-    ,
+        ref: "ourTeams"
+    },
     message: {
         type: String,
         required: true
@@ -33,7 +32,7 @@ const SuccessRequestDonation = new mongoose.Schema({
         type: Number
     },
     latitude: {
-        type: Number,
+        type: Number
     },
     createdAt: {
         type: Date,
@@ -41,4 +40,7 @@ const SuccessRequestDonation = new mongoose.Schema({
     }
 });
 
-module.exports = mongoose.model("SuccessRequestDonation", SuccessRequestDonation);
+// ✅ Safe model definition
+const SuccessRequestDonation = mongoose.models.SuccessRequestDonation || mongoose.model("SuccessRequestDonation", SuccessRequestDonationSchema);
+
+module.exports = SuccessRequestDonation;

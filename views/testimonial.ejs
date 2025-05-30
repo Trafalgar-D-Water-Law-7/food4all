@@ -39,42 +39,68 @@
             <div class="container">
                 <div class="text-center">
                     <h5 class="section-title ff-secondary text-center text-primary fw-normal">Testimonial</h5>
-                    <h1 class="mb-5">What people Say!!!</h1>
+                    <h1 class="mb-5">What People Say!!!</h1>
                 </div>
-                <div class="owl-carousel testimonial-carousel">
-                    <% if (feedbacks.length> 0) { %>
+
+                <% if (feedbacks.length> 0) { %>
+                    <div class="row g-4">
                         <% feedbacks.forEach(feedback=> { %>
-                            <div class="testimonial-item bg-transparent border rounded p-4">
-                                <i class="fa fa-quote-left fa-2x text-primary mb-3"></i>
-                                <p>
-                                    <%= feedback.message %>
-                                </p>
-                                <div class="d-flex align-items-center">
-                                    <% if (feedback.user) { %>
-                                        <img class="img-fluid flex-shrink-0 rounded-circle"
-                                            src="/<%= feedback.user.photo %>" style="width: 50px; height: 50px;">
-                                        <div class="ps-3">
-                                            <h5 class="mb-1">
-                                                <%= feedback.user.name %>
-                                            </h5>
-                                        </div>
-                                        <% } else { %>
-                                            <div class="ps-3">
-                                                <h5 class="mb-1">Anonymous</h5>
+                            <div class="col-md-6 col-lg-4">
+                                <div class="testimonial-item bg-transparent border rounded p-4 h-100">
+                                    <div class="d-flex justify-content-between">
+                                        <i class="fa fa-quote-left fa-2x text-primary mb-3"></i>
+
+                                        <% if (feedback.user && userId &&
+                                            feedback.user._id.toString()===userId.toString()) { %>
+                                            <div class="dropdown">
+                                                <i class="ri-more-2-line" role="button" data-bs-toggle="dropdown"
+                                                    aria-expanded="false"></i>
+                                                <ul class="dropdown-menu dropdown-menu-end">
+                                                    <li>
+                                                        <form method="POST"
+                                                            action="/testimonial/<%= feedback._id %>?_method=DELETE"
+                                                            onsubmit="return confirm('Delete this testimonial?')">
+                                                            <button type="submit"
+                                                                class="dropdown-item text-danger">Delete</button>
+                                                        </form>
+                                                    </li>
+                                                </ul>
                                             </div>
                                             <% } %>
+                                    </div>
+
+                                    <p>
+                                        <%= feedback.message %>
+                                    </p>
+
+                                    <div class="d-flex align-items-center mt-3">
+                                        <% if (feedback.user) { %>
+                                            <img class="img-fluid flex-shrink-0 rounded-circle"
+                                                src="/uploads/<%= feedback.user.photo %>" style="width: 50px; height: 50px;">
+                                            <div class="ps-3">
+                                                <h5 class="mb-1">
+                                                    <%= feedback.user.name %>
+                                                </h5>
+                                            </div>
+                                            <% } else { %>
+                                                <div class="ps-3">
+                                                    <h5 class="mb-1">Anonymous</h5>
+                                                </div>
+                                                <% } %>
+                                    </div>
                                 </div>
                             </div>
-                            <% }); %>
-                                <% } else { %>
-                                    <div class="text-center">
-                                        <p class="text-muted">No feedback available yet.</p>
-                                    </div>
-                                    <% } %>
-
-                </div>
+                            <% }) %>
+                    </div>
+                    <% } else { %>
+                        <div class="text-center">
+                            <p class="text-muted">No feedback available yet.</p>
+                        </div>
+                        <% } %>
             </div>
         </div>
+        <!-- Testimonial End -->
+
         <!-- Testimonial End -->
 
 

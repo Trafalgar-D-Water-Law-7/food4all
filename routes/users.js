@@ -12,6 +12,7 @@ const upload = require('../config/storage');
 const transporter = require('../config/mailer');
 const crypto = require('crypto');
 const generateToken = require('../config/generateToken');
+const sendEmail = require('../config/sendEmail'); // Import the sendEmail function
 
 
 
@@ -20,7 +21,7 @@ const deleteExpiredDonations = require('../config/cronJobs'); // Adjust path if 
 deleteExpiredDonations(); // Start the scheduled task
 
 const { ensureUserLoggedIn, preventUserIfLoggedIn, preventMemberIfLoggedIn } = require('../middleware/auth');
-const { CompositionListInstance } = require('twilio/lib/rest/video/v1/composition');
+
 
 
 
@@ -114,8 +115,8 @@ router.post('/verify-otp', async (req, res) => {
     // Check if OTP matches the one stored in session
     if (otp === req.session.otp) {
         try {
-            const { name, email, password, street, contact, photo,  } = req.session.userData;
-const normalizedEmail = email.toLowerCase();
+            const { name, email, password, street, contact, photo, } = req.session.userData;
+            const normalizedEmail = email.toLowerCase();
 
             // Create a new user with the provided details
             const newUser = new User({
@@ -318,23 +319,39 @@ router.delete('/donation/:id', async (req, res) => {
     try {
         const donationId = req.params.id;
 
-        // Find the donation
-        const donation = await Donation.findById(donationId);
+        // Find the donation and populate claimedBy
+        const donation = await Donation.findById(donationId).populate('claimedBy');
 
         if (!donation) {
             return res.status(404).json({ error: 'Donation not found' });
         }
 
-        const userId = donation.user; // Assuming the 'user' field stores the reference to the User
+        const userId = donation.user;
+        const claimedByUser = donation.claimedBy;
 
-        // Decrease donation count for the user
+        // Decrease donation count and update user's donations array
         await User.findByIdAndUpdate(userId, {
             $inc: { donationCount: -1 },
-            $pull: { donations: donationId } // Optional: remove donation ID from user's donations array
+            $pull: { donations: donationId }
         });
 
         // Delete the donation
         await Donation.findByIdAndDelete(donationId);
+
+        // Notify the claimedBy user (if exists)
+        if (claimedByUser?.email) {
+            const subject = 'Donation Removed by Owner';
+            const html = `
+                <p>Dear ${claimedByUser.name || 'User'},</p>
+                <p>The donation you claimed has been removed by the owner.</p>
+                <p><strong>Donation:</strong> ${donation.subject || 'Untitled'}</p>
+                <p>If you have any questions, please contact support.</p>
+                <br/>
+                <p>Regards,<br/>The PlateShare Team</p>
+            `;
+
+            await sendEmail(claimedByUser.email, subject, html);
+        }
 
         res.status(200).json({ message: 'Donation deleted successfully' });
     } catch (err) {
@@ -450,9 +467,12 @@ router.get("/myFoodRequests", preventMemberIfLoggedIn, async (req, res) => {
 
         const requests = await FoodRequest.find({ user: userId })
             .sort({ createdAt: -1 })
-            .populate('wantToDonate');
+            .populate({
+                path: 'wantToDonate',
+                select: 'name email' // Only fetch these fields
+            });
+            console.log(requests)
 
-            console.log("Food Requests:", requests[0]);
 
         // Format request timestamps
         const formattedRequests = requests.map(req => ({
@@ -764,6 +784,8 @@ router.delete('/request/:id', async (req, res) => {
         res.status(500).send('Error deleting request');
     }
 });
+
+
 
 // Step 1: Render forget password page
 router.get('/cpu-forgot-password', (req, res) => {

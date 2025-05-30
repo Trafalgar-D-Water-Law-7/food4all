@@ -116,7 +116,7 @@ router.get('/contact', (req, res) => {
 });
 
 
-const TWO_HOURS = 2 * 60 * 60 * 1000; // ms
+const TwentyFourHours = 24 * 60 * 60 * 1000; // ms
 
 router.post('/contactUs', async (req, res) => {
   try {
@@ -129,7 +129,7 @@ router.post('/contactUs', async (req, res) => {
     }
 
     const now = new Date();
-    const cutoff = new Date(now - TWO_HOURS);
+    const cutoff = new Date(now - TwentyFourHours);
 
     const recentMessage = await Contact.findOne({
       $or: [{ email }, { ip }],
@@ -137,7 +137,7 @@ router.post('/contactUs', async (req, res) => {
     }).sort({ createdAt: -1 });
 
     if (recentMessage) {
-      req.flash('error', 'You can only send a message once every 2 hours.');
+      req.flash('error', 'You can only send a message once every 24 hours.');
       return res.redirect('/contact');
     }
 

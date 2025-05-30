@@ -6,11 +6,9 @@ const ourTeams = require("../models/ourTeams")
 const successRequestDonation = require("../models/successRequestDonation")
 const crypto = require('crypto');
 const transporter = require('../config/mailer');
-const nodemailer = require("nodemailer");
-
-const { ensureUserLoggedIn,preventUserIfLoggedIn,preventMemberIfLoggedIn } = require('../middleware/auth');
 
 
+const { ensureUserLoggedIn, preventUserIfLoggedIn, preventMemberIfLoggedIn } = require('../middleware/auth');
 
 
 router.get("/", function (req, res) {
@@ -19,7 +17,7 @@ router.get("/", function (req, res) {
     error: req.flash('error')
   })
 })
-router.get("/login",preventMemberIfLoggedIn, function (req, res) {
+router.get("/login", preventMemberIfLoggedIn, function (req, res) {
   res.render("memberLogin", {
     success: req.flash('success'),
     error: req.flash('error')
@@ -70,7 +68,7 @@ router.get('/readyToPick', preventUserIfLoggedIn, async (req, res) => {
 
 
 
-router.get('/memberProfile',preventUserIfLoggedIn,  async (req, res) => {
+router.get('/memberProfile', preventUserIfLoggedIn, async (req, res) => {
   try {
     if (!req.session.memberId) {
       req.flash('error', 'You must log in first.');
@@ -110,7 +108,7 @@ router.get('/memberProfile',preventUserIfLoggedIn,  async (req, res) => {
 
 
 
-router.post('/markPicked/:id',preventUserIfLoggedIn,  async (req, res) => {
+router.post('/markPicked/:id', preventUserIfLoggedIn, async (req, res) => {
   try {
     if (!req.session.memberId) return res.redirect('/login');
 
@@ -236,8 +234,6 @@ router.post('/verify-member-otp', async (req, res) => {
   }
 });
 
-
-
 router.post("/login", preventUserIfLoggedIn, async (req, res) => {
   let { email, password } = req.body;
   email = email.trim().toLowerCase(); // Normalize email
@@ -249,29 +245,37 @@ router.post("/login", preventUserIfLoggedIn, async (req, res) => {
       return res.redirect("/ourTeams/login");
     }
 
+    // ✅ Check if member is approved
+    if (!teamMember.isApproved) {
+      req.flash("error", "Your account is not approved yet. Please wait for admin approval.");
+      return res.redirect("/ourTeams/login");
+    }
+
     const isMatch = await bcrypt.compare(password, teamMember.password);
     if (!isMatch) {
       req.flash("error", "Invalid email or password");
       return res.redirect("/ourTeams/login");
     }
 
-    req.session.memberId = teamMember._id; // Store user session
+    // ✅ Approved and password is correct – log the user in
+    req.session.memberId = teamMember._id;
     req.flash("success", "Login successful!");
-    res.redirect("/ourTeams/memberProfile"); // Redirect to a protected page
+    res.redirect("/ourTeams/memberProfile");
   } catch (error) {
     console.error(error);
     req.flash("error", "Something went wrong. Please try again.");
-    res.redirect("/ourTeams/login"); // corrected casing
+    res.redirect("/ourTeams/login");
   }
 });
 
 
+
 router.get('/logout', (req, res) => {
   req.session.destroy((err) => {
-      if (err) {
-          return res.status(500).json({ message: 'Failed to log out.' });
-      }
-      res.redirect("/ourTeams/login")
+    if (err) {
+      return res.status(500).json({ message: 'Failed to log out.' });
+    }
+    res.redirect("/ourTeams/login")
   });
 });
 

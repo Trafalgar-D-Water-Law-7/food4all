@@ -5,7 +5,7 @@ const flash = require("connect-flash");
 const User = require("../models/user");
 const router = express.Router();
 
-const testamonial = require("../models/testimonial")
+const testimonial = require("../models/testimonial")
 
 
 // Assuming userId is stored in the session after login
@@ -36,7 +36,7 @@ router.post("/", async (req, res) => {
 
     try {
         // Check if feedback already exists for this user
-        let feedback = await testamonial.findOne({ user: userId });
+        let feedback = await testimonial.findOne({ user: userId });
 
         if (feedback) {
             // Update existing feedback
@@ -44,7 +44,7 @@ router.post("/", async (req, res) => {
             await feedback.save();
         } else {
             // Create a new feedback
-            feedback = new testamonial({
+            feedback = new testimonial({
                 user: userId,
                 message: message
             });
@@ -73,7 +73,7 @@ router.post("/", async (req, res) => {
 router.get('/', async function (req, res, next) {
     try {
         // Fetch all feedback and populate the user details
-        const feedbacks = await testamonial.find().populate('user'); // Populating username only
+        const feedbacks = await testimonial.find().populate('user'); // Populating username only
 
         res.render('testimonial', {
             title: 'Express',
@@ -88,6 +88,34 @@ router.get('/', async function (req, res, next) {
     }
 });
 
+
+
+// DELETE testimonial by ID
+router.delete('/:id', async (req, res) => {
+  try {
+    const feedback = await testimonial.findById(req.params.id);
+
+    if (!feedback) {
+      req.flash('error', 'Testimonial not found');
+      return res.redirect('/');
+    }
+
+    // Ensure the logged-in user is the one who posted it
+    if (feedback.user.toString() !== req.session.userId.toString()) {
+      req.flash('error', 'You are not authorized to delete this testimonial');
+      return res.redirect('/');
+    }
+
+    await testimonial.findByIdAndDelete(req.params.id);
+
+    req.flash('success', 'Testimonial deleted successfully');
+    res.redirect('/');
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Something went wrong');
+    res.redirect('/');
+  }
+});
 
 
 

@@ -77,7 +77,7 @@
 
             <div class="d-flex gap-2">
               <% if (!memberId) { %>
-                <a href="/users/donate" class=" btn-primary " style="padding: 6px 12px;  color: white; border: none; border-radius: 4px;">Donate Food</a>
+                <a href="/users/donate" class="btn btn-primary py-2 px-4">Donate Food</a>
                 <% } %>
 
                   <% if (userId) { %>
@@ -91,6 +91,11 @@
                       <% if (memberId) { %>
                         <a href="/ourTeams/memberProfile" class="btn btn-outline-light py-2 px-4">👤 Profile</a>
                         <a href="/ourTeams/logout" class="btn btn-danger py-2 px-4">Log Out</a>
+                      
+
+                        
+                          <a class="btn btn-outline-primary py-2 px-4" href="/ourTeams/cpm-change-password">Change Password</a>
+                        
                         <% } %>
             </div>
           </div>

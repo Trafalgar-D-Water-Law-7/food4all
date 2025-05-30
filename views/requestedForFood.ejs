@@ -45,7 +45,7 @@
                         <div class="col-sm-6 col-md-4 col-lg-3 mb-3">
                             <div class="card h-100 shadow-sm request-card" data-lat="<%= request.latitude %>"
                                 data-lng="<%= request.longitude %>" style="font-size: 0.85rem;">
-                                <img src="/<%= request?.user?.photo || 'default.jpg' %>" class="card-img-top"
+                                <img src="/uploads/<%= request?.user?.photo || 'default.jpg' %>" class="card-img-top"
                                     alt="<%= request.subject || 'Food Request' %>"
                                     style="height: 120px; object-fit: cover;">
 

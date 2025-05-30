@@ -140,7 +140,7 @@
         col.className = 'col-lg-4 col-md-6 col-12';
         col.innerHTML = `
           <div class="card h-100">
-            <img src="${imageUrl}" class="card-img-top" alt="${subject}">
+            <img src="/uploads/${imageUrl}" class="card-img-top" alt="${subject}">
             <div class="card-body">
               <h5 class="card-title">${subject}</h5>
               <p class="card-text small text-muted">${message || 'No description provided'}</p>
@@ -226,7 +226,7 @@
             <%= feedback.message %>
           </p>
           <div class="d-flex align-items-center">
-            <img class="img-fluid flex-shrink-0 rounded-circle" src="/<%= feedback.user.photo %>"
+            <img class="img-fluid flex-shrink-0 rounded-circle" src="/uploads/<%= feedback.user.photo %>"
               style="width: 50px; height: 50px;">
             <div class="ps-3">
               <h5 class="mb-1">

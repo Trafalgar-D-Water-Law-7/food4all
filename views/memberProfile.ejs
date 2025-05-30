@@ -6,52 +6,52 @@
   <title>Plate Share - Member Profile</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <%- include('config/export') %>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
-  <style>
-    body {
-      background-color: #f8f9fa;
-    }
+    <style>
+      body {
+        background-color: #f8f9fa;
+      }
 
-    .request-card {
-      margin-bottom: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      background: white;
-      transition: all 0.3s ease;
-    }
+      .request-card {
+        margin-bottom: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        background: white;
+        transition: all 0.3s ease;
+      }
 
-    .request-card:hover {
-      transform: translateY(-4px);
-    }
+      .request-card:hover {
+        transform: translateY(-4px);
+      }
 
-    .card-title {
-      font-weight: 700;
-      font-size: 1.2rem;
-      color: #333;
-    }
+      .card-title {
+        font-weight: 700;
+        font-size: 1.2rem;
+        color: #333;
+      }
 
-    .section-header {
-      font-size: 1.5rem;
-      font-weight: bold;
-      margin-bottom: 20px;
-    }
+      .section-header {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+      }
 
-    .btn i {
-      margin-right: 5px;
-    }
+      .btn i {
+        margin-right: 5px;
+      }
 
-    hr {
-      border-top: 1px dashed #ced4da;
-    }
+      hr {
+        border-top: 1px dashed #ced4da;
+      }
 
-    .no-data {
-      text-align: center;
-      font-size: 1.1rem;
-      color: #6c757d;
-      margin-top: 30px;
-    }
-  </style>
+      .no-data {
+        text-align: center;
+        font-size: 1.1rem;
+        color: #6c757d;
+        margin-top: 30px;
+      }
+    </style>
 </head>
 
 <body>
@@ -68,107 +68,139 @@
     </div>
   </div>
 
+
+
+  
+
   <div class="container mt-4">
-    <% if (pickedByMe.length === 0) { %>
+    <% if (pickedByMe.length===0) { %>
       <div class="text-center text-muted my-5">
         <i class="bi bi-emoji-frown" style="font-size: 2rem;"></i>
         <p class="mt-2">You haven’t picked any donations yet.</p>
       </div>
-    <% } else { %>
-      <h4 class="mb-3 text-success">Donations You Picked</h4>
-      <div class="row">
-        <% pickedByMe.forEach((donation, index) => { %>
-          <div class="col-md-6 col-lg-4 d-flex request-wrapper" data-lat="<%= donation.latitude %>" data-lng="<%= donation.longitude %>" data-index="<%= index %>">
-            <div class="card request-card w-100 shadow-sm p-3">
-              <div class="card-body">
-                <h5 class="card-title text-primary">🍱 <%= donation.foodRequest?.foodType || 'Food Request' %></h5>
-                <p><strong>Requested By:</strong> <%= donation.foodRequest?.user?.name || 'Anonymous' %></p>
-                <p class="mb-2"><i class="bi bi-compass"></i> <span class="distance-placeholder text-muted">Calculating distance...</span></p>
-                <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#detailsModal<%= index %>">
-                  <i class="bi bi-eye-fill"></i> View Details
-                </button>
-                <p class="text-success fw-semibold mt-2">
-                  <i class="bi bi-check2-circle"></i> You picked this
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Modal -->
-          <div class="modal fade" id="detailsModal<%= index %>" tabindex="-1" aria-labelledby="detailsModalLabel<%= index %>" aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-scrollable">
-              <div class="modal-content border-0 shadow rounded">
-                <div class="modal-header bg-primary text-white">
-                  <h5 class="modal-title" id="detailsModalLabel<%= index %>">
-                    <i class="bi bi-info-circle-fill me-2"></i> Donation Details
+      <% } else { %>
+        <h4 class="mb-3 text-success">Donations You Picked</h4>
+        <div class="row">
+          <% pickedByMe.forEach((donation, index)=> {
+            const requesterName = donation.foodRequest?.user?.name;
+            if (!requesterName || requesterName.toLowerCase() === 'anonymous') return;
+            %>
+            <div class="col-md-6 col-lg-4 d-flex request-wrapper" data-lat="<%= donation.latitude %>"
+              data-lng="<%= donation.longitude %>" data-index="<%= index %>">
+              <div class="card request-card w-100 shadow-sm p-3">
+                <div class="card-body">
+                  <h5 class="card-title text-primary">🍱 <%= donation.foodRequest?.foodType || 'Food Request' %>
                   </h5>
-                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-
-                <div class="modal-body">
-                  <div class="row">
-                    <!-- Left Column: Requester Info -->
-                    <div class="col-md-6 border-end">
-                      <h6 class="text-secondary fw-bold mb-3">📦 Requester Details</h6>
-                      <p><strong>Name:</strong> <%= donation.foodRequest?.user?.name || 'Anonymous' %></p>
-                      <p><strong>Message:</strong> <%= donation.foodRequest?.message || 'No message' %></p>
-                      <p><strong>Address:</strong> <%= donation.foodRequest?.address || 'N/A' %></p>
-                      <% if (donation.foodRequest?.user?.contact) { %>
-                        <p><strong>Contact:</strong> <a href="tel:<%= donation.foodRequest.user.contact %>"><%= donation.foodRequest.user.contact %></a></p>
-                      <% } %>
-                      <% if (donation.foodRequest && donation.foodRequest.latitude && donation.foodRequest.longitude) { %>
-                        <p>
-                          <strong>Map:</strong>
-                          <a href="https://www.google.com/maps?q=<%= donation.foodRequest.latitude %>,<%= donation.foodRequest.longitude %>" target="_blank">
-                            View Location <i class="bi bi-geo-alt-fill"></i>
-                          </a>
-                        </p>
-                      <% } %>
-                    </div>
-
-                    <!-- Right Column: Donor Info -->
-                    <div class="col-md-6">
-                      <h6 class="text-secondary fw-bold mb-3">🎁 Donor Details</h6>
-                      <p><strong>Name:</strong> <%= donation.donor?.name || 'Unknown' %></p>
-                      <p><strong>Message:</strong> <%= donation.message || 'No message' %></p>
-                      <p><strong>Address:</strong> <%= donation.address || 'N/A' %></p>
-                      <% if (donation.donor?.contact) { %>
-                        <p><strong>Contact:</strong> <a href="tel:<%= donation.donor.contact %>"><%= donation.donor.contact %></a></p>
-                      <% } %>
-                      <% if (donation.foodRequest && donation.foodRequest.latitude && donation.foodRequest.longitude) { %>
-                        <p>
-                          <strong>Map:</strong>
-                          <a href="https://www.google.com/maps?q=<%= donation.foodRequest.latitude %>,<%= donation.foodRequest.longitude %>" target="_blank">
-                            View Location <i class="bi bi-geo-alt-fill"></i>
-                          </a>
-                        </p>
-                      <% } %>
-                    </div>
-                  </div>
-
-                  <hr class="my-4">
-
-                  <!-- Full Summary Section -->
-                  <div class="summary">
-                    <h6 class="text-secondary fw-bold mb-3">🧾 Summary</h6>
-                    <ul class="list-group">
-                      <li class="list-group-item"><strong>Requester:</strong> <%= donation.foodRequest?.user?.name || 'Anonymous' %></li>
-                      <li class="list-group-item"><strong>Donor:</strong> <%= donation.donor?.name || 'Unknown' %></li>
-                    </ul>
-                  </div>
-                </div>
-
-                <div class="modal-footer bg-light">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle"></i> Close
+                  <p><strong>Requested By:</strong>
+                    <%= requesterName %>
+                  </p>
+                  <p class="mb-2"><i class="bi bi-compass"></i> <span
+                      class="distance-placeholder text-muted">Calculating distance...</span></p>
+                  <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
+                    data-bs-target="#detailsModal<%= index %>">
+                    <i class="bi bi-eye-fill"></i> View Details
                   </button>
+                  <p class="text-success fw-semibold mt-2">
+                    <i class="bi bi-check2-circle"></i> You picked this
+                  </p>
                 </div>
               </div>
             </div>
-          </div>
-        <% }); %>
-      </div>
-    <% } %>
+
+            <!-- Modal -->
+            <div class="modal fade" id="detailsModal<%= index %>" tabindex="-1"
+              aria-labelledby="detailsModalLabel<%= index %>" aria-hidden="true">
+              <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-content border-0 shadow rounded">
+                  <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="detailsModalLabel<%= index %>">
+                      <i class="bi bi-info-circle-fill me-2"></i> Donation Details
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                      aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    <div class="row">
+                      <!-- Requester Info -->
+                      <div class="col-md-6 border-end">
+                        <h6 class="text-secondary fw-bold mb-3">📦 Requester Details</h6>
+                        <p><strong>Name:</strong>
+                          <%= requesterName %>
+                        </p>
+                        <p><strong>Message:</strong>
+                          <%= donation.foodRequest?.message || 'No message' %>
+                        </p>
+                        <p><strong>Address:</strong>
+                          <%= donation.foodRequest?.address || 'N/A' %>
+                        </p>
+                        <% if (donation.foodRequest?.user?.contact) { %>
+                          <p><strong>Contact:</strong> <a href="tel:<%= donation.foodRequest.user.contact %>">
+                              <%= donation.foodRequest.user.contact %>
+                            </a></p>
+                          <% } %>
+                            <% if (donation.foodRequest.latitude && donation.foodRequest.longitude) { %>
+                              <p><strong>Map:</strong>
+                                <a href="https://www.google.com/maps?q=<%= donation.foodRequest.latitude %>,<%= donation.foodRequest.longitude %>"
+                                  target="_blank">
+                                  View Location <i class="bi bi-geo-alt-fill"></i>
+                                </a>
+                              </p>
+                              <% } %>
+                      </div>
+
+                      <!-- Donor Info -->
+                      <div class="col-md-6">
+                        <h6 class="text-secondary fw-bold mb-3">🎁 Donor Details</h6>
+                        <p><strong>Name:</strong>
+                          <%= donation.donor?.name || 'Unknown' %>
+                        </p>
+                        <p><strong>Message:</strong>
+                          <%= donation.message || 'No message' %>
+                        </p>
+                        <p><strong>Address:</strong>
+                          <%= donation.address || 'N/A' %>
+                        </p>
+                        <% if (donation.donor?.contact) { %>
+                          <p><strong>Contact:</strong> <a href="tel:<%= donation.donor.contact %>">
+                              <%= donation.donor.contact %>
+                            </a></p>
+                          <% } %>
+                            <% if (donation.foodRequest.latitude && donation.foodRequest.longitude) { %>
+                              <p><strong>Map:</strong>
+                                <a href="https://www.google.com/maps?q=<%= donation.foodRequest.latitude %>,<%= donation.foodRequest.longitude %>"
+                                  target="_blank">
+                                  View Location <i class="bi bi-geo-alt-fill"></i>
+                                </a>
+                              </p>
+                              <% } %>
+                      </div>
+                    </div>
+
+                    <hr class="my-4">
+                    <div class="summary">
+                      <h6 class="text-secondary fw-bold mb-3">🧾 Summary</h6>
+                      <ul class="list-group">
+                        <li class="list-group-item"><strong>Requester:</strong>
+                          <%= requesterName %>
+                        </li>
+                        <li class="list-group-item"><strong>Donor:</strong>
+                          <%= donation.donor?.name || 'Unknown' %>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                      <i class="bi bi-x-circle"></i> Close
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <% }); %>
+        </div>
+
+        <% } %>
   </div>
 
   <script>
@@ -177,10 +209,10 @@
       const dLat = (lat2 - lat1) * Math.PI / 180;
       const dLon = (lon2 - lon1) * Math.PI / 180;
       const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(lat1 * Math.PI / 180) *
-                Math.cos(lat2 * Math.PI / 180) *
-                Math.sin(dLon / 2) *
-                Math.sin(dLon / 2);
+        Math.cos(lat1 * Math.PI / 180) *
+        Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
       return R * c;
     }

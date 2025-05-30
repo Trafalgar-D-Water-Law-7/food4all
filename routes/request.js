@@ -6,6 +6,8 @@ const User = require("../models/user")
 const SuccessRequestDonation = require("../models/successRequestDonation")
 const FoodRequest = require("../models/request")
 const transporter = require('../config/mailer');
+const sendEmail = require('../config/sendEmail');
+
 
 
 
@@ -233,26 +235,68 @@ router.post("/i-want-to-donate", ensureAuthenticated, async (req, res) => {
 
 
 
-// DELETE /request/:id
+
 router.delete('/delete/:id', async (req, res) => {
     try {
         const requestId = req.params.id;
+        const action = req.query.action; // 'delete' or 'received'
 
-        // Find the request
-        const request = await FoodRequest.findById(requestId);
+        const request = await FoodRequest.findById(requestId).populate({
+            path: 'wantToDonate',
+            select: 'name email'
+        });
+
         if (!request) {
             return res.status(404).json({ error: 'Request not found' });
         }
 
-        // Delete the request
-        await FoodRequest.findByIdAndDelete(requestId);
+        if (action === 'delete') {
+            // Notify all donors who wanted to help
+            if (request.wantToDonate && request.wantToDonate.length > 0) {
+                for (const donor of request.wantToDonate) {
+                    if (donor.email) {
+                        await sendEmail(
+                            donor.email,
+                            "Food Request Cancelled",
+                            `<p>Hello ${donor.name},</p>
+                            <p>The food request you offered to help with has been <strong>cancelled</strong> by the requester.</p>
+                            <p>Thank you for your support!</p>`
+                        );
+                    }
+                }
+            }
 
-        res.status(200).json({ message: 'Request deleted successfully' });
+            // Also notify the picked donor (if any)
+            const successDonation = await SuccessRequestDonation.findOne({ foodRequest: requestId }).populate({
+                path: 'pickedBy',
+                select: 'name email'
+            });
+
+            if (successDonation && successDonation.pickedBy && successDonation.pickedBy.email) {
+                const pickedBy = successDonation.pickedBy;
+                await sendEmail(
+                    pickedBy.email,
+                    "Food Request Cancelled",
+                    `<p>Hello ${pickedBy.name},</p>
+        <p>The food request you were assigned to has been <strong>cancelled</strong> by the requester.</p>
+        <p>Thank you for your support!</p>`
+                );
+            }
+
+
+            // Optionally: delete the record from SuccessRequestDonation if needed
+            await SuccessRequestDonation.deleteMany({ requestId });
+        }
+
+        // Finally delete the request itself
+        await FoodRequest.findByIdAndDelete(requestId);
+        res.status(200).json({ message: 'Request removed' });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Server error' });
     }
 });
+
 
 
 

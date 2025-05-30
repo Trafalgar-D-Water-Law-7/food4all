@@ -12,7 +12,7 @@ const storage = multer.diskStorage({
         const finalName = uniqueSuffix + fileExtension;
 
         // Construct relative path
-        const relativePath = `uploads/${finalName}`;
+        const relativePath = `${finalName}`;
 
         // Support for single and multiple uploads
         if (!req.savedFilePaths) {
