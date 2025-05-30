@@ -184,57 +184,49 @@
                         <% requests.forEach(request=> { %>
                             <div class="col" id="request-<%= request._id %>">
                                 <div class="card h-100 animate__animated animate__fadeIn">
-                                    <div class="card-header">
-                                        <h5 class="card-title mb-0">
-                                            <i class="bi bi-chat-left-text me-2"></i> Food Request
-                                        </h5>
-                                    </div>
                                     <div class="card-body">
-                                        <div class="request-message">
-                                            <%= request.message %>
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <h5 class="fw-semibold mb-1"><i
+                                                    class="bi bi-chat-left-text me-2 text-success"></i>Request</h5>
+                                            <small class="text-muted"><i class="bi bi-clock me-1"></i>
+                                                <%= request.timeAgo %>
+                                            </small>
                                         </div>
 
+                                        <p class="mb-2">
+                                            <%= request.message.length> 100 ? request.message.slice(0, 100) + '...' :
+                                                request.message %>
+                                        </p>
+
                                         <% if (request.wantToDonate && request.wantToDonate.length> 0) { %>
-                                            <div class="request-message text-success">
-                                                <strong>Donors:</strong>
-                                                <ul class="mb-0">
-                                                    <% request.wantToDonate.forEach(donor=> { %>
-                                                        <li>
-                                                            <%= donor.name %> (<%= donor.email %>)
-                                                        </li>
-                                                        <% }) %>
-                                                </ul>
+                                            <div class="mb-2">
+                                                <small class="text-success d-block"><strong>Donors:</strong></small>
+                                                <% request.wantToDonate.forEach(donor=> { %>
+                                                    <small class="d-block text-muted">
+                                                        <%= donor.name %> - <%= donor.email %>
+                                                    </small>
+                                                    <% }) %>
                                             </div>
                                             <% } else { %>
-                                                <div class="request-message text-muted">
-                                                    No one has offered to donate yet.
-                                                </div>
+                                                <small class="text-muted d-block mb-2">No donor yet.</small>
                                                 <% } %>
 
-
-
-                                                    <div class="request-meta">
-                                                        <div class="request-time">
-                                                            <i class="bi bi-clock me-1"></i>
-                                                            <%= request.timeAgo %>
-                                                        </div>
-                                                        <div class="action-buttons">
-                                                            <button class="btn btn-outline-danger delete-request"
-                                                                data-id="<%= request._id %>" data-action="delete">
-                                                                <i class="bi bi-trash me-1"></i> Delete
-                                                            </button>
-                                                            <button class="btn btn-outline-success delete-request"
-                                                                data-id="<%= request._id %>" data-action="received">
-                                                                <i class="bi bi-check2-circle me-1"></i> Received
-                                                            </button>
-                                                        </div>
-
+                                                    <div class="d-flex justify-content-end gap-2">
+                                                        <button class="btn btn-sm btn-outline-danger delete-request"
+                                                            data-id="<%= request._id %>" data-action="delete">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                        <button class="btn btn-sm btn-outline-success delete-request"
+                                                            data-id="<%= request._id %>" data-action="received">
+                                                            <i class="bi bi-check2"></i>
+                                                        </button>
                                                     </div>
                                     </div>
                                 </div>
                             </div>
                             <% }); %>
                     </div>
+
                     <% } %>
         </div>
 
