@@ -120,6 +120,61 @@
                 </div>
             </div>
         </div>
+
+        <script>
+            document.getElementById('contactForm').addEventListener('submit', function (e) {
+                const nameInput = document.getElementById('name');
+                const emailInput = document.getElementById('email');
+                const subjectInput = document.getElementById('subject');
+                const messageInput = document.getElementById('message');
+
+                const name = nameInput.value.trim();
+                const subject = subjectInput.value.trim();
+                const message = messageInput.value.trim();
+
+                const isPureLetterWord = word => /^[a-zA-Z]+$/.test(word);
+
+                let isValid = true;
+
+                // Name: at least 3 letter-only words
+                const nameWords = name.split(/\s+/);
+                if (nameWords.length < 3 || !nameWords.every(isPureLetterWord)) {
+                    nameInput.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    nameInput.classList.remove('is-invalid');
+                }
+
+                // Email: browser will handle format, no custom validation here
+
+                // Subject: at least 3 letter-only words
+                const subjectWords = subject.split(/\s+/);
+                if (subjectWords.length < 3 || !subjectWords.every(isPureLetterWord)) {
+                    subjectInput.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    subjectInput.classList.remove('is-invalid');
+                }
+
+                // Message: at least 5 letter-only words
+                const messageWords = message.split(/\s+/);
+                if (messageWords.length < 5 || !messageWords.every(isPureLetterWord)) {
+                    messageInput.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    messageInput.classList.remove('is-invalid');
+                }
+
+                if (!isValid) {
+                    e.preventDefault();
+                document.querySelector('.is-invalid').scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                }
+            });
+        </script>
+
         <!-- Contact End -->
 
         <%- include('config/footer')%>

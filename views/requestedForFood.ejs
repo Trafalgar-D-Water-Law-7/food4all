@@ -147,7 +147,7 @@
                                         <div class="mb-3">
                                             <strong class="text-dark">From:</strong>
                                             <span class="ms-1 text-muted">
-                                                <%=  request?.user?.name  %>
+                                                <%= request?.user?.name %>
                                             </span>
                                         </div>
                                         <div class="mb-3">
@@ -216,18 +216,25 @@
                 const message = form.querySelector('textarea[name="message"]').value.trim();
                 const address = form.querySelector('input[name="address"]').value.trim();
 
-                if (message.split(/\s+/).length < 5) {
-                    alert("Please enter at least 5 words in the message.");
+                const isPureLetterWord = word => /^[a-zA-Z]+$/.test(word);
+
+                // Validate message: at least 5 words, all words must be letters only
+                const messageWords = message.split(/\s+/);
+                if (messageWords.length < 5 || !messageWords.every(isPureLetterWord)) {
+                    alert("Message must contain at least 5 words, and only letters (no numbers or symbols).");
                     return false;
                 }
 
-                if (address.split(/\s+/).length < 2) {
-                    alert("Please enter a more detailed address.");
+                // Validate address: at least 2 words, all words must be letters only
+                const addressWords = address.split(/\s+/);
+                if (addressWords.length < 2 || !addressWords.every(isPureLetterWord)) {
+                    alert("Address must contain at least 2 words, and only letters.");
                     return false;
                 }
 
                 return true;
             }
+
 
             // Function to format the time as "X minutes ago", "X hours ago", etc.
             function timeAgo(dateTime) {

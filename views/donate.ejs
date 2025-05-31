@@ -7,65 +7,65 @@
     <title>Food Donation | Share Meals, Spread Kindness</title>
     <meta name="description" content="Donate surplus food to help those in need through our secure platform">
     <%- include('config/export') %>
-    <style>
-        /* Validation Styles */
-        .form-error {
-            color: #dc3545;
-            font-size: 0.875rem;
-            display: none;
-            margin-top: 0.25rem;
-        }
-        
-        .is-invalid {
-            border-color: #dc3545 !important;
-        }
-        
-        /* Image Preview Styles */
-        .image-preview-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-            margin-top: 1rem;
-        }
-        
-        .image-preview {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 0.5rem;
-            box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s;
-        }
-        
-        .image-preview:hover {
-            transform: scale(1.05);
-        }
-        
-        /* Form Container */
-        .form-container {
-            background-color: #fff;
-            border-radius: 0.5rem;
-            box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.08);
-            padding: 2rem;
-        }
-        
-        /* Info Card */
-        .info-card {
-            background-color: #f8f9fa;
-            border-left: 4px solid #fd7e14;
-            padding: 1.5rem;
-            border-radius: 0.25rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        /* Responsive Adjustments */
-        @media (max-width: 767.98px) {
-            .hero-header {
-                padding-top: 4rem !important;
-                padding-bottom: 4rem !important;
+        <style>
+            /* Validation Styles */
+            .form-error {
+                color: #dc3545;
+                font-size: 0.875rem;
+                display: none;
+                margin-top: 0.25rem;
             }
-        }
-    </style>
+
+            .is-invalid {
+                border-color: #dc3545 !important;
+            }
+
+            /* Image Preview Styles */
+            .image-preview-container {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.75rem;
+                margin-top: 1rem;
+            }
+
+            .image-preview {
+                width: 100px;
+                height: 100px;
+                object-fit: cover;
+                border-radius: 0.5rem;
+                box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.1);
+                transition: transform 0.2s;
+            }
+
+            .image-preview:hover {
+                transform: scale(1.05);
+            }
+
+            /* Form Container */
+            .form-container {
+                background-color: #fff;
+                border-radius: 0.5rem;
+                box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.08);
+                padding: 2rem;
+            }
+
+            /* Info Card */
+            .info-card {
+                background-color: #f8f9fa;
+                border-left: 4px solid #fd7e14;
+                padding: 1.5rem;
+                border-radius: 0.25rem;
+                margin-bottom: 1.5rem;
+            }
+
+            /* Responsive Adjustments */
+            @media (max-width: 767.98px) {
+                .hero-header {
+                    padding-top: 4rem !important;
+                    padding-bottom: 4rem !important;
+                }
+            }
+        </style>
 </head>
 
 <body>
@@ -73,174 +73,184 @@
         <!-- Navigation -->
         <%- include('config/nav') %>
 
-        <!-- Hero Section -->
-        <div class="container-xxl position-relative p-0">
-            <div class="container-xxl py-5 bg-dark hero-header mb-5">
-                <div class="container text-center my-5 pt-5 pb-4">
-                    <h1 class="display-3 text-white mb-3 animated slideInDown">Food Donation</h1>
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb justify-content-center text-uppercase">
-                            <li class="breadcrumb-item"><a href="/">Home</a></li>
-                            <li class="breadcrumb-item text-white active" aria-current="page">Donate</li>
-                        </ol>
-                    </nav>
+            <!-- Hero Section -->
+            <div class="container-xxl position-relative p-0">
+                <div class="container-xxl py-5 bg-dark hero-header mb-5">
+                    <div class="container text-center my-5 pt-5 pb-4">
+                        <h1 class="display-3 text-white mb-3 animated slideInDown">Food Donation</h1>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb justify-content-center text-uppercase">
+                                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                                <li class="breadcrumb-item text-white active" aria-current="page">Donate</li>
+                            </ol>
+                        </nav>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Donation Form Section -->
-        <div class="container-xxl py-5  px-0 px-sm-3">
-          <div class="container px-2 px-sm-3 px-md-4">
-                <div class="row g-5 align-items-center">
-                    <!-- Form Column -->
-                    <div class="col-lg-6">
-                        <div class="form-container ">
-                            <div class="text-center mb-4">
-                                <h2 class="text-primary mb-2">Share Your Surplus Food</h2>
-                                <p class="text-muted">Your donation helps reduce food waste and feed those in need</p>
-                            </div>
+            <!-- Donation Form Section -->
+            <div class="container-xxl py-5  px-0 px-sm-3">
+                <div class="container px-2 px-sm-3 px-md-4">
+                    <div class="row g-5 align-items-center">
+                        <!-- Form Column -->
+                        <div class="col-lg-6">
+                            <div class="form-container ">
+                                <div class="text-center mb-4">
+                                    <h2 class="text-primary mb-2">Share Your Surplus Food</h2>
+                                    <p class="text-muted">Your donation helps reduce food waste and feed those in need
+                                    </p>
+                                </div>
 
-                            <div class="info-card">
-                                <h5 class="d-flex align-items-center mb-3">
-                                    <i class="fa fa-info-circle me-2 text-primary"></i> Donation Guidelines
-                                </h5>
-                                <ul class="mb-0">
-                                    <li>Food should be fresh and properly packaged</li>
-                                    <li>Maximum 48 hours expiry time</li>
-                                    <li>Clearly describe contents and special instructions</li>
-                                </ul>
-                            </div>
+                                <div class="info-card">
+                                    <h5 class="d-flex align-items-center mb-3">
+                                        <i class="fa fa-info-circle me-2 text-primary"></i> Donation Guidelines
+                                    </h5>
+                                    <ul class="mb-0">
+                                        <li>Food should be fresh and properly packaged</li>
+                                        <li>Maximum 48 hours expiry time</li>
+                                        <li>Clearly describe contents and special instructions</li>
+                                    </ul>
+                                </div>
 
-                            <form id="donationForm" action="/users/donate" enctype="multipart/form-data" method="post" novalidate>
-                                <div class="row g-3">
-                                    <!-- Donor Information -->
-                                    <div class="col-md-6">
-                                        <div class="form-floating">
-                                            <input type="text" class="form-control" id="donorName" 
-                                                   placeholder="Your Name" value="<%=user.name%>" name="name" readonly>
-                                            <label for="donorName">Your Name</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-floating">
-                                            <input type="email" class="form-control" id="donorEmail" 
-                                                   placeholder="Your Email" value="<%=user.email%>" name="email" readonly>
-                                            <label for="donorEmail">Your Email</label>
-                                        </div>
-                                    </div>
-
-                                    <!-- Donation Details -->
-                                    <div class="col-12">
-                                        <div class="form-floating">
-                                            <input type="text" class="form-control" id="donationTitle" 
-                                                   placeholder="e.g. '10 Veg Meals'" name="subject" required>
-                                            <label for="donationTitle">Donation Title</label>
-                                            <div class="form-error" id="titleError">Please enter a descriptive title (3-20 words)</div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-12">
-                                        <div class="form-floating">
-                                            <textarea class="form-control" placeholder="Describe the food items" 
-                                                      id="donationDescription" name="message" 
-                                                      style="height: 120px" required></textarea>
-                                            <label for="donationDescription">Food Description</label>
-                                            <div class="form-error" id="descriptionError">
-                                                Please provide details about contents, packaging, and special instructions (5-50 words)
+                                <form id="donationForm" action="/users/donate" enctype="multipart/form-data"
+                                    method="post" novalidate>
+                                    <div class="row g-3">
+                                        <!-- Donor Information -->
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input type="text" class="form-control" id="donorName"
+                                                    placeholder="Your Name" value="<%=user.name%>" name="name" readonly>
+                                                <label for="donorName">Your Name</label>
                                             </div>
                                         </div>
-                                    </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input type="email" class="form-control" id="donorEmail"
+                                                    placeholder="Your Email" value="<%=user.email%>" name="email"
+                                                    readonly>
+                                                <label for="donorEmail">Your Email</label>
+                                            </div>
+                                        </div>
 
-                                    <div class="col-12">
-                                        <div class="form-floating">
-                                            <input type="number" class="form-control" id="expiryTime" 
-                                                   placeholder="e.g. 6" name="expiryTime" min="1" max="48" required>
-                                            <label for="expiryTime">Expiry Time (hours)</label>
-                                            <div class="form-error" id="expiryError">Please enter a value between 1-48 hours</div>
+                                        <!-- Donation Details -->
+                                        <div class="col-12">
+                                            <div class="form-floating">
+                                                <input type="text" class="form-control" id="donationTitle"
+                                                    placeholder="e.g. '10 Veg Meals'" name="subject" required>
+                                                <label for="donationTitle">Donation Title</label>
+                                                <div class="form-error" id="titleError">Please enter a descriptive title
+                                                    (3-20 words)</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-12">
+                                            <div class="form-floating">
+                                                <textarea class="form-control" placeholder="Describe the food items"
+                                                    id="donationDescription" name="message" style="height: 120px"
+                                                    required></textarea>
+                                                <label for="donationDescription">Food Description</label>
+                                                <div class="form-error" id="descriptionError">
+                                                    Please provide details about contents, packaging, and special
+                                                    instructions (5-50 words)
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-12">
+                                            <div class="form-floating">
+                                                <input type="number" class="form-control" id="expiryTime"
+                                                    placeholder="e.g. 6" name="expiryTime" min="1" max="48" required>
+                                                <label for="expiryTime">Expiry Time (hours)</label>
+                                                <div class="form-error" id="expiryError">Please enter a value between
+                                                    1-48 hours</div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Photo Upload -->
+                                        <div class="col-12">
+                                            <div class="form-floating">
+                                                <input type="file" class="form-control" id="foodPhotos" accept="image/*"
+                                                    capture="environment" name="photos" multiple required>
+                                                <label for="foodPhotos">Upload Food Photos (max 5)</label>
+                                                <div class="form-error" id="photoError">Please upload at least one clear
+                                                    photo</div>
+                                                <div id="imagePreviewContainer" class="image-preview-container"></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Hidden Fields -->
+                                        <input type="hidden" name="latitude" id="latitude">
+                                        <input type="hidden" name="longitude" id="longitude">
+                                        <input type="hidden" name="donor" value="<%= user._id %>">
+
+                                        <!-- Submit Button -->
+                                        <div class="col-12">
+                                            <button class="btn btn-primary w-100 py-3" type="submit">
+                                                <i class="fa fa-heart me-2"></i> Submit Donation
+                                            </button>
+                                        </div>
+
+                                        <div class="col-12 text-center text-muted small mt-2">
+                                            <i class="fa fa-map-marker-alt me-1"></i> Your location will be
+                                            automatically captured
                                         </div>
                                     </div>
-
-                                    <!-- Photo Upload -->
-                                    <div class="col-12">
-                                        <div class="form-floating">
-                                            <input type="file" class="form-control" id="foodPhotos" 
-                                                   accept="image/*" capture="environment" name="photos" multiple required>
-                                            <label for="foodPhotos">Upload Food Photos (max 5)</label>
-                                            <div class="form-error" id="photoError">Please upload at least one clear photo</div>
-                                            <div id="imagePreviewContainer" class="image-preview-container"></div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Hidden Fields -->
-                                    <input type="hidden" name="latitude" id="latitude">
-                                    <input type="hidden" name="longitude" id="longitude">
-                                    <input type="hidden" name="donor" value="<%= user._id %>">
-
-                                    <!-- Submit Button -->
-                                    <div class="col-12">
-                                        <button class="btn btn-primary w-100 py-3" type="submit">
-                                            <i class="fa fa-heart me-2"></i> Submit Donation
-                                        </button>
-                                    </div>
-
-                                    <div class="col-12 text-center text-muted small mt-2">
-                                        <i class="fa fa-map-marker-alt me-1"></i> Your location will be automatically captured
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-
-                    <!-- Information Column -->
-                    <div class="col-lg-6">
-                        <div class="h-100 d-flex flex-column justify-content-center">
-                            <div class="text-center mb-4">
-                                <img src="/img/delevery boy 2.gif" alt="Food Donation" 
-                                     class="img-fluid rounded shadow-lg mb-4" style="max-height: 300px;">
-                                <h3 class="text-dark mb-3">Your Donation Makes a Difference</h3>
-                                <p class="lead text-muted">
-                                    Every meal shared helps fight hunger and reduce food waste in our community
-                                </p>
+                                </form>
                             </div>
+                        </div>
 
-                            <div class="bg-light p-4 rounded text-center">
-                                <div class="d-inline-block bg-white p-3 rounded shadow-sm mb-3">
-                                    <h4 class="text-primary mb-0"><%=totalDonations%></h4>
-                                    <p class="mb-0 small text-muted">Meals Donated</p>
+                        <!-- Information Column -->
+                        <div class="col-lg-6">
+                            <div class="h-100 d-flex flex-column justify-content-center">
+                                <div class="text-center mb-4">
+                                    <img src="/img/delevery boy 2.gif" alt="Food Donation"
+                                        class="img-fluid rounded shadow-lg mb-4" style="max-height: 300px;">
+                                    <h3 class="text-dark mb-3">Your Donation Makes a Difference</h3>
+                                    <p class="lead text-muted">
+                                        Every meal shared helps fight hunger and reduce food waste in our community
+                                    </p>
                                 </div>
-                                
-                                <div class="d-flex justify-content-center gap-3 mt-3">
-                                    <div class="text-center">
-                                        <i class="fa fa-utensils fa-2x text-primary mb-2"></i>
-                                        <h5 class="mb-1">Quality</h5>
-                                        <p class="small mb-0">Fresh, nutritious meals</p>
+
+                                <div class="bg-light p-4 rounded text-center">
+                                    <div class="d-inline-block bg-white p-3 rounded shadow-sm mb-3">
+                                        <h4 class="text-primary mb-0">
+                                            <%=totalDonations%>
+                                        </h4>
+                                        <p class="mb-0 small text-muted">Meals Donated</p>
                                     </div>
-                                    <div class="text-center">
-                                        <i class="fa fa-clock fa-2x text-primary mb-2"></i>
-                                        <h5 class="mb-1">Quick</h5>
-                                        <p class="small mb-0">Fast pickup system</p>
+
+                                    <div class="d-flex justify-content-center gap-3 mt-3">
+                                        <div class="text-center">
+                                            <i class="fa fa-utensils fa-2x text-primary mb-2"></i>
+                                            <h5 class="mb-1">Quality</h5>
+                                            <p class="small mb-0">Fresh, nutritious meals</p>
+                                        </div>
+                                        <div class="text-center">
+                                            <i class="fa fa-clock fa-2x text-primary mb-2"></i>
+                                            <h5 class="mb-1">Quick</h5>
+                                            <p class="small mb-0">Fast pickup system</p>
+                                        </div>
+                                        <div class="text-center">
+                                            <i class="fa fa-shield-alt fa-2x text-primary mb-2"></i>
+                                            <h5 class="mb-1">Safe</h5>
+                                            <p class="small mb-0">Verified recipients</p>
+                                        </div>
                                     </div>
-                                    <div class="text-center">
-                                        <i class="fa fa-shield-alt fa-2x text-primary mb-2"></i>
-                                        <h5 class="mb-1">Safe</h5>
-                                        <p class="small mb-0">Verified recipients</p>
-                                    </div>
+
+                                    <hr class="my-4">
+
+                                    <a href="/about" class="btn btn-outline-primary">
+                                        Learn More About Our Impact <i class="fa fa-arrow-right ms-2"></i>
+                                    </a>
                                 </div>
-                                
-                                <hr class="my-4">
-                                
-                                <a href="/about" class="btn btn-outline-primary">
-                                    Learn More About Our Impact <i class="fa fa-arrow-right ms-2"></i>
-                                </a>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Footer -->
-        <%- include('config/footer') %>
+            <!-- Footer -->
+            <%- include('config/footer') %>
     </div>
 
     <!-- JavaScript Libraries -->
@@ -248,13 +258,13 @@
 
     <!-- Custom Scripts -->
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function () {
             // Initialize form validation
             initFormValidation();
-            
+
             // Initialize image preview
             initImagePreview();
-            
+
             // Get user location
             getUserLocation();
         });
@@ -266,16 +276,18 @@
             const descriptionInput = document.getElementById('donationDescription');
             const expiryInput = document.getElementById('expiryTime');
             const photoInput = document.getElementById('foodPhotos');
-            
+
             // Validation functions
             const validators = {
                 title: value => {
-                    const wordCount = value.trim().split(/\s+/).length;
-                    return wordCount >= 3 && wordCount <= 20;
+                    const words = value.trim().split(/\s+/);
+                    if (words.length < 3) return false;
+                    return words.every(word => /^[a-zA-Z]+$/.test(word));
                 },
                 description: value => {
-                    const wordCount = value.trim().split(/\s+/).length;
-                    return wordCount >= 5 && wordCount <= 50;
+                    const words = value.trim().split(/\s+/);
+                    if (words.length < 3) return false;
+                    return words.every(word => /^[a-zA-Z]+$/.test(word));
                 },
                 expiry: value => {
                     const hours = parseInt(value);
@@ -283,23 +295,25 @@
                 },
                 photos: files => files.length > 0 && files.length <= 5
             };
-            
+
+
+
             // Add event listeners for real-time validation
             titleInput.addEventListener('input', () => validateField(titleInput, 'titleError', validators.title));
             descriptionInput.addEventListener('input', () => validateField(descriptionInput, 'descriptionError', validators.description));
             expiryInput.addEventListener('input', () => validateField(expiryInput, 'expiryError', validators.expiry));
             photoInput.addEventListener('change', () => validateField(photoInput, 'photoError', validators.photos));
-            
+
             // Form submission handler
-            form.addEventListener('submit', function(e) {
+            form.addEventListener('submit', function (e) {
                 let isValid = true;
-                
+
                 // Validate all fields
                 isValid = validateField(titleInput, 'titleError', validators.title) && isValid;
                 isValid = validateField(descriptionInput, 'descriptionError', validators.description) && isValid;
                 isValid = validateField(expiryInput, 'expiryError', validators.expiry) && isValid;
                 isValid = validateField(photoInput, 'photoError', validators.photos) && isValid;
-                
+
                 if (!isValid) {
                     e.preventDefault();
                     // Scroll to first error
@@ -309,40 +323,40 @@
                     });
                 }
             });
-            
+
             // Field validation helper
             function validateField(input, errorId, validator) {
                 const errorElement = document.getElementById(errorId);
                 const value = input.files ? input.files : input.value;
                 const isValid = validator(value);
-                
+
                 if (input.classList) {
                     input.classList.toggle('is-invalid', !isValid);
                 }
                 errorElement.style.display = isValid ? 'none' : 'block';
-                
+
                 return isValid;
             }
         }
-        
+
         // Image Preview
         function initImagePreview() {
             const photoInput = document.getElementById('foodPhotos');
             const previewContainer = document.getElementById('imagePreviewContainer');
-            
-            photoInput.addEventListener('change', function() {
+
+            photoInput.addEventListener('change', function () {
                 previewContainer.innerHTML = '';
                 const files = Array.from(this.files).slice(0, 5); // Limit to 5 files
-                
+
                 if (files.length > 5) {
                     alert('Maximum 5 photos allowed. Only the first 5 will be used.');
                 }
-                
+
                 files.forEach(file => {
                     if (!file.type.startsWith('image/')) return;
-                    
+
                     const reader = new FileReader();
-                    reader.onload = function(e) {
+                    reader.onload = function (e) {
                         const img = document.createElement('img');
                         img.src = e.target.result;
                         img.className = 'image-preview';
@@ -353,7 +367,7 @@
                 });
             });
         }
-        
+
         // Location Services
         function getUserLocation() {
             if (navigator.geolocation) {
@@ -372,7 +386,7 @@
                 fallbackIPLocation();
             }
         }
-        
+
         function fallbackIPLocation() {
             fetch('https://ipapi.co/json/')
                 .then(response => response.json())

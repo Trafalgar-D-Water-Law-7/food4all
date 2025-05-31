@@ -8,8 +8,7 @@ const crypto = require('crypto');
 const transporter = require('../config/mailer');
 
 
-const { ensureUserLoggedIn, preventUserIfLoggedIn, preventMemberIfLoggedIn } = require('../middleware/auth');
-
+const {  preventUserIfLoggedIn, preventMemberIfLoggedIn } = require('../middleware/auth');
 
 router.get("/", function (req, res) {
   res.render("ourTeams", {

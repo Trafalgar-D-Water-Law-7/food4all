@@ -228,7 +228,7 @@
                     <div class="col food-card" data-name="<%= food.name.toLowerCase() %>" data-token="<%= food.claimedToken ? food.claimedToken.toLowerCase() : '' %>">
                         <div class="card h-100 animate__animated animate__fadeIn">
                             <% if (food.photos && food.photos.length > 0) { %>
-                                <img src="/<%= food.photos[0] %>" class="food-image" alt="<%= food.name %>">
+                                <img src="/uploads/<%= food.photos[0] %>" class="food-image" alt="<%= food.name %>">
                             <% } else { %>
                                 <div class="food-image bg-light d-flex align-items-center justify-content-center">
                                     <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>

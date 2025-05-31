@@ -1,221 +1,259 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Request Food</title>
   <%- include('config/export') %>
 
-  <style>
-    .form-section {
-      background-color: #ffffff;
-      border-radius: 8px;
-      padding: 30px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-    }
+    <style>
+      .form-section {
+        background-color: #ffffff;
+        border-radius: 8px;
+        padding: 30px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      }
 
-    .form-section h2 {
-      font-weight: 600;
-    }
+      .form-section h2 {
+        font-weight: 600;
+      }
 
-    .location-alert {
-      background-color: #e9f7ef;
-      color: #1e7e34;
-      border: 1px solid #c3e6cb;
-      border-radius: 6px;
-      padding: 10px;
-      font-size: 0.95rem;
-      text-align: center;
-      margin-top: 15px;
-    }
+      .location-alert {
+        background-color: #e9f7ef;
+        color: #1e7e34;
+        border: 1px solid #c3e6cb;
+        border-radius: 6px;
+        padding: 10px;
+        font-size: 0.95rem;
+        text-align: center;
+        margin-top: 15px;
+      }
 
-    .form-control:valid {
-      border-color: #198754;
-    }
+      .form-control:valid {
+        border-color: #198754;
+      }
 
-    .form-control:invalid {
-      border-color: #dc3545;
-    }
+      .form-control:invalid {
+        border-color: #dc3545;
+      }
 
-    .toast {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background-color: #28a745;
-      color: white;
-      padding: 10px 15px;
-      border-radius: 5px;
-      display: none;
-      z-index: 1000;
-    }
-  </style>
+      .toast {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: #28a745;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 5px;
+        display: none;
+        z-index: 1000;
+      }
+    </style>
 </head>
 
 <body>
   <%- include('config/nav') %>
 
-  <!-- Header -->
-  <div class="container-xxl py-5 bg-dark hero-header mb-5">
-    <div class="container text-center my-5 pt-5 pb-4">
-      <h1 class="display-4 text-white mb-3 animated slideInDown">Request Food</h1>
+    <!-- Header -->
+    <div class="container-xxl py-5 bg-dark hero-header mb-5">
+      <div class="container text-center my-5 pt-5 pb-4">
+        <h1 class="display-4 text-white mb-3 animated slideInDown">Request Food</h1>
+      </div>
     </div>
-  </div>
 
-  <div class="container my-5">
-    <div class="row align-items-center justify-content-center">
-      
-      <!-- Left: Form -->
-      <div class="col-md-6">
-        <div class="form-section bg-white p-4 shadow rounded">
-          <h2 class="text-center mb-4">Submit a Food Request</h2>
-          <form id="foodRequestForm" action="/request/submit-food-request" method="POST" novalidate>
-            <!-- Hidden Location -->
-            <input type="hidden" id="latitude" name="latitude" />
-            <input type="hidden" id="longitude" name="longitude" />
-  
-            <!-- Message -->
-            <div class="mb-3">
-              <label for="message" class="form-label">📝 Message</label>
-              <textarea class="form-control" id="message" name="message" rows="3"
-                placeholder="Please share any important details..." required></textarea>
-              <div class="invalid-feedback">Message must be at least 5 words.</div>
-            </div>
-  
-            <!-- Address -->
-            <div class="mb-3">
-              <label for="address" class="form-label">📍 Delivery Address</label>
-              <input type="text" id="address" name="address" class="form-control"
-                placeholder="Enter your full delivery address" required />
-              <div class="invalid-feedback">Address must be at least 5 characters.</div>
-            </div>
-  
-  
-            <!-- Submit Button -->
-            <button type="submit" class="btn btn-success w-100">Submit Request</button>
-  
-            <!-- Location Info -->
-            <div class="location-alert mt-3">
-              ✅ We use your current location to connect you with nearby food donors.
-            </div>
-          </form>
+    <div class="container my-5">
+      <div class="row align-items-center justify-content-center">
+
+        <!-- Left: Form -->
+        <div class="col-md-6">
+          <div class="form-section bg-white p-4 shadow rounded">
+            <h2 class="text-center mb-4">Submit a Food Request</h2>
+            <form id="foodRequestForm" action="/request/submit-food-request" method="POST" novalidate>
+              <!-- Hidden Location -->
+              <input type="hidden" id="latitude" name="latitude" />
+              <input type="hidden" id="longitude" name="longitude" />
+
+              <!-- Message -->
+              <div class="mb-3">
+                <label for="message" class="form-label">📝 Message</label>
+                <textarea class="form-control" id="message" name="message" rows="3"
+                  placeholder="Please share any important details..." required></textarea>
+                <div class="invalid-feedback">Message must be at least 5 words.</div>
+              </div>
+
+              <!-- Address -->
+              <div class="mb-3">
+                <label for="address" class="form-label">📍 Delivery Address</label>
+                <input type="text" id="address" name="address" class="form-control"
+                  placeholder="Enter your full delivery address" required />
+                <div class="invalid-feedback">Address must be at least 5 characters.</div>
+              </div>
+
+
+              <!-- Submit Button -->
+              <button type="submit" class="btn btn-success w-100">Submit Request</button>
+
+              <!-- Location Info -->
+              <div class="location-alert mt-3">
+                ✅ We use your current location to connect you with nearby food donors.
+              </div>
+            </form>
+          </div>
         </div>
+
+        <!-- Right: Visual Section -->
+        <div class="col-md-6 mt-4 mt-md-0 d-flex flex-column align-items-center text-center">
+          <img src="/img/about-3.jpg" class="img-fluid mb-3" alt="Helping with food" style="max-height: 300px;">
+          <h4 class="text-primary">Need a meal? We’re here to help.</h4>
+          <p class="text-muted">By filling this form, you're taking the first step toward receiving support from our
+            community of kind-hearted donors.</p>
+        </div>
+
       </div>
-  
-      <!-- Right: Visual Section -->
-      <div class="col-md-6 mt-4 mt-md-0 d-flex flex-column align-items-center text-center">
-        <img src="/img/about-3.jpg" class="img-fluid mb-3" alt="Helping with food" style="max-height: 300px;">
-        <h4 class="text-primary">Need a meal? We’re here to help.</h4>
-        <p class="text-muted">By filling this form, you're taking the first step toward receiving support from our community of kind-hearted donors.</p>
-      </div>
-  
     </div>
-  </div>
-  
 
-  <div class="toast" id="toast">📍 Location added!</div>
 
-  <%- include('config/footer') %>
+    <div class="toast" id="toast">📍 Location added!</div>
 
-  <!-- Scripts -->
+    <%- include('config/footer') %>
 
-  <script>
-    window.addEventListener("DOMContentLoaded", () => {
-      const latInput = document.getElementById("latitude");
-      const lonInput = document.getElementById("longitude");
-      const alertBox = document.querySelector(".location-alert");
-      const toast = document.getElementById("toast");
-  
-      function showToast(msg) {
-        toast.textContent = msg;
-        toast.style.display = "block";
-        setTimeout(() => {
-          toast.style.display = "none";
-        }, 3000);
-      }
-  
-      function setLocation(lat, lon, source = "GPS") {
-        latInput.value = lat;
-        lonInput.value = lon;
-        if (alertBox) {
-          alertBox.textContent = `📍 Location detected via ${source}.`;
-          alertBox.classList.remove("bg-warning", "text-dark");
-        }
-        showToast(`📍 Location set (${source})`);
-      }
-  
-      function fallbackToIP() {
-        fetch("https://ipapi.co/json/")
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.latitude && data.longitude) {
-              setLocation(data.latitude, data.longitude, "IP");
-            } else {
-              throw new Error("IP location unavailable");
-            }
-          })
-          .catch(() => {
+      <!-- Scripts -->
+
+      <script>
+        window.addEventListener("DOMContentLoaded", () => {
+          const latInput = document.getElementById("latitude");
+          const lonInput = document.getElementById("longitude");
+          const alertBox = document.querySelector(".location-alert");
+          const toast = document.getElementById("toast");
+
+          function showToast(msg) {
+            toast.textContent = msg;
+            toast.style.display = "block";
+            setTimeout(() => {
+              toast.style.display = "none";
+            }, 3000);
+          }
+
+          function setLocation(lat, lon, source = "GPS") {
+            latInput.value = lat;
+            lonInput.value = lon;
             if (alertBox) {
-              alertBox.textContent = "⚠️ We couldn't detect your location. Please enter your address manually.";
-              alertBox.classList.add("bg-warning", "text-dark");
+              alertBox.textContent = `📍 Location detected via ${source}.`;
+              alertBox.classList.remove("bg-warning", "text-dark");
+            }
+            showToast(`📍 Location set (${source})`);
+          }
+
+          function fallbackToIP() {
+            fetch("https://ipapi.co/json/")
+              .then((res) => res.json())
+              .then((data) => {
+                if (data.latitude && data.longitude) {
+                  setLocation(data.latitude, data.longitude, "IP");
+                } else {
+                  throw new Error("IP location unavailable");
+                }
+              })
+              .catch(() => {
+                if (alertBox) {
+                  alertBox.textContent = "⚠️ We couldn't detect your location. Please enter your address manually.";
+                  alertBox.classList.add("bg-warning", "text-dark");
+                }
+              });
+          }
+
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+              (position) => {
+                setLocation(position.coords.latitude, position.coords.longitude, "GPS");
+              },
+              (error) => {
+                console.warn("GPS failed:", error.message);
+                fallbackToIP();
+              },
+              { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+          } else {
+            fallbackToIP();
+          }
+        });
+      </script>
+
+
+      <script>
+        const toast = document.getElementById("toast");
+
+
+
+        // Client-side validation
+        document.addEventListener("DOMContentLoaded", function () {
+          const form = document.getElementById("foodRequestForm");
+          const message = document.getElementById("message");
+          const address = document.getElementById("address");
+
+          function validateField(field, isInvalid, errorMessage) {
+            if (isInvalid) {
+              field.classList.add("is-invalid");
+              field.classList.remove("is-valid");
+              field.nextElementSibling.textContent = errorMessage;
+            } else {
+              field.classList.remove("is-invalid");
+              field.classList.add("is-valid");
+              field.nextElementSibling.textContent = "";
+            }
+          }
+
+          function isOnlyLetters(text) {
+            return /^[A-Za-z\s]+$/.test(text); // only letters and spaces
+          }
+
+          function hasMinWords(text, minWords) {
+            const words = text.trim().split(/\s+/);
+            return words.length >= minWords;
+          }
+
+          function startsWithLetter(text) {
+            return /^[A-Za-z]/.test(text.trim());
+          }
+
+          message.addEventListener("input", function () {
+            const val = message.value.trim();
+            const charCheck = val.length >= 5;
+            const wordCheck = hasMinWords(val, 3);
+            const letterOnlyCheck = isOnlyLetters(val);
+
+            validateField(
+              message,
+              !charCheck || !wordCheck || !letterOnlyCheck,
+              "Message must be at least 5 characters, contain at least 3 words, and only letters."
+            );
+          });
+
+          address.addEventListener("input", function () {
+            const val = address.value.trim();
+            const charCheck = val.length >= 5;
+            const wordCheck = hasMinWords(val, 3);
+            const startCheck = startsWithLetter(val);
+
+            validateField(
+              address,
+              !charCheck || !wordCheck || !startCheck,
+              "Address must be at least 5 characters, contain at least 3 words, and start with a letter."
+            );
+          });
+
+          form.addEventListener("submit", function (e) {
+            if (
+              message.classList.contains("is-invalid") ||
+              address.classList.contains("is-invalid")
+            ) {
+              e.preventDefault();
             }
           });
-      }
-  
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            setLocation(position.coords.latitude, position.coords.longitude, "GPS");
-          },
-          (error) => {
-            console.warn("GPS failed:", error.message);
-            fallbackToIP();
-          },
-          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-        );
-      } else {
-        fallbackToIP();
-      }
-    });
-  </script>
-  
+        });
 
-  <script>
-    const toast = document.getElementById("toast");
-
-    
-
-    // Client-side validation
-    document.addEventListener("DOMContentLoaded", function () {
-      const form = document.getElementById("foodRequestForm");
-      const message = document.getElementById("message");
-      const address = document.getElementById("address");
-
-      function validateField(field, isInvalid, errorMessage) {
-        if (isInvalid) {
-          field.classList.add("is-invalid");
-          field.classList.remove("is-valid");
-          field.nextElementSibling.textContent = errorMessage;
-        } else {
-          field.classList.remove("is-invalid");
-          field.classList.add("is-valid");
-        }
-      }
-
-      message.addEventListener("input", function () {
-        const wordCount = message.value.trim().split(/\s+/).length;
-        validateField(message, wordCount < 5, "Message must be at least 5 words.");
-      });
-
-      address.addEventListener("input", function () {
-        validateField(address, address.value.trim().length < 5, "Address must be at least 5 characters.");
-      });
-
-      form.addEventListener("submit", function (e) {
-        if (message.classList.contains("is-invalid") || address.classList.contains("is-invalid")) {
-          e.preventDefault();
-        }
-      });
-    });
-  </script>
+      </script>
 </body>
+
 </html>

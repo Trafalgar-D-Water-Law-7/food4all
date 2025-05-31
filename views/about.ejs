@@ -63,9 +63,15 @@
                     <div class="col-lg-6">
                         <h5 class="section-title ff-secondary text-start text-primary fw-normal">About Us</h5>
                         <h1 class="mb-4">Welcome to <i class="fa fa-utensils text-primary me-2"></i>Food4All</h1>
-                        <p class="mb-4" style="text-align: justify;">At Food4All, we believe in the power of sharing. Our mission is to bridge the gap between surplus food and those in need. By connecting donors with volunteers, we ensure that good food never goes to waste and reaches the hands of those who need it most.</p>
-                        <p class="mb-4"style="text-align: justify;" >Whether you’re a restaurant, a household, or a volunteer, you play a vital role in creating a hunger-free society. Every contribution counts, and every meal shared brings us one step closer to a better world.</p>
-                         <p class="mb-4"style="text-align: justify;">Join us in our journey to fight hunger, reduce waste, & uplift communities.</p>
+                        <p class="mb-4" style="text-align: justify;">At Food4All, we believe in the power of sharing.
+                            Our mission is to bridge the gap between surplus food and those in need. By connecting
+                            donors with volunteers, we ensure that good food never goes to waste and reaches the hands
+                            of those who need it most.</p>
+                        <p class="mb-4" style="text-align: justify;">Whether you’re a restaurant, a household, or a
+                            volunteer, you play a vital role in creating a hunger-free society. Every contribution
+                            counts, and every meal shared brings us one step closer to a better world.</p>
+                        <p class="mb-4" style="text-align: justify;">Join us in our journey to fight hunger, reduce
+                            waste, & uplift communities.</p>
                         <div class="row g-4 mb-4">
                             <div class="col-sm-6">
                                 <div class="d-flex align-items-center border-start border-5 border-primary px-3">
@@ -103,31 +109,41 @@
                     <h1 class="mb-5">Our Social Team</h1>
                 </div>
                 <div class="row g-4">
-                    <% team.forEach((member, index) => { %>
-                        <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="<%= (index * 0.2 + 0.1).toFixed(1) %>s">
+                    <% team.forEach((member, index)=> { %>
+                        <div class="col-lg-3 col-md-6 wow fadeInUp"
+                            data-wow-delay="<%= (index * 0.2 + 0.1).toFixed(1) %>s">
                             <div class="team-item text-center rounded overflow-hidden">
-                                <div class="rounded-circle overflow-hidden m-4">
-                                    <img class="img-fluid" src="/uploads/<%= member.photo || 'img/default.jpg' %>" alt="">
+                                <div class="rounded overflow-hidden m-4">
+                                    <img class="img-fluid" src="/uploads/<%= member.photo || 'img/default.jpg' %> "
+                                        alt="" style="width: 200px; height: 200px; object-fit: cover;">
                                 </div>
-                                <h5 class="mb-0"><%= member.name %></h5>
-                            
-                                <small><%= member.address %></small>
+                                <h5 class="mb-0">
+                                    <%= member.name %>
+                                </h5>
+
+                                <small>
+                                    <%= member.address %>
+                                </small>
                                 <div class="d-flex justify-content-center mt-3">
                                     <% if (member.facebook) { %>
-                                        <a class="btn btn-square btn-primary mx-1" href="<%= member.facebook %>"><i class="fab fa-facebook-f"></i></a>
-                                    <% } %>
-                                    <% if (member.twitter) { %>
-                                        <a class="btn btn-square btn-primary mx-1" href="<%= member.twitter %>"><i class="fab fa-twitter"></i></a>
-                                    <% } %>
-                                    <% if (member.instagram) { %>
-                                        <a class="btn btn-square btn-primary mx-1" href="<%= member.instagram %>"><i class="fab fa-instagram"></i></a>
-                                    <% } %>
+                                        <a class="btn btn-square btn-primary mx-1" href="<%= member.facebook %>"><i
+                                                class="fab fa-facebook-f"></i></a>
+                                        <% } %>
+                                            <% if (member.twitter) { %>
+                                                <a class="btn btn-square btn-primary mx-1"
+                                                    href="<%= member.twitter %>"><i class="fab fa-twitter"></i></a>
+                                                <% } %>
+                                                    <% if (member.instagram) { %>
+                                                        <a class="btn btn-square btn-primary mx-1"
+                                                            href="<%= member.instagram %>"><i
+                                                                class="fab fa-instagram"></i></a>
+                                                        <% } %>
                                 </div>
                             </div>
                         </div>
-                    <% }) %>
+                        <% }) %>
                 </div>
-                
+
             </div>
         </div>
         <!-- Team End -->
@@ -135,61 +151,59 @@
 
 
         <!-- developer -->\
-         <div class="container-xxl pt-5 pb-3">
+        <div class="container-xxl pt-5 pb-3">
             <div class="container">
                 <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
                     <h3 class="section-title ff-secondary text-center text-primary fw-normal">Developers</h5>
                 </div>
-                <div class="row g-4 justify-content-center" >
-                   
-                        <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay=">s">
-                            <div class="team-item text-center rounded overflow-hidden">
-                                <div style="border-radius: 5px;" class="rounded overflow-hidden m-1">
-                                    <img class="img-fluid" src="/img/rohan.jpg" alt="">
-                                </div>
-                                <h5 class="mb-0">Rohan Bista
-                                    <br>
-                            
-                                <small>Hetauda</small>
-                                <div class="d-flex justify-content-center mt-3">
+                <style>
+                    .team-img {
+                        width: 200px;
+                        height: 200px;
+                        aspect-ratio: 1 / 1;
+                        border: 3px solid #fd7e14;
+                        transition: transform 0.3s ease;
+                    }
 
-                                        <a class="btn btn-square btn-primary mx-1" href="#"><i class="fab fa-facebook-f"></i></a>
-
-                                 
-                                        <a class="btn btn-square btn-primary mx-1" href="#"><i class="fab fa-twitter"></i></a>
-
-                                    
-                                        <a class="btn btn-square btn-primary mx-1" href="#"><i class="fab fa-instagram"></i></a>
-                                    
-                                </div>
+                    .team-img:hover {
+                        transform: scale(1.05);
+                    }
+                </style>
+                <div class="row g-4 justify-content-center">
+                    <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                        <div class="team-item text-center rounded overflow-hidden">
+                            <div class="m-2 p-2 bg-light rounded">
+                                <img class="team-img img-fluid rounded-circle" src="/img/rohan.jpg" alt="Rohan Bista">
+                            </div>
+                            <h5 class="mb-1">Rohan Bista</h5>
+                            <small>Hetauda, Basamadi</small>
+                            <div class="d-flex justify-content-center mt-3">
+                                <a class="btn btn-square btn-primary mx-1" href="#"><i
+                                        class="fab fa-facebook-f"></i></a>
+                                <a class="btn btn-square btn-primary mx-1" href="#"><i class="fab fa-twitter"></i></a>
+                                <a class="btn btn-square btn-primary mx-1" href="#"><i class="fab fa-instagram"></i></a>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay=">s">
-                            <div class="team-item text-center rounded overflow-hidden">
-                                <div style="border-radius: 5px;" class="rounded overflow-hidden m-1">
-                                    <img class="img-fluid" src="/img/rohan.jpg" alt="">
-                                </div>
-                                <h5 class="mb-0">Rohan Bista
-                                    <br>
-                            
-                                <small>Hetauda</small>
-                                <div class="d-flex justify-content-center mt-3">
-
-                                        <a class="btn btn-square btn-primary mx-1" href="#"><i class="fab fa-facebook-f"></i></a>
-
-                                 
-                                        <a class="btn btn-square btn-primary mx-1" href="#"><i class="fab fa-twitter"></i></a>
-
-                                    
-                                        <a class="btn btn-square btn-primary mx-1" href="#"><i class="fab fa-instagram"></i></a>
-                                    
-                                </div>
+                    <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.2s">
+                        <div class="team-item text-center rounded overflow-hidden">
+                            <div class="m-2 p-2 bg-light rounded">
+                                <img class="team-img img-fluid rounded-circle" src="/img/ashok.jpg" alt="Ashok Giri">
+                            </div>
+                            <h5 class="mb-1">Ashok Giri</h5>
+                            <small>Hetauda, Kamane</small>
+                            <div class="d-flex justify-content-center mt-3">
+                                <a class="btn btn-square btn-primary mx-1" href="#"><i
+                                        class="fab fa-facebook-f"></i></a>
+                                <a class="btn btn-square btn-primary mx-1" href="#"><i class="fab fa-twitter"></i></a>
+                                <a class="btn btn-square btn-primary mx-1" href="#"><i class="fab fa-instagram"></i></a>
                             </div>
                         </div>
-
+                    </div>
                 </div>
-                
+
+
             </div>
         </div>
 

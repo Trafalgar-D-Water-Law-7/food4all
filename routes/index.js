@@ -96,8 +96,7 @@ router.get('/payment/failure', (req, res) => {
 // Public Pages
 // ------------------
 router.get('/about', async (req, res) => {
-  const team = await ourTeam.find();
-
+  const team = await ourTeam.find({ isApproved: true }); // ✅ Only fetch approved members
 
   res.render('about', {
     title: 'About',
@@ -106,6 +105,7 @@ router.get('/about', async (req, res) => {
     error: req.flash('error')
   });
 });
+
 
 router.get('/contact', (req, res) => {
   res.render('contact', {
@@ -189,4 +189,20 @@ router.get('/memberSignup', (req, res) => {
   });
 });
 
+
+router.get("/terms&conditions", (req, res) => {
+  res.render("terms&conditions", {
+    title: "Terms & Conditions",
+    success: req.flash("success"),
+    error: req.flash("error"),
+  });
+});
+
+router.get("/privacy", (req, res) => {
+  res.render("privacyPolicy", {
+    title: "Privicy Policy",
+    success: req.flash("success"),
+    error: req.flash("error"),
+  });
+});
 module.exports = router;

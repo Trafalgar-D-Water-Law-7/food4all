@@ -117,7 +117,7 @@
                                         <div class="form-floating">
                                             <input type="text" class="form-control" id="name" name="name"
                                                 placeholder="Your Name" required maxlength="40">
-                                            <label for="name">Full Name (2 words)</label>
+                                            <label for="name">Full Name (Min 2 words)</label>
                                         </div>
                                         <div class="invalid-feedback" id="nameError">Please provide your full name (2
                                             words).</div>
@@ -175,7 +175,7 @@
                                         <div class="form-floating">
                                             <input type="text" class="form-control" id="street" name="street"
                                                 placeholder="Street" required maxlength="60">
-                                            <label for="street">Street Address (2 words)</label>
+                                            <label for="street">Street Address (Min 2 words)</label>
                                         </div>
                                         <div class="invalid-feedback" id="streetError">Please provide your street
                                             address (2 words).</div>
@@ -206,7 +206,7 @@
                                         <div class="form-check">
                                             <input class="form-check-input" type="checkbox" id="termsCheck" required>
                                             <label class="form-check-label" for="termsCheck">
-                                                I agree to the <a href="/terms" target="_blank">Terms of Service</a> and
+                                                I agree to the <a href="/terms&conditions" target="_blank">Terms of Service</a> and
                                                 <a href="/privacy" target="_blank">Privacy Policy</a>
                                             </label>
                                             <div class="invalid-feedback">You must agree before submitting.</div>
@@ -316,21 +316,29 @@
                                         const error = document.getElementById("nameError");
                                         const val = name.value.trim();
 
-                                        // Check for exactly 2 words
+                                        // Split into words by whitespace
                                         const words = val.split(/\s+/);
-                                        if (words.length !== 2 || words.some(w => w.length === 0)) {
+
+                                        // Check for min 2 and max 5 words
+                                        if (words.length < 2 || words.length > 5 || words.some(w => w.length === 0)) {
                                             name.classList.add('is-invalid');
-                                            error.textContent = "Full name must be exactly 2 words.";
+                                            error.textContent = "Full name must be between 2 to 5 words.";
                                             return false;
                                         }
+
+                                        // Allow letters, spaces, hyphens, and apostrophes
                                         if (!/^[A-Za-z\s\-']+$/.test(val)) {
                                             name.classList.add('is-invalid');
                                             error.textContent = "Name contains invalid characters.";
                                             return false;
                                         }
+
+                                        // Valid name
                                         name.classList.remove('is-invalid');
+                                        error.textContent = "";
                                         return true;
                                     }
+
 
                                     function validateEmail() {
                                         const email = document.getElementById("email");
@@ -397,16 +405,20 @@
                                         const error = document.getElementById("streetError");
                                         const val = street.value.trim();
 
-                                        // Check exactly 2 words for street
                                         const words = val.split(/\s+/);
-                                        if (words.length !== 2 || words.some(w => w.length === 0)) {
+
+                                        // Check for minimum 2 and maximum 5 words
+                                        if (words.length < 2 || words.length > 5 || words.some(w => w.length === 0)) {
                                             street.classList.add('is-invalid');
-                                            error.textContent = "Street address must be exactly 2 words.";
+                                            error.textContent = "Street address must be between 2 to 5 words.";
                                             return false;
                                         }
+
                                         street.classList.remove('is-invalid');
+                                        error.textContent = "";
                                         return true;
                                     }
+
 
                                     function validateTerms() {
                                         const termsCheck = document.getElementById("termsCheck");
@@ -487,7 +499,7 @@
                                 <li><strong>Community Connection</strong> - Meet like-minded people in your area</li>
                                 <li><strong>Real Impact</strong> - See exactly how much food you've helped save</li>
                                 <li><strong>Easy Management</strong> - Simple tools to track your contributions</li>
-                                <li><strong>Recognition</strong> - Earn badges for your sustainability efforts</li>
+                                <li><strong>Earn Reward / Badges</strong> - Earn reward and badges for your sustainability efforts</li>
                                 <li><strong>Exclusive Access</strong> - Get early invites to community events</li>
                             </ul>
 

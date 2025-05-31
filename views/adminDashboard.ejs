@@ -2,446 +2,33 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Admin Dashboard - User Management</title>
+  <title>Admin - Manage Users</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" />
 
   <style>
-    :root {
-      --primary-color: #3498db;
-      --secondary-color: #2c3e50;
-      --success-color: #27ae60;
-      --danger-color: #e74c3c;
-      --light-color: #ecf0f1;
-      --dark-color: #2c3e50;
-    }
-    
-    body {
-      background-color: #f8f9fa;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    
-    .navbar-brand {
-      font-weight: 600;
-    }
-    
-    .card {
-      border: none;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      margin-bottom: 20px;
-    }
-    
-    .card-header {
-      background-color: var(--secondary-color);
-      color: white;
-      border-radius: 10px 10px 0 0 !important;
-      padding: 15px 20px;
-    }
-    
-    .table th {
-      background-color: var(--secondary-color);
-      color: white;
-    }
-    
-    .badge {
-      font-weight: 500;
-      padding: 5px 10px;
-    }
-    
-    .btn-sm {
-      padding: 0.25rem 0.5rem;
-      font-size: 0.875rem;
-    }
-    
-    .search-box {
-      position: relative;
-      margin-bottom: 20px;
-    }
-    
-    .search-box i {
-      position: absolute;
-      left: 10px;
-      top: 10px;
-      color: #6c757d;
-    }
-    
-    .search-box input {
-      padding-left: 35px;
-      border-radius: 20px;
-    }
-    
-    .email-link, .phone-link {
+    a.email-link, a.phone-link {
       font-weight: 500;
       text-decoration: none;
-      transition: all 0.2s;
     }
-    
-    .email-link { color: var(--primary-color); }
-    .email-link:hover { color: #1d6fa5; text-decoration: underline; }
-    
-    .phone-link { color: var(--success-color); }
-    .phone-link:hover { color: #1e8449; text-decoration: underline; }
-    
+
+    a.email-link { color: #0d6efd; }
+    a.email-link:hover { text-decoration: underline; }
+
+    a.phone-link { color: #198754; }
+    a.phone-link:hover { text-decoration: underline; }
+
     .modal img {
       max-width: 100%;
       height: auto;
       border-radius: 10px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    
-    .dataTables_wrapper .dataTables_filter input {
-      border-radius: 20px;
-      padding: 5px 10px;
-      border: 1px solid #dee2e6;
-    }
-    
-    .dataTables_length select {
-      border-radius: 5px;
-      padding: 5px;
-    }
-    
-    .tab-content {
-      padding: 20px 0;
-    }
-    
-    .nav-tabs .nav-link {
-      color: var(--secondary-color);
-      font-weight: 500;
-    }
-    
-    .nav-tabs .nav-link.active {
-      color: var(--primary-color);
-      font-weight: 600;
     }
   </style>
-</head>
-
-<body>
-  <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-    <div class="container">
-      <a class="navbar-brand" href="#">
-        <i class="bi bi-shield-lock me-2"></i>Admin Dashboard
-      </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
-            <a class="nav-link active" href="#"><i class="bi bi-people-fill me-1"></i>  Control Room</a>
-          </li>
-     
-          <li class="nav-item">
-            <a class="nav-link" href="/admin/logout"><i class="bi bi-box-arrow-right me-1"></i> Logout</a>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
-
-  <div class="container">
-    <!-- Stats Cards -->
-    <div class="row mb-4">
-      <div class="col-md-4">
-        <div class="card">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <h6 class="text-muted mb-2">Total Users</h6>
-                <h3 class="mb-0"><%= users.length %></h3>
-              </div>
-              <div class="bg-primary bg-opacity-10 p-3 rounded">
-                <i class="bi bi-people-fill text-primary" style="font-size: 1.5rem;"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="card">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <h6 class="text-muted mb-2">Total Members</h6>
-                <h3 class="mb-0"><%= membersList.length %></h3>
-              </div>
-              <div class="bg-success bg-opacity-10 p-3 rounded">
-                <i class="bi bi-person-check-fill text-success" style="font-size: 1.5rem;"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="card">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <h6 class="text-muted mb-2">Pending Approvals</h6>
-                <h3 class="mb-0"><%= membersList.filter(m => !m.isApproved).length %></h3>
-              </div>
-              <div class="bg-warning bg-opacity-10 p-3 rounded">
-                <i class="bi bi-hourglass-split text-warning" style="font-size: 1.5rem;"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tab Navigation -->
-    <ul class="nav nav-tabs" id="myTab" role="tablist">
-      <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button" role="tab">
-          <i class="bi bi-people-fill me-1"></i> All Users
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link" id="members-tab" data-bs-toggle="tab" data-bs-target="#members" type="button" role="tab">
-          <i class="bi bi-person-lines-fill me-1"></i> Member Requests
-        </button>
-      </li>
-    </ul>
-
-    <!-- Tab Content -->
-    <div class="tab-content" id="myTabContent">
-      <!-- Users Tab -->
-      <div class="tab-pane fade show active" id="users" role="tabpanel">
-        <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><i class="bi bi-people-fill me-2"></i>User Management</h5>
-            <div class="d-flex">
-              <button class="btn btn-sm btn-outline-light me-2">
-                <i class="bi bi-download me-1"></i> Export
-              </button>
-              <button class="btn btn-sm btn-outline-light">
-                <i class="bi bi-funnel-fill me-1"></i> Filters
-              </button>
-            </div>
-          </div>
-          <div class="card-body">
-            <table id="usersTable" class="table table-hover table-striped" style="width:100%">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Contact</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <% users.forEach((user, index) => { %>
-                  <tr>
-                    <td><%= index + 1 %></td>
-                    <td><%= user.name %></td>
-                    <td>
-                      <a href="mailto:<%= user.email %>" class="email-link">
-                        <i class="bi bi-envelope-fill me-1"></i><%= user.email %>
-                      </a>
-                    </td>
-                    <td>
-                      <a href="tel:<%= user.contact %>" class="phone-link">
-                        <i class="bi bi-telephone-fill me-1"></i><%= user.contact %>
-                      </a>
-                    </td>
-                    <td>
-                      <div class="btn-group btn-group-sm" role="group">
-                        <button class="btn btn-outline-primary" onclick='showDetails(<%- JSON.stringify(user) %>)'>
-                          <i class="bi bi-eye-fill"></i>
-                        </button>
-                        <button class="btn btn-outline-danger" onclick="deleteUser('<%= user._id %>', this)">
-                          <i class="bi bi-trash-fill"></i>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                <% }) %>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- Members Tab -->
-      <div class="tab-pane fade" id="members" role="tabpanel">
-        <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><i class="bi bi-person-lines-fill me-2"></i>Member Requests</h5>
-            <span class="badge bg-warning">
-              <%= membersList.filter(m => !m.isApproved).length %> Pending
-            </span>
-          </div>
-          <div class="card-body">
-            <table id="membersTable" class="table table-hover table-striped" style="width:100%">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Phone</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <% membersList.forEach((member, index) => { %>
-                  <tr>
-                    <td><%= index + 1 %></td>
-                    <td><%= member.name %></td>
-                    <td>
-                      <a href="mailto:<%= member.email %>" class="email-link">
-                        <i class="bi bi-envelope-fill me-1"></i><%= member.email %>
-                      </a>
-                    </td>
-                    <td>
-                      <a href="tel:<%= member.phone %>" class="phone-link">
-                        <i class="bi bi-telephone-fill me-1"></i><%= member.phone %>
-                      </a>
-                    </td>
-                    <td>
-                      <% if (member.isApproved) { %>
-                        <span class="badge bg-success">Approved</span>
-                      <% } else { %>
-                        <span class="badge bg-warning">Pending</span>
-                      <% } %>
-                    </td>
-                    <td>
-                      <div class="btn-group btn-group-sm" role="group">
-                        <button class="btn btn-outline-primary" onclick='showDetails(<%- JSON.stringify(member) %>)'>
-                          <i class="bi bi-eye-fill"></i>
-                        </button>
-                        <% if (!member.isApproved) { %>
-                          <button class="btn btn-outline-success" onclick="approveMember('<%= member._id %>', this)">
-                            <i class="bi bi-check-circle-fill"></i>
-                          </button>
-                        <% } %>
-                        <button class="btn btn-outline-danger" onclick="deleteMember('<%= member._id %>', this)">
-                          <i class="bi bi-trash-fill"></i>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                <% }) %>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Details Modal -->
-  <div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="modal-content">
-        <div class="modal-header bg-dark text-white">
-          <h5 class="modal-title" id="detailsModalLabel">User Details</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="row g-3">
-            <div class="col-md-4 text-center">
-              <img id="detailPhoto" class="img-fluid shadow mb-3" style="display:none; max-height: 200px;" alt="Profile Photo" />
-              <div class="card">
-                <div class="card-body text-center">
-                  <h5 id="detailName" class="card-title">-</h5>
-                  <div class="d-flex justify-content-center gap-2 mt-3">
-                    <a href="#" id="detailEmail" class="btn btn-sm btn-outline-primary">
-                      <i class="bi bi-envelope-fill"></i>
-                    </a>
-                    <a href="#" id="detailPhone" class="btn btn-sm btn-outline-success">
-                      <i class="bi bi-telephone-fill"></i>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-8">
-              <div class="table-responsive">
-                <table class="table table-sm table-borderless">
-                  <tbody>
-                    <tr>
-                      <th width="30%">Email:</th>
-                      <td id="detailEmailText">-</td>
-                    </tr>
-                    <tr>
-                      <th>Phone:</th>
-                      <td id="detailPhoneText">-</td>
-                    </tr>
-                    <tr>
-                      <th>Address:</th>
-                      <td id="detailAddress">-</td>
-                    </tr>
-                    <tr>
-                      <th>Status:</th>
-                      <td id="detailApproved">-</td>
-                    </tr>
-                    <tr>
-                      <th>Joined On:</th>
-                      <td id="detailCreatedAt">-</td>
-                    </tr>
-                    <tr>
-                      <th>Donations:</th>
-                      <td id="detailDonationCount">-</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-  <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-  <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 
   <script>
-    // Initialize DataTables
-    $(document).ready(function() {
-      $('#usersTable').DataTable({
-        responsive: true,
-        dom: '<"top"f>rt<"bottom"lip><"clear">',
-        language: {
-          search: "_INPUT_",
-          searchPlaceholder: "Search users...",
-          lengthMenu: "Show _MENU_ users per page",
-          info: "Showing _START_ to _END_ of _TOTAL_ users",
-          infoEmpty: "No users found",
-          infoFiltered: "(filtered from _MAX_ total users)"
-        }
-      });
-      
-      $('#membersTable').DataTable({
-        responsive: true,
-        dom: '<"top"f>rt<"bottom"lip><"clear">',
-        language: {
-          search: "_INPUT_",
-          searchPlaceholder: "Search members...",
-          lengthMenu: "Show _MENU_ members per page",
-          info: "Showing _START_ to _END_ of _TOTAL_ members",
-          infoEmpty: "No members found",
-          infoFiltered: "(filtered from _MAX_ total members)"
-        },
-        columnDefs: [
-          { orderable: false, targets: [4, 5] } // Disable sorting on status and actions columns
-        ]
-      });
-    });
-
     async function deleteUser(userId, button) {
-      if (!confirm("Are you sure you want to delete this user and all their associated data?")) return;
+      if (!confirm("Are you sure you want to delete this user and their donations?")) return;
 
       try {
         const res = await fetch(`/admin/delete-user/${userId}`, {
@@ -451,23 +38,20 @@
         const text = await res.text();
 
         if (res.ok) {
-          // Remove row from DataTable
-          const table = $('#usersTable').DataTable();
-          table.row($(button).closest('tr')).remove().draw();
-          
-          // Show success toast
-          showToast('User deleted successfully', 'success');
+          const row = button.closest('tr');
+          row.remove();
+          alert("User deleted successfully");
         } else {
-          showToast('Failed to delete user: ' + text, 'danger');
+          alert("Failed to delete user: " + text);
         }
       } catch (err) {
         console.error(err);
-        showToast('An error occurred while deleting user', 'danger');
+        alert("An error occurred");
       }
     }
 
     async function deleteMember(memberId, button) {
-      if (!confirm("Are you sure you want to delete this member? This action cannot be undone.")) return;
+      if (!confirm("Are you sure you want to delete this member?")) return;
 
       try {
         const res = await fetch(`/admin/delete-member/${memberId}`, {
@@ -477,22 +61,20 @@
         const text = await res.text();
 
         if (res.ok) {
-          // Remove row from DataTable
-          const table = $('#membersTable').DataTable();
-          table.row($(button).closest('tr')).remove().draw();
-          
-          showToast('Member deleted successfully', 'success');
+          const row = button.closest('tr');
+          row.remove();
+          alert("Member deleted successfully");
         } else {
-          showToast('Failed to delete member: ' + text, 'danger');
+          alert("Failed to delete member: " + text);
         }
       } catch (err) {
         console.error(err);
-        showToast('An error occurred', 'danger');
+        alert("An error occurred");
       }
     }
 
     async function approveMember(memberId, button) {
-      if (!confirm("Approve this member? They will gain access to member features.")) return;
+      if (!confirm("Are you sure you want to approve this member?")) return;
 
       try {
         const res = await fetch(`/admin/approve-member/${memberId}`, {
@@ -501,37 +83,27 @@
         });
 
         if (res.ok) {
-          // Update the row in DataTable
-          const row = $(button).closest('tr');
-          const table = $('#membersTable').DataTable();
-          const data = table.row(row).data();
-          
-          // Update the status cell
-          $(row).find('td:eq(4)').html('<span class="badge bg-success">Approved</span>');
-          
-          // Remove the approve button
-          $(button).remove();
-          
-          showToast('Member approved successfully', 'success');
+          alert("Member approved successfully");
+          button.closest('td').innerHTML = '<span class="badge bg-success">Approved</span>';
         } else {
           const text = await res.text();
-          showToast('Failed to approve member: ' + text, 'danger');
+          alert("Failed to approve member: " + text);
         }
       } catch (err) {
         console.error(err);
-        showToast('Error approving member', 'danger');
+        alert("Error approving member");
       }
     }
 
     function showDetails(obj) {
       document.getElementById('detailName').textContent = obj.name || '-';
+      document.getElementById('detailEmail').textContent = obj.email || '-';
       document.getElementById('detailEmail').href = obj.email ? 'mailto:' + obj.email : '#';
-      document.getElementById('detailEmailText').textContent = obj.email || '-';
+      document.getElementById('detailPhone').textContent = obj.phone || obj.contact || '-';
       document.getElementById('detailPhone').href = (obj.phone || obj.contact) ? 'tel:' + (obj.phone || obj.contact) : '#';
-      document.getElementById('detailPhoneText').textContent = obj.phone || obj.contact || '-';
       document.getElementById('detailAddress').textContent = obj.address || obj.street || '-';
-      document.getElementById('detailApproved').textContent = obj.isApproved ? 'Approved' : 'Pending';
-      document.getElementById('detailCreatedAt').textContent = obj.createdAt ? new Date(obj.createdAt).toLocaleString() : '-';
+      document.getElementById('detailApproved').textContent = obj.isApproved ? 'Yes' : 'No';
+      document.getElementById('detailCreatedAt').textContent = new Date(obj.createdAt).toLocaleString() || '-';
       document.getElementById('detailDonationCount').textContent = obj.donationCount ?? (obj.donations?.length ?? 0);
       
       const imgEl = document.getElementById('detailPhoto');
@@ -545,12 +117,143 @@
       const modal = new bootstrap.Modal(document.getElementById('detailsModal'));
       modal.show();
     }
-    
-    function showToast(message, type) {
-      // You can implement a toast notification system here
-      // For simplicity, we'll use alert in this example
-      alert(message);
-    }
   </script>
+</head>
+
+<body class="bg-light">
+  <div class="container mt-5">
+    <h2 class="mb-4">All Users</h2>
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover bg-white align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Contact</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% users.forEach((user, index) => { %>
+            <tr>
+              <td><%= index + 1 %></td>
+              <td><%= user.name %></td>
+              <td>
+                <a href="mailto:<%= user.email %>" class="email-link">
+                  <i class="bi bi-envelope-fill me-1"></i><%= user.email %>
+                </a>
+              </td>
+              <td>
+                <a href="tel:<%= user.contact %>" class="phone-link">
+                  <i class="bi bi-telephone-fill me-1"></i><%= user.contact %>
+                </a>
+              </td>
+              <td>
+                <button class="btn btn-primary btn-sm me-1" onclick='showDetails(<%- JSON.stringify(user) %>)'>Show Details</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteUser('<%= user._id %>', this)">Delete</button>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="container mt-5">
+    <h2 class="mb-4">Pending Members</h2>
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover bg-white align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Contact</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% membersList.forEach((member, index) => { %>
+            <tr>
+              <td><%= index + 1 %></td>
+              <td><%= member.name %></td>
+              <td>
+                <a href="mailto:<%= member.email %>" class="email-link">
+                  <i class="bi bi-envelope-fill me-1"></i><%= member.email %>
+                </a>
+              </td>
+              <td>
+                <a href="tel:<%= member.phone %>" class="phone-link">
+                  <i class="bi bi-telephone-fill me-1"></i><%= member.phone %>
+                </a>
+              </td>
+              <td>
+                <button class="btn btn-primary btn-sm me-1" onclick='showDetails(<%- JSON.stringify(member) %>)'>Show Details</button>
+                <% if (!member.isApproved) { %>
+                  <button class="btn btn-success btn-sm me-1" onclick="approveMember('<%= member._id %>', this)">Approve Member</button>
+                <% } else { %>
+                  <span class="badge bg-success me-1">Approved</span>
+                <% } %>
+                <button class="btn btn-danger btn-sm" onclick="deleteMember('<%= member._id %>', this)">Delete</button>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal for showing user/member details -->
+  <div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="detailsModalLabel">Full Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-4 text-center">
+              <img id="detailPhoto" class="img-fluid shadow" style="display:none;" alt="Profile Photo" />
+            </div>
+            <div class="col-md-8">
+              <dl class="row">
+                <dt class="col-sm-4">Name:</dt>
+                <dd class="col-sm-8" id="detailName">-</dd>
+
+                <dt class="col-sm-4">Email:</dt>
+                <dd class="col-sm-8">
+                  <a href="#" id="detailEmail" class="email-link"></a>
+                </dd>
+
+                <dt class="col-sm-4">Phone:</dt>
+                <dd class="col-sm-8">
+                  <a href="#" id="detailPhone" class="phone-link"></a>
+                </dd>
+
+                <dt class="col-sm-4">Address:</dt>
+                <dd class="col-sm-8" id="detailAddress">-</dd>
+
+                <dt class="col-sm-4">Approved:</dt>
+                <dd class="col-sm-8" id="detailApproved">-</dd>
+
+                <dt class="col-sm-4">Joined On:</dt>
+                <dd class="col-sm-8" id="detailCreatedAt">-</dd>
+
+                <dt class="col-sm-4">Donation Count:</dt>
+                <dd class="col-sm-8" id="detailDonationCount">-</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
